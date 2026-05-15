@@ -2,20 +2,20 @@ import React from 'react';
 
 const Hero = () => {
     return (
-        <div className="relative bg-gray-900 h-screen flex items-center justify-center">
+        <div className="relative bg-gray-900 min-h-[100dvh] flex items-center justify-center overflow-hidden">
             {/* Background Image with Gradient Overlay */}
             <div 
-                className="absolute inset-0 bg-cover bg-center" 
+                className="absolute inset-0 bg-cover bg-[position:75%_center] md:bg-center" 
                 style={{ backgroundImage: 'url(/assets/img/hero/h1_hero.jpeg)' }}
             >
                 {/* Gradient overlay for perfect text readability while showing image */}
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-950/90 via-gray-900/80 to-transparent"></div>
-                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-gray-950/95 via-gray-900/80 md:via-gray-900/80 to-gray-900/40 md:to-transparent"></div>
+                <div className="absolute inset-0 bg-black/30 md:bg-black/20"></div>
             </div>
             
-            <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+            <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center pt-20 pb-16 md:py-0">
                 <div className="max-w-3xl">
-                    <span className="block text-[#D4AF37] font-bold tracking-[0.3em] uppercase mb-4 text-sm md:text-base animate-fade-in-up">
+                    <span className="block text-[#D4AF37] font-bold tracking-[0.3em] uppercase mb-4 text-xs sm:text-sm md:text-base animate-fade-in-up">
                         Welcome to Balouch Tailors
                     </span>
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
@@ -24,7 +24,7 @@ const Hero = () => {
                             Confidence.
                         </span>
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-200 font-light tracking-wide mb-10 leading-relaxed max-w-2xl drop-shadow">
+                    <p className="text-base sm:text-lg md:text-xl text-gray-200 font-light tracking-wide mb-10 leading-relaxed max-w-2xl drop-shadow">
                         Custom-fit Gents Shalwar Kameez designed for the modern man. From classic whites to contemporary hues, Balouch Tailors ensures you never settle for less than a perfect fit.
                     </p>
                     
