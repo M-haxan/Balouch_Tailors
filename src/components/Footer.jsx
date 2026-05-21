@@ -1,7 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Footer = () => {
+    const location = useLocation();
+
+    // Hide footer on admin dashboard
+    if (location.pathname === '/admin/dashboard') {
+        return null;
+    }
+
     return (
         <footer className="bg-white border-t border-gray-100 pt-20 pb-10">
             <div className="container mx-auto px-4">

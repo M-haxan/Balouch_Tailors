@@ -44,12 +44,14 @@ const Header = () => {
                     </nav>
                 </div>
 
-                <div className="hidden xl:block">
-                    <button onClick={handleGetDirections} className="inline-block px-8 py-3 bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors rounded shadow-sm">
+                <div className="hidden xl:flex items-center gap-4">
+                    <button 
+                        onClick={handleGetDirections}
+                        className="inline-block px-8 py-3 bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors rounded"
+                    >
                         Visit Us
                     </button>
                 </div>
-
                 {/* Mobile menu button */}
                 <div className="lg:hidden flex items-center z-50 relative">
                     <button onClick={toggleMenu} className="text-gray-500 hover:text-black focus:outline-none p-2">

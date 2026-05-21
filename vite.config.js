@@ -8,4 +8,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://bt-backend-dimd.onrender.com',
+        changeOrigin: true,
+        rewrite: (path) => path,
+      }
+    }
+  }
 })
