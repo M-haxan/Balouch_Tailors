@@ -1,20 +1,25 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+const useAuthStore = create(
+  persist(
+    (set) => ({
+      user: null,
+      isAuthenticated: false,
 
-const useAuthStore = create((set) => ({
-  user: null, // Shuru mein koi user nahi hoga
-  isAuthenticated: false, // Shuru mein user logged in nahi hai
+      loginSuccess: (userData) => set({
+        user: userData,
+        isAuthenticated: true
+      }),
 
-  // Action 1: Jab admin successfully login ho jaye
-  loginSuccess: (userData) => set({
-    user: userData,
-    isAuthenticated: true
-  }),
-
-  // Action 2: Jab admin logout kare
-  logout: () => set({ 
-    user: null, 
-    isAuthenticated: false 
-  }),
-}));
+      logout: () => set({ 
+        user: null, 
+        isAuthenticated: false 
+      }),
+    }),
+    {
+      name: 'admin-ui-state', // LocalStorage mein sirf UI ka status save hoga
+    }
+  )
+);
 
 export default useAuthStore;

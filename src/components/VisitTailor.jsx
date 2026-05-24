@@ -5,12 +5,11 @@ const VisitTailor = () => {
     const shopName = "BALOUCH+TAILOR'S+Multan";
     const placeId = "ChIJOxF6UagzOzkROAZCfNdJGds";
     
-    // URL to trigger directions. User ki location auto-detect hogi.
+    // URL to trigger directions
     const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${shopName}&destination_place_id=${placeId}`;
 
     const handleGetDirections = (e) => {
         e.preventDefault();
-        // Naye tab mein Google Maps open karega
         window.open(directionsUrl, '_blank', 'noopener,noreferrer');
     };
 

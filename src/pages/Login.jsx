@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/BT_Logo.png';
 import { useLoginMutation } from '../hooks/useAuth';
+import Preloader from '../components/Preloader';
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const { email, password } = form;
-  const { mutate, isLoading, isError, error } = useLoginMutation();
+  const { mutate, isPending, isError, error } = useLoginMutation();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -18,6 +19,12 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4">
+{/* 3. Custom Preloader Overlay */}
+      {isPending && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+          <Preloader />
+        </div>
+      )}
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
@@ -71,10 +78,10 @@ const Login = () => {
 
             <button
               type="submit"
-              disabled={isLoading}
-              className={`w-full bg-black text-white text-sm font-medium py-3 rounded hover:bg-gray-800 transition-colors ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+              disabled={isPending}
+              className={`w-full bg-black text-white text-sm font-medium py-3 rounded hover:bg-gray-800 transition-colors ${isPending ? 'opacity-60 cursor-not-allowed' : ''}`}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isPending ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
