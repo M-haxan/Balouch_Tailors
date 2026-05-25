@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -15,6 +15,8 @@ import Login from './pages/Login';
 import AdminLayout from './Layouts/AdminLayout';
 import AdminCatalogue from './pages/AdminCatalogue';
 import AdminPricing from './pages/AdminPricing';
+import AdminSettings from './pages/AdminSettings';
+import AdminCustomers from './pages/AdminCustomers';
 const queryClient = new QueryClient();
 
 function Home() {
@@ -57,6 +59,8 @@ function App() {
             <Route path="/admin/dashboard" element={<h1 className="text-2xl font-bold p-6">Welcome Admin!</h1>} />
             <Route path="/admin/catalogue" element={<AdminCatalogue />} />
             <Route path="/admin/pricing" element={<AdminPricing />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/customers" element={<AdminCustomers />} />
           </Route>
         </Routes>
       </main>
