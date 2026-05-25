@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import AdminNavbar from './AdminNavbar';
 import AdminSidebar from './AdminSidebar';
-import useAuthStore from '../store/authStore';
+import useAuthStore from '../Store/authStore';
 
 const AdminLayout = () => {
   // Zustand persistence hydrate hone ka wait karna zaroori hai

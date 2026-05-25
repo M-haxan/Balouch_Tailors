@@ -12,7 +12,7 @@ import Pricing from './components/Pricing';
 import VisitTailor from './components/VisitTailor';
 import Footer from './components/Footer';
 import Login from './pages/Login';
-import AdminLayout from './layouts/AdminLayout';
+import AdminLayout from './Layouts/AdminLayout';
 import AdminCatalogue from './pages/AdminCatalogue';
 import AdminPricing from './pages/AdminPricing';
 const queryClient = new QueryClient();
