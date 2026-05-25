@@ -7,7 +7,9 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    
   ],
+  
   server: {
     proxy: {
       '/api': {
@@ -15,6 +17,9 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path,
       }
+    },
+    watch: {
+      usePolling: true, // <-- YEH LINE ADD KAREIN
     }
   }
 })

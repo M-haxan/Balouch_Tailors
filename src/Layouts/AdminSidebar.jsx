@@ -1,6 +1,8 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FiShoppingBag, FiCreditCard, FiLogOut } from 'react-icons/fi';
+import { CgProfile } from "react-icons/cg";
+import { GiPencilRuler } from "react-icons/gi";
 import useAuthStore from '../store/authStore';
 
 const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) => {
@@ -50,6 +52,15 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
             <FiCreditCard className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Pricing</span>}
           </NavLink>
+           <NavLink to="/admin/customers" className={getLinkStyle} onClick={onCloseMobile}>
+            <CgProfile className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
+            {!collapsed && <span>Customers</span>}
+          </NavLink>
+          <NavLink to="/admin/measurements" className={getLinkStyle} onClick={onCloseMobile}>
+            <GiPencilRuler className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
+            {!collapsed && <span>Measurement</span>}
+          </NavLink>
+          
         </nav>
       </div>
 
