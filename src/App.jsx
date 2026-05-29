@@ -17,6 +17,7 @@ import AdminCatalogue from './pages/AdminCatalogue';
 import AdminPricing from './pages/AdminPricing';
 import AdminSettings from './pages/AdminSettings';
 import AdminCustomers from './pages/AdminCustomers';
+import AdminMeasurements from './pages/AdminMeasurements';
 const queryClient = new QueryClient();
 
 function Home() {
@@ -61,6 +62,7 @@ function App() {
             <Route path="/admin/pricing" element={<AdminPricing />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/customers" element={<AdminCustomers />} />
+            <Route path="/admin/measurements" element={<AdminMeasurements />} />
           </Route>
         </Routes>
       </main>
