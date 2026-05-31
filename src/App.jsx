@@ -18,6 +18,10 @@ import AdminPricing from './pages/AdminPricing';
 import AdminSettings from './pages/AdminSettings';
 import AdminCustomers from './pages/AdminCustomers';
 import AdminMeasurements from './pages/AdminMeasurements';
+import CreateOrder from './pages/AdminOrder';
+import Allorders from './pages/Allorders';
+import InvoicePrint from './pages/InvoicePrinnt';
+
 const queryClient = new QueryClient();
 
 function Home() {
@@ -63,6 +67,9 @@ function App() {
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/customers" element={<AdminCustomers />} />
             <Route path="/admin/measurements" element={<AdminMeasurements />} />
+            <Route path="/admin/orders/create" element={<CreateOrder />} />
+            <Route path="/admin/allorders" element={<Allorders />} />
+     <Route path="/admin/print/:id" element={<InvoicePrint />} />
           </Route>
         </Routes>
       </main>
