@@ -2,7 +2,7 @@ import axios from 'axios';
 import useAuthStore from '../store/authStore';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || 'https://bt-backend-dimd.onrender.com/api',
+  baseURL: import.meta.env.VITE_BACKEND_URL || 'https://m-haxan-bt-backend.hf.space/api',
   withCredentials: true, 
 });
 

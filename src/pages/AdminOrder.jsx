@@ -238,7 +238,7 @@ const CreateOrder = () => {
                     </div>
                     <div className="md:col-span-3">
                       <label className="block text-xs font-bold text-gray-500 mb-1">Stitching Price (Rs)</label>
-                      <input required type="number" min="0" placeholder="0" value={suit.price} onChange={(e) => handleSuitChange(index, 'price', e.target.value)} className="w-full border border-gray-300 focus:border-[#D4AF37] rounded-lg p-2.5 outline-none font-black text-black" />
+                      <input required type="number" min="0" placeholder="0" value={suit.price} onChange={(e) => handleSuitChange(index, 'price', e.target.value)} onWheel={(e) => e.target.blur()} className="w-full border border-gray-300 focus:border-[#D4AF37] rounded-lg p-2.5 outline-none font-black text-black" />
                     </div>
                   </div>
 {/* Wearer Selection Dropdown */}
@@ -353,6 +353,7 @@ const CreateOrder = () => {
                     placeholder="0" 
                     value={advancePaid} 
                     onChange={(e) => setAdvancePaid(e.target.value)} 
+                    onWheel={(e) => e.target.blur()}
                     className="w-1/2 bg-black border border-gray-700 focus:border-[#D4AF37] text-white rounded-lg px-3 py-2 outline-none font-bold text-right" 
                   />
                 </div>
