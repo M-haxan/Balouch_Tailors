@@ -1,7 +1,7 @@
 // src/hooks/useAuth.js
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import useAuthStore from '../store/authStore';
+import useAuthStore from '../Store/authStore';
 import { useNavigate } from 'react-router-dom';
 import API from '../api/axios'; 
 
