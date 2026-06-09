@@ -3,7 +3,7 @@ import { useGetCustomers } from '../hooks/useCustomers';
 import { useCreateOrder } from '../hooks/useOrder';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiTrash2, FiSave, FiMic, FiUser, FiCalendar, FiDollarSign, FiScissors } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiSave, FiMic, FiUser, FiCalendar, FiDollarSign, FiScissors, FiX } from 'react-icons/fi';
 
 // Shop ke common smart tags
 const COMMON_TAGS = ['Ban', 'Collar', 'Gol Kaf', 'Chor Kaf', 'Double Silai', 'Front Pocket', '2 Side Pockets', 'Shalwar Poket'];
@@ -19,20 +19,24 @@ const CreateOrder = () => {
   const [deliveryDate, setDeliveryDate] = useState('');
   const [advancePaid, setAdvancePaid] = useState('');
   const [savedOrder, setSavedOrder] = useState(null); // Nayi state
+  const [alterations, setAlterations] = useState([]);
   
   // Suits ki dynamic array state
   const [suits, setSuits] = useState([
-    { fabricDetails: '', volumeNo: '', staticTags: [], customDesign: '', price: '', wearer:'' }
+    { fabricDetails: '', volumeNo: '', staticTags: [], customDesign: '', price: '', wearer:'', fabricimage:'null' }
   ]);
 
   // --- FINANCIAL CALCULATIONS (Auto-magic) ---
   const totalAmount = useMemo(() => {
-    return suits.reduce((total, suit) => total + (Number(suit.price) || 0), 0);
-  }, [suits]);
+    const suitsTotal = suits.reduce((total, suit) => total + (Number(suit.price) || 0), 0);
+    const altsTotal = alterations.reduce((total, alt) => total + (Number(alt.price) || 0), 0);
+    return suitsTotal + altsTotal; // Dono ko jama kar diya
+  }, [suits, alterations]);
 
   const balanceAmount = useMemo(() => {
     return totalAmount - (Number(advancePaid) || 0);
   }, [totalAmount, advancePaid]);
+ 
 
   // --- SUIT ARRAY HANDLERS ---
   const handleAddSuit = () => {
@@ -40,12 +44,33 @@ const CreateOrder = () => {
   };
 
   const handleRemoveSuit = (index) => {
-    if (suits.length === 1) {
-      toast.warning("Kam az kam ek suit hona zaroori hai!");
+    // Agar yeh aakhri suit hai aur ALTERATION bhi zero hai, tab delete karne se roko
+    if (suits.length === 1 && alterations.length === 0) {
+      toast.warning("Khata khali nahi ho sakta! Kam az kam ek suit ya alteration zaroori hai.");
       return;
     }
     const newSuits = suits.filter((_, i) => i !== index);
     setSuits(newSuits);
+  };
+  // handlealteration add karne ke liye
+  const handleAddAlteration = () => {
+    setAlterations([...alterations, { description: '', price: '' }]);
+  };
+  // handlealteration remove karne ke liye
+  const handleRemoveAlteration = (index) => {
+    // Agar yeh aakhri alteration hai, tab delete karne se roko
+    if (alterations.length === 1 && suits.length === 0) {
+      toast.warning("Khata khali nahi ho sakta! Kam az kam ek suit ya alteration zaroori hai.");
+      return;
+    }
+    const newAlterations = alterations.filter((_, i) => i !== index);
+    setAlterations(newAlterations);
+  };
+  // handlealteration change karne ke liye
+  const handleAlterationChange = (index, field, value) => {
+    const newAlterations = [...alterations];
+    newAlterations[index][field] = value;
+    setAlterations(newAlterations);
   };
 
   const handleSuitChange = (index, field, value) => {
@@ -100,35 +125,59 @@ const CreateOrder = () => {
   };
 
   // --- SUBMIT FORM ---
+  // --- SUBMIT FORM ---
   const handleSubmit = (e) => {
     e.preventDefault();
     
     if (!customerId) return toast.error("Please select a customer.");
     if (!deliveryDate) return toast.error("Delivery date is required.");
+    if (suits.length === 0 && alterations.length === 0) return toast.error("Kam az kam ek suit ya alteration add karein.");
     if (totalAmount === 0) return toast.warning("Total amount cannot be zero.");
 
-    // API Payload
-    const payload = {
-  customer: customerId,
-  suits: suits.map(s => ({ 
-    ...s, 
-    price: Number(s.price) || 0,
-    // MAGIC LINE: Agar wearer select nahi hua, toh main customer ki ID daal do
-    wearer: s.wearer ? s.wearer : customerId 
-  })),
-  totalAmount,
-  advancePaid: Number(advancePaid) || 0,
-  balanceAmount,
-  deliveryDate
-};
+    // 🌟 THE MAGIC: FormData banana (Kyunke images bhejni hain)
+    const formData = new FormData();
+    
+    formData.append('customer', customerId);
+    formData.append('totalAmount', totalAmount);
+    formData.append('advancePaid', Number(advancePaid) || 0);
+    formData.append('balanceAmount', balanceAmount);
+    formData.append('deliveryDate', deliveryDate);
 
-   createOrder(payload, {
-  onSuccess: (response) => {
-    // response.data mein naya order aayega (backend setup ke mutabiq)
-    setSavedOrder(response.data || response); 
-    window.scrollTo(0, 0); // Screen ko wapas upar le aayen
-  }
-});
+    // 1. Suits ka data (Images ko nikal kar baqi data ko text/string bana kar bhejenge)
+    const suitsData = suits.map(s => ({
+      fabricDetails: s.fabricDetails,
+      volumeNo: s.volumeNo,
+      staticTags: s.staticTags,
+      customDesign: s.customDesign,
+      price: Number(s.price) || 0,
+      wearer: s.wearer ? s.wearer : customerId
+    }));
+    formData.append('suits', JSON.stringify(suitsData)); // Stringify karna lazmi hai
+
+    // 2. Alterations ka data 
+    const alterationsData = alterations.map(alt => ({
+      description: alt.description,
+      price: Number(alt.price) || 0,
+      wearer: customerId // Alteration bhi main customer ki taraf assign kar di
+    }));
+    formData.append('alterations', JSON.stringify(alterationsData));
+
+    // 3. 🌟 IMAGES KO APPEND KARNA 🌟
+    suits.forEach((suit) => {
+      // Agar admin ne image select ki hai (toh usay 'fabricImages' ke naam se attach karo)
+      // Yeh naam backend ke upload.array('fabricImages') se match karna chahiye
+      if (suit.fabricimage && suit.fabricimage !== 'null') {
+         formData.append('fabricImages', suit.fabricimage);
+      }
+    });
+
+    // API Call: Ab normal payload ki jagah formData bhejenge
+    createOrder(formData, {
+      onSuccess: (response) => {
+        setSavedOrder(response.data || response); 
+        window.scrollTo(0, 0);
+      }
+    });
   };
 // Agar order save ho gaya hai toh yeh Success Screen dikhao
   if (savedOrder) {
@@ -213,54 +262,56 @@ const CreateOrder = () => {
             <div className="space-y-6">
               {suits.map((suit, index) => (
                 <div key={index} className="border-2 border-gray-100 rounded-xl p-5 bg-gray-50/50 relative group">
-                  
-                  {/* Remove Suit Button */}
-                  {suits.length > 1 && (
-                    <button 
-                      type="button" 
+                  { 
+                    <button
+                      type="button"
                       onClick={() => handleRemoveSuit(index)}
                       className="absolute top-4 right-4 text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition"
                     >
                       <FiTrash2 />
                     </button>
-                  )}
-                  
-                  <h4 className="font-black text-black mb-4">Suit #{index + 1}</h4>
+                  }
 
+                  <h4 className="font-black text-black mb-4">Suit #{index + 1}</h4>
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-4">
                     <div className="md:col-span-5">
                       <label className="block text-xs font-bold text-gray-500 mb-1">Fabric & Color</label>
                       <input required type="text" placeholder="e.g. Black Wash-n-Wear" value={suit.fabricDetails} onChange={(e) => handleSuitChange(index, 'fabricDetails', e.target.value)} className="w-full border border-gray-300 focus:border-black rounded-lg p-2.5 outline-none font-medium" />
                     </div>
+
+                    <div className="md:col-span-3">
+                      <label className="block text-xs font-bold text-gray-500 mb-1">Fabric Image</label>
+                      <input type="file" accept="image/*" onChange={(e) => handleSuitChange(index, 'fabricimage', e.target.files[0])} className="w-full border border-gray-300 focus:border-black rounded-lg p-2.5 outline-none font-medium" />
+                    </div>
+
                     <div className="md:col-span-4">
                       <label className="block text-xs font-bold text-gray-500 mb-1">Design Vol #</label>
                       <input required type="text" placeholder="e.g. Vol-45" value={suit.volumeNo} onChange={(e) => handleSuitChange(index, 'volumeNo', e.target.value)} className="w-full border border-gray-300 focus:border-black rounded-lg p-2.5 outline-none font-medium" />
                     </div>
+
                     <div className="md:col-span-3">
                       <label className="block text-xs font-bold text-gray-500 mb-1">Stitching Price (Rs)</label>
                       <input required type="number" min="0" placeholder="0" value={suit.price} onChange={(e) => handleSuitChange(index, 'price', e.target.value)} onWheel={(e) => e.target.blur()} className="w-full border border-gray-300 focus:border-[#D4AF37] rounded-lg p-2.5 outline-none font-black text-black" />
                     </div>
                   </div>
-{/* Wearer Selection Dropdown */}
-<div className="mt-3 bg-gray-100 p-3 rounded-lg border border-gray-200">
-  <label className="block text-xs font-bold text-gray-500 mb-1">Yeh suit kiska hai? (Wearer)</label>
-  <select 
-    value={suit.wearer || ''}
-    onChange={(e) => handleSuitChange(index, 'wearer', e.target.value)}
-    className="w-full border border-gray-300 focus:border-black rounded-lg p-2 outline-none text-sm font-medium bg-white"
-  >
-    <option value="">-- Main Customer (Jiske naam par bill hai) --</option>
-    {/* Baqi sab customers ki list (Taake bete/bhai ko select kiya ja sake) */}
-    {customers.map(c => (
-      <option key={c._id} value={c._id}>{c.name} - {c.phone}</option>
-    ))}
-  </select>
-</div>
-                  {/* Smart Tags & Voice Input */}
+
+                  <div className="mt-3 bg-gray-100 p-3 rounded-lg border border-gray-200">
+                    <label className="block text-xs font-bold text-gray-500 mb-1">Yeh suit kiska hai? (Wearer)</label>
+                    <select
+                      value={suit.wearer || ''}
+                      onChange={(e) => handleSuitChange(index, 'wearer', e.target.value)}
+                      className="w-full border border-gray-300 focus:border-black rounded-lg p-2 outline-none text-sm font-medium bg-white"
+                    >
+                      <option value="">-- Main Customer (Jiske naam par bill hai) --</option>
+                      {customers.map(c => (
+                        <option key={c._id} value={c._id}>{c.name} - {c.phone}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div className="space-y-3">
                     <label className="block text-xs font-bold text-gray-500">Design Instructions & Tags</label>
-                    
-                    {/* Chips / Tags */}
+
                     <div className="flex flex-wrap gap-2">
                       {COMMON_TAGS.map(tag => {
                         const isSelected = suit.staticTags.includes(tag);
@@ -270,8 +321,8 @@ const CreateOrder = () => {
                             key={tag}
                             onClick={() => toggleTag(index, tag)}
                             className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
-                              isSelected 
-                                ? 'bg-black text-[#D4AF37] border-black shadow-md' 
+                              isSelected
+                                ? 'bg-black text-[#D4AF37] border-black shadow-md'
                                 : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
                             }`}
                           >
@@ -281,17 +332,16 @@ const CreateOrder = () => {
                       })}
                     </div>
 
-                    {/* Text Box with Mic */}
                     <div className="relative">
-                      <textarea 
-                        rows="2" 
+                      <textarea
+                        rows="2"
                         placeholder="Yahan type karein ya mic daba kar urdu mein bolein..."
-                        value={suit.customDesign} 
-                        onChange={(e) => handleSuitChange(index, 'customDesign', e.target.value)} 
+                        value={suit.customDesign}
+                        onChange={(e) => handleSuitChange(index, 'customDesign', e.target.value)}
                         className="w-full border border-gray-300 focus:border-black rounded-lg p-3 pr-12 outline-none font-medium resize-none"
                       />
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => startListening(index)}
                         title="Urdu Voice Typing"
                         className="absolute right-3 top-3 text-white bg-blue-600 hover:bg-blue-700 p-2 rounded-full shadow-md transition-transform active:scale-95"
@@ -304,13 +354,57 @@ const CreateOrder = () => {
               ))}
             </div>
 
-            <button 
-              type="button" 
-              onClick={handleAddSuit}
-              className="mt-4 text-sm font-bold text-black border-2 border-dashed border-gray-300 hover:border-black hover:bg-gray-50 w-full py-3 rounded-xl transition flex justify-center items-center gap-2"
-            >
-              <FiPlus className="text-lg" /> Add Another Suit
-            </button>
+            <div className="space-y-4 mt-6">
+              {alterations.map((alt, index) => (
+                <div key={index} className="border-2 border-gray-100 rounded-xl p-5 bg-gray-50/50 relative group">
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveAlteration(index)}
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                  >
+                    <FiX />
+                  </button>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1">Alteration Description</label>
+                      <input
+                        type="text"
+                        value={alt.description}
+                        onChange={(e) => handleAlterationChange(index, 'description', e.target.value)}
+                        className="w-full border border-gray-300 focus:border-black rounded-lg p-2.5 outline-none font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 mb-1">Price</label>
+                      <input
+                        type="number"
+                        value={alt.price}
+                        onChange={(e) => handleAlterationChange(index, 'price', e.target.value)}
+                        className="w-full border border-gray-300 focus:border-black rounded-lg p-2.5 outline-none font-medium"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-3 mt-4">
+              <button
+                type="button"
+                onClick={handleAddAlteration}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 px-4 rounded-xl transition"
+              >
+                <FiPlus className="text-lg" /> Add Alteration
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAddSuit}
+                className="bg-[#D4AF37] hover:bg-black text-black hover:text-[#D4AF37] font-black py-2.5 px-4 rounded-xl transition"
+              >
+                <FiPlus className="text-lg" /> Add Another Suit
+              </button>
+            </div>
           </div>
 
           {/* SECTION 3: INVOICE & DATES */}

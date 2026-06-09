@@ -32,9 +32,9 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
       className={`
         ${sidebarWidth} bg-white shadow-md 
         h-[calc(100vh-5rem)] 
-        sticky top-20 left-0 z-40 
+        sticky top-20 left-0 z-50 
         transition-all duration-300 
-        ${mobileOpen ? 'fixed translate-x-0 w-64' : 'hidden md:block'}
+        ${mobileOpen ? 'fixed translate-x-0 w-64 max-w-[85vw]' : 'hidden md:block'}
       `}
     >
       {/* Upper Menu Section */}

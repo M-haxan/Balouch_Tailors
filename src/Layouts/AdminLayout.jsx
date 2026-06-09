@@ -40,7 +40,7 @@ const AdminLayout = () => {
         {/* Mobile overlay when sidebar is open */}
         {mobileOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-40 z-40 md:hidden"
+            className="fixed inset-0 bg-black/30 backdrop-blur-[1px] z-40 md:hidden"
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
