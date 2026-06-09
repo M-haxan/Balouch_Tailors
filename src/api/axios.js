@@ -39,8 +39,9 @@ API.interceptors.response.use(
       error.response.status === 401 && 
       !originalRequestUrl.includes('/auth/login')
     ) {
-      useAuthStore.getState().logout();
-      window.location.href = '/admin/login';
+      // useAuthStore.getState().logout();
+      // window.location.href = '/admin/login';
+      alert("API Error 401: Backend keh raha hai token masla hai!")
     }
     
     return Promise.reject(error);
