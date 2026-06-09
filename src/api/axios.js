@@ -5,7 +5,8 @@ const API = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL || 'https://m-haxan-bt-backend.hf.space/api',
   // withCredentials: true, // Isey abhi comment kar dein, JWT headers mein ja raha hai cookies mein nahi
 });
-
+const currentToken = useAuthStore.getState().user?.token;
+alert(`API Error 401! Token ka status: ${currentToken ? "Token mil gaya tha" : "Token UNDEFINED hai!"}`);
 // 🌟 NAYA IZAFA: Request Interceptor (Jate hue Token sath bhejna) 🌟
 API.interceptors.request.use(
   (config) => {
@@ -46,6 +47,7 @@ API.interceptors.response.use(
     
     return Promise.reject(error);
   }
+  
 );
 
 export default API;
