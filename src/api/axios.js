@@ -32,6 +32,8 @@ API.interceptors.request.use(
     // Agar token mil gaya hai, toh header mein attach kar do
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+       console.log("Request bheji ja rahi hai, Header mein token ye hai:", config.headers.Authorization);
+    
     } else {
       console.warn("Watchman Warning: Token abhi bhi nahi mila!");
     }
