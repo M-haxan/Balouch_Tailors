@@ -3,20 +3,37 @@ import useAuthStore from '../Store/authStore';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL || 'https://m-haxan-bt-backend.hf.space/api',
-  // withCredentials: true, // Isey abhi comment kar dein, JWT headers mein ja raha hai cookies mein nahi
 });
-const currentToken = useAuthStore.getState().user?.token;
-alert(`API Error 401! Token ka status: ${currentToken ? "Token mil gaya tha" : "Token UNDEFINED hai!"}`);
-// 🌟 NAYA IZAFA: Request Interceptor (Jate hue Token sath bhejna) 🌟
+
+// 🌟 BULLETPROOF REQUEST INTERCEPTOR 🌟
 API.interceptors.request.use(
   (config) => {
-    // Zustand store se current state (user data) nikalein
-    const state = useAuthStore.getState();
-    const token = state.user?.token; // Jo token login ke waqt save hua tha
+    let token = null;
 
-    // Agar token mojood hai, toh usay har API call ke Header mein attach kar do
+    try {
+      // 1. Seedha LocalStorage se Zustand ki saved state uthao (Bina delay ke)
+      const localData = localStorage.getItem('admin-ui-state');
+      
+      if (localData) {
+        const parsedData = JSON.parse(localData);
+        // Zustand persist ka data hamesha 'state' ke andar hota hai
+        token = parsedData?.state?.user?.token; 
+      }
+
+      // 2. Fallback Check: Agar aapne token alag se bhi save kiya hua hai
+      if (!token) {
+        token = localStorage.getItem('token') || localStorage.getItem('admin-token');
+      }
+
+    } catch (e) {
+      console.error("LocalStorage read error:", e);
+    }
+
+    // Agar token mil gaya hai, toh header mein attach kar do
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn("Watchman Warning: Token abhi bhi nahi mila!");
     }
     
     return config;
@@ -26,7 +43,7 @@ API.interceptors.request.use(
   }
 );
 
-// Global Watchman (Response Interceptor - Wapas aate hue error check karna)
+// Global Watchman (Response Interceptor)
 API.interceptors.response.use(
   (response) => {
     return response; 
@@ -34,20 +51,21 @@ API.interceptors.response.use(
   (error) => {
     const originalRequestUrl = error.config?.url || '';
 
-    // Agar error 401 hai AUR request login ki nahi hai, 
+    // Agar error 401 hai AUR request login ki nahi hai, tabhi logout karo
     if (
       error.response && 
       error.response.status === 401 && 
       !originalRequestUrl.includes('/auth/login')
     ) {
-      // useAuthStore.getState().logout();
-      // window.location.href = '/admin/login';
-      alert("API Error 401: Backend keh raha hai token masla hai!")
+      // Alert ko temporarily laga rehne dein taake tasalli ho jaye
+      alert("API Error 401: Token reject ho gaya!");
+      
+      useAuthStore.getState().logout();
+      window.location.href = '/admin/login';
     }
     
     return Promise.reject(error);
   }
-  
 );
 
 export default API;
