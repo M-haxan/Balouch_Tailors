@@ -11,25 +11,25 @@ export const useLoginMutation = () => {
 
   return useMutation({
     mutationFn: async ({ email, password }) => {
-      // API call to login endpoint
       const response = await API.post('/auth/login', { email, password });
-      return response.data; 
+      return response.data;
     },
-    
+
     onSuccess: (data) => {
-      const token = data.token || data.accessToken || data.jwt || null;
-      const userPayload = data.user || {
-        id: data._id,
-        name: data.name,
-        email: data.email,
-        role: data.role,
+      const payload = data?.data || data?.result || data;
+      const token = payload?.token || payload?.accessToken || payload?.jwt || data?.token || data?.accessToken || data?.jwt || null;
+      const userPayload = payload?.user || data?.user || {
+        id: payload?._id || data?._id,
+        name: payload?.name || data?.name,
+        email: payload?.email || data?.email,
+        role: payload?.role || data?.role,
       };
 
       loginSuccess(userPayload, token);
       toast.success('Login successful');
       navigate('/admin/dashboard');
     },
-    
+
     onError: (error) => {
       const msg = error.response?.data?.message || error.message || 'Login failed';
       console.error('Login Process Failed:', msg);

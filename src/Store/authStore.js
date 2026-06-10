@@ -1,5 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+
+const clearPersistedAuthState = () => {
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('admin-token');
+    localStorage.removeItem('admin-ui-state');
+  } catch (error) {
+    console.warn('Unable to clear persisted auth state:', error);
+  }
+};
+
 const useAuthStore = create(
   persist(
     (set) => ({
@@ -7,20 +18,25 @@ const useAuthStore = create(
       token: null,
       isAuthenticated: false,
 
-      loginSuccess: (userData, token) => set({
-        user: token ? { ...userData, token } : userData,
-        token: token || null,
-        isAuthenticated: true
-      }),
+      loginSuccess: (userData, token = null) => {
+        set({
+          user: userData || null,
+          token: token || null,
+          isAuthenticated: true,
+        });
+      },
 
-      logout: () => set({ 
-        user: null,
-        token: null,
-        isAuthenticated: false 
-      }),
+      logout: () => {
+        clearPersistedAuthState();
+        set({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+        });
+      },
     }),
     {
-      name: 'admin-ui-state', // LocalStorage mein sirf UI ka status save hoga
+      name: 'admin-ui-state',
     }
   )
 );
