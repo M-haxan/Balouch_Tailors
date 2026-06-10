@@ -17,10 +17,15 @@ export const useLoginMutation = () => {
     },
     
     onSuccess: (data) => {
-      loginSuccess(
-        { id: data._id, name: data.name, email: data.email, role: data.role }, 
-        data.token
-      );
+      const token = data.token || data.accessToken || data.jwt || null;
+      const userPayload = data.user || {
+        id: data._id,
+        name: data.name,
+        email: data.email,
+        role: data.role,
+      };
+
+      loginSuccess(userPayload, token);
       toast.success('Login successful');
       navigate('/admin/dashboard');
     },

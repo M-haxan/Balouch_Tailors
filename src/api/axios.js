@@ -3,6 +3,7 @@ import useAuthStore from '../Store/authStore';
 
 const API = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL || 'https://m-haxan-bt-backend.hf.space/api',
+  withCredentials: true,
 });
 
 // 🌟 BULLETPROOF REQUEST INTERCEPTOR 🌟
@@ -11,33 +12,40 @@ API.interceptors.request.use(
     let token = null;
 
     try {
-      // 1. Seedha LocalStorage se Zustand ki saved state uthao (Bina delay ke)
       const localData = localStorage.getItem('admin-ui-state');
-      
+
       if (localData) {
         const parsedData = JSON.parse(localData);
-        // Zustand persist ka data hamesha 'state' ke andar hota hai
-        token = parsedData?.state?.user?.token; 
+        const persistedState = parsedData?.state;
+        token = persistedState?.user?.token || persistedState?.token;
       }
 
-      // 2. Fallback Check: Agar aapne token alag se bhi save kiya hua hai
       if (!token) {
         token = localStorage.getItem('token') || localStorage.getItem('admin-token');
       }
 
+      if (!token && typeof document !== 'undefined') {
+        const cookieMatch = document.cookie.match(/(?:^|; )(?:jwt|token|authToken|accessToken)=([^;]+)/);
+        if (cookieMatch) {
+          token = decodeURIComponent(cookieMatch[1]);
+        }
+      }
     } catch (e) {
-      console.error("LocalStorage read error:", e);
+      console.error('LocalStorage read error:', e);
     }
 
-    // Agar token mil gaya hai, toh header mein attach kar do
+    config.withCredentials = true;
+
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-       console.log("Request bheji ja rahi hai, Header mein token ye hai:", config.headers.Authorization);
-    
+      config.headers = {
+        ...(config.headers || {}),
+        Authorization: `Bearer ${token}`,
+      };
+      console.log('Request bheji ja rahi hai, Header mein token ye hai:', config.headers.Authorization);
     } else {
-      console.warn("Watchman Warning: Token abhi bhi nahi mila!");
+      console.warn('Watchman Warning: Token abhi bhi nahi mila, cookie-based auth ka use ho raha hai.');
     }
-    
+
     return config;
   },
   (error) => {
