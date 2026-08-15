@@ -2,7 +2,7 @@ import axios from 'axios';
 import useAuthStore from '../Store/authStore';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || 'https://m-haxan-bt-backend.hf.space/api',
+  baseURL: import.meta.env.VITE_BACKEND_URL || ' https://bt-backend-5d1ec458f8eb.herokuapp.com/.',
   withCredentials: true,
 });
 
