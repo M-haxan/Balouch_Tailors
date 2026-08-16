@@ -38,7 +38,7 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
       `}
     >
       {/* Upper Menu Section */}
-      <div className="py-6 pb-20 overflow-y-auto h-full">
+      <div className="py-6 pb-20  h-full">
         {!collapsed && (
           <p className="px-6 text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
             Management

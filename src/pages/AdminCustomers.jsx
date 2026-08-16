@@ -41,7 +41,7 @@ const AdminCustomers = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 relative min-h-[80vh]">
+    <div className="bg-white  shadow-sm p-6 relative min-h-[80vh]">
       {/* HEADER & SEARCH */}
       <div className="flex flex-col md:flex-row justify-between items-center border-b pb-4 mb-6 gap-4">
         <div>
@@ -55,14 +55,14 @@ const AdminCustomers = () => {
             <input 
               type="text" 
               placeholder="Search by phone or name..." 
-              className="w-full pl-10 pr-4 py-2 border-2 border-gray-100 focus:border-black rounded-lg outline-none transition"
+              className="w-full pl-10 pr-4 py-2 border-2 border-gray-100 focus:border-black  outline-none transition"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button 
             onClick={() => openFormModal()}
-            className="bg-[#D4AF37] text-black hover:bg-black hover:text-[#D4AF37] px-4 py-2 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="bg-[#D4AF37] text-black hover:bg-black hover:text-[#D4AF37] px-4 py-2 text-sm font-bold transition-colors flex items-center gap-2 whitespace-nowrap"
           >
             <FiPlus className="text-lg" /> Add Customer
           </button>
@@ -73,7 +73,7 @@ const AdminCustomers = () => {
       {isLoading ? (
         <div className="text-center py-20 text-gray-500 font-medium">Loading customers...</div>
       ) : filteredCustomers.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+        <div className="text-center py-20 bg-gray-50  border-2 border-dashed border-gray-200">
           <p className="text-gray-500 mb-2">No customers found.</p>
         </div>
       ) : (
@@ -81,16 +81,31 @@ const AdminCustomers = () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-black text-[#D4AF37] text-sm uppercase tracking-wider">
-                <th className="p-4 rounded-tl-lg">Client Name</th>
+                <th className="p-4 rounded-tl-md">Client Name</th>
                 <th className="p-4">Contact</th>
                 <th className="p-4">Address</th>
-                <th className="p-4 rounded-tr-lg text-right">Actions</th>
+                <th className="p-4 rounded-tr-md text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredCustomers.map((customer) => (
                 <tr key={customer._id} className="hover:bg-gray-50 transition">
-                  <td className="p-4 font-bold text-gray-900">{customer.name}</td>
+                  <td className="p-4 font-bold text-gray-900">
+                    <div className="flex items-center gap-3">
+                      {customer.profileImage?.url ? (
+                        <img
+                          src={customer.profileImage.url} 
+                          alt={customer.name} 
+                          className="w-8 h-8 rounded-full object-cover border border-gray-200" 
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-black uppercase">
+                          {customer.name[0]}
+                        </div>
+                      )}
+                      <span>{customer.name}</span>
+                    </div>
+                  </td>
                   <td className="p-4 text-gray-600">{customer.phone}</td>
                   <td className="p-4 text-gray-600 text-sm max-w-xs truncate">{customer.address || '-'}</td>
                   <td className="p-4 flex justify-end gap-1">
@@ -154,9 +169,17 @@ const CustomerViewModal = ({ customer, closeModal }) => {
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-[#D4AF37] font-black text-xl shadow-sm">
-              {customer.name[0].toUpperCase()}
-            </div>
+            {customer.profileImage?.url ? (
+              <img 
+                src={customer.profileImage.url} 
+                alt={customer.name} 
+                className="w-12 h-12 rounded-full object-cover shadow-sm border border-gray-200"
+              />
+            ) : (
+              <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-[#D4AF37] font-black text-xl shadow-sm">
+                {customer.name[0].toUpperCase()}
+              </div>
+            )}
             <div>
               <h2 className="text-xl font-black text-black">{customer.name}</h2>
               <p className="text-xs text-gray-500 font-medium">Customer Profile Insights</p>
@@ -180,6 +203,12 @@ const CustomerViewModal = ({ customer, closeModal }) => {
                   <FiPhone className="text-[#D4AF37] text-base shrink-0" />
                   <span className="font-semibold">{customer.phone}</span>
                 </div>
+                {customer.cnic && (
+                  <div className="flex items-center gap-3 text-sm text-gray-700">
+                    <span className="text-[#D4AF37] text-xs font-bold shrink-0">CNIC</span>
+                    <span className="font-semibold">{customer.cnic}</span>
+                  </div>
+                )}
                 <div className="flex items-start gap-3 text-sm text-gray-700">
                   <FiMapPin className="text-[#D4AF37] text-base shrink-0 mt-0.5" />
                   <span className="leading-relaxed">{customer.address || 'No address provided'}</span>
@@ -288,14 +317,22 @@ const CustomerFormModal = ({ customer, closeModal }) => {
   const [basicInfo, setBasicInfo] = useState({
     name: customer?.name || '',
     phone: customer?.phone || '',
-    address: customer?.address || ''
+    address: customer?.address || '',
+    cnic: customer?.cnic || ''
   });
 
+  const [profileImage, setProfileImage] = useState(null);
   const [measurements, setMeasurements] = useState(customer?.measurements || []);
   const [selectedTemplateForNew, setSelectedTemplateForNew] = useState('');
 
   const handleBasicInfoChange = (e) => {
     setBasicInfo({ ...basicInfo, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setProfileImage(e.target.files[0]);
+    }
   };
 
   const handleAddMeasurementCategory = () => {
@@ -319,14 +356,24 @@ const CustomerFormModal = ({ customer, closeModal }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('name', basicInfo.name);
+    formData.append('phone', basicInfo.phone);
+    formData.append('address', basicInfo.address);
+    formData.append('cnic', basicInfo.cnic);
+    formData.append('measurements', JSON.stringify(measurements));
+    if (profileImage) {
+      formData.append('profileImage', profileImage);
+    }
+
     if (isEditMode) {
-      updateCustomer({ id: customer._id, data: basicInfo });
+      updateCustomer({ id: customer._id, data: formData });
       updateMeasurements({ id: customer._id, data: { measurements } }, {
         onSuccess: () => closeModal()
       });
     } else {
-      const payload = { ...basicInfo, measurements };
-      addCustomer(payload, { onSuccess: () => closeModal() });
+      addCustomer(formData, { onSuccess: () => closeModal() });
     }
   };
 
@@ -359,6 +406,14 @@ const CustomerFormModal = ({ customer, closeModal }) => {
                     <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input required type="text" name="phone" className="w-full pl-10 pr-3 py-2 border-2 border-gray-200 focus:border-black rounded-lg outline-none" value={basicInfo.phone} onChange={handleBasicInfoChange} />
                   </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1">CNIC (Optional)</label>
+                  <input type="text" name="cnic" placeholder="xxxxx-xxxxxxx-x" className="w-full px-4 py-2 border-2 border-gray-200 focus:border-black rounded-lg outline-none" value={basicInfo.cnic} onChange={handleBasicInfoChange} />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-1">Profile Photo (Optional)</label>
+                  <input type="file" accept="image/*" className="w-full px-2 py-1.5 border-2 border-gray-200 rounded-lg outline-none text-xs file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:bg-gray-100 hover:file:bg-gray-200" onChange={handleFileChange} />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold text-gray-500 mb-1">Address (Optional)</label>
