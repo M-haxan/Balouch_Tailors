@@ -9,6 +9,10 @@ const API = axios.create({
 API.interceptors.request.use(
   (config) => {
     config.withCredentials = true;
+    const token = useAuthStore.getState().token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => Promise.reject(error)
