@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import logo from '../assets/BT_Logo.png';
 import { useLoginMutation } from '../hooks/useAuth';
 import Preloader from '../components/Preloader';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const { email, password } = form;
+  const [showPassword, setShowPassword] = useState(false);
   const { mutate, isPending, isError, error } = useLoginMutation();
 
   const handleSubmit = (e) => {
@@ -58,14 +60,23 @@ const Login = () => {
               <label className="block text-xs font-semibold text-gray-700 uppercase tracking-widest mb-1">
                 Password
               </label>
-              <input
-                type="password"
-                required
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="••••••••"
-                className="w-full border border-gray-200 rounded px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-black transition-colors"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="••••••••"
+                  className="w-full border border-gray-200 rounded pl-4 pr-12 py-3 text-sm text-gray-800 focus:outline-none focus:border-black transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-black focus:outline-none"
+                >
+                  {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center justify-between text-xs text-gray-500">
