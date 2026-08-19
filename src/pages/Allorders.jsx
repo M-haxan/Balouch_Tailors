@@ -23,12 +23,12 @@ const Allorders = () => {
     const searchStr = searchTerm.toLowerCase();
     
     const customerName = order.customer?.name || '';
-    const customerPhone = order.customer?.phone || '';
+    const customerPhone = order.customer?.phone ? order.customer.phone.toString() : '';
     const orderNum = order.orderNumber ? order.orderNumber.toString() : '';
 
     const matchesSearch = 
       customerName.toLowerCase().includes(searchStr) || 
-      customerPhone.toLowerCase().includes(searchStr) ||
+      customerPhone.includes(searchStr) ||
       orderNum.includes(searchStr);
     
     const matchesStatus = statusFilter === 'All' || order.orderStatus === statusFilter;
