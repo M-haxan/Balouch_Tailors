@@ -26,7 +26,8 @@ API.interceptors.response.use(
     if (
       error.response &&
       error.response.status === 401 &&
-      !originalRequestUrl.includes('/auth/login')
+      !originalRequestUrl.includes('/auth/login') &&
+      !originalRequestUrl.includes('/orders/track')
     ) {
       useAuthStore.getState().logout();
       if (typeof window !== 'undefined') {

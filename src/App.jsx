@@ -23,6 +23,8 @@ import Allorders from './pages/Allorders';
 import InvoicePrint from './pages/InvoicePrinnt';
 import AdminWorkers from './pages/AdminWorkers';
 import WorkerDashboard from './pages/WorkerDashboard';
+import PublicOrderTrack from './pages/PublicOrderTrack';
+import PublicSuitTrack from './pages/PublicSuitTrack';
 
 const queryClient = new QueryClient();
 
@@ -40,8 +42,8 @@ function Home() {
 
 function App() {
   const location = useLocation();
-  // Yeh variable check karta hai ke URL /admin ya /worker se shuru ho raha hai ya nahi
-  const hideHeaderAndFooter = location.pathname.startsWith('/admin') || location.pathname.startsWith('/worker');
+  // Yeh variable check karta hai ke URL /admin ya /worker ya /track se shuru ho raha hai ya nahi
+  const hideHeaderAndFooter = location.pathname.startsWith('/admin') || location.pathname.startsWith('/worker') || location.pathname.startsWith('/track');
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -58,6 +60,10 @@ function App() {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/contact" element={<VisitTailor />} />
           
+          {/* Public Tracking Routes */}
+          <Route path="/track/:orderNumber" element={<PublicOrderTrack />} />
+          <Route path="/track/suit/:suitId" element={<PublicSuitTrack />} />
+
           {/* Admin Login */}
           <Route path="/admin/login" element={<Login />} />
 

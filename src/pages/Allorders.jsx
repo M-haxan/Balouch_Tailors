@@ -158,7 +158,7 @@ const Allorders = () => {
                     <select
                       value={order.orderStatus}
                       onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                      className={`text-xs font-bold px-3 py-1.5 rounded-full border outline-none cursor-pointer appearance-none text-center ${getStatusColor(order.orderStatus)}`}
+                      className={`text-xs font-bold px-3 py-1.5 rounded-full border outline-none cursor-pointer text-center ${getStatusColor(order.orderStatus)}`}
                     >
                       {statusOptions.map(opt => <option key={opt} value={opt} className="bg-white text-black">{opt}</option>)}
                     </select>
@@ -166,7 +166,7 @@ const Allorders = () => {
 
                   {/* Actions */}
                   <td className="p-4 text-right">
-                    <div className="flex justify-end gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex justify-end gap-2">
                       <button 
                         onClick={() => setViewingOrder(order)}
                         className="bg-green-50 hover:bg-green-100 text-green-600 p-2 rounded-lg transition shadow-sm"

@@ -61,12 +61,23 @@ const InvoicePrint = () => {
             <p className="text-sm text-gray-600 mt-1 font-medium">Main Bazar, Multan | Contact: 0300-XXXXXXX</p>
           </div>
           
-          <div className="flex justify-between items-start mb-6 text-sm">
+          <div className="flex justify-between items-center mb-6 text-sm">
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 min-w-[200px]">
               <p className="text-xs text-gray-500 font-bold uppercase mb-1">Billed To:</p>
               <p className="font-black text-lg">{order.customer?.name}</p>
               <p className="font-bold text-gray-700">{order.customer?.phone}</p>
             </div>
+            
+            {/* Dynamic Customer Order Status Tracking QR */}
+            <div className="flex flex-col items-center border border-gray-200 p-2 rounded-xl bg-gray-50/50 print:border-gray-300">
+              <img 
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${window.location.origin}/track/${order.orderNumber}`)}`} 
+                alt="Track Order QR" 
+                className="w-16 h-16"
+              />
+              <span className="text-[8px] text-gray-400 font-bold mt-1 uppercase tracking-wider">Track Status</span>
+            </div>
+
             <div className="text-right">
               <p className="text-lg"><strong>Order #:</strong> <span className="font-black">#{displayId}</span></p>
               <p className="text-gray-600"><strong>Booking:</strong> {new Date(order.bookingDate).toLocaleDateString()}</p>
@@ -197,35 +208,48 @@ const InvoicePrint = () => {
                       
                       <div className="flex flex-col grow">
                         {suitsList.map((suitItem, sIdx) => (
-                          <div key={sIdx} className="p-4 border-b last:border-b-0 border-gray-300 border-dashed">
+                          <div key={sIdx} className="p-4 border-b last:border-b-0 border-gray-300 border-dashed flex justify-between items-start gap-4">
                             
-                            {/* Suit Title & Volume */}
-                            <div className="flex justify-between items-center mb-3">
-                              <span className="font-sans font-black text-xl uppercase" dir="ltr">
-                                {suitItem.displayNum}. {suitItem.fabricDetails}
-                              </span>
-                              <span className="bg-black text-white px-2 py-0.5 rounded text-xs font-sans font-bold tracking-wider" dir="ltr">
-                                VOL: {suitItem.volumeNo}
-                              </span>
+                            {/* Details (Right to left layout for Urdu compatibility) */}
+                            <div className="flex-grow">
+                              {/* Suit Title & Volume */}
+                              <div className="flex justify-between items-center mb-3">
+                                <span className="font-sans font-black text-xl uppercase" dir="ltr">
+                                  {suitItem.displayNum}. {suitItem.fabricDetails}
+                                </span>
+                                <span className="bg-black text-white px-2 py-0.5 rounded text-xs font-sans font-bold tracking-wider" dir="ltr">
+                                  VOL: {suitItem.volumeNo}
+                                </span>
+                              </div>
+
+                              {/* Tags */}
+                              {suitItem.staticTags && suitItem.staticTags.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5" dir="ltr">
+                                  {suitItem.staticTags.map(tag => (
+                                    <span key={tag} className="border border-black px-2 py-0.5 rounded text-xs font-bold font-sans">
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+
+                              {/* Custom Design Voice Note */}
+                              {suitItem.customDesign && (
+                                <div className="mt-2 text-xl font-bold leading-relaxed text-right text-gray-800">
+                                  {suitItem.customDesign}
+                                </div>
+                              )}
                             </div>
 
-                            {/* Tags */}
-                            {suitItem.staticTags && suitItem.staticTags.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5" dir="ltr">
-                                {suitItem.staticTags.map(tag => (
-                                  <span key={tag} className="border border-black px-2 py-0.5 rounded text-xs font-bold font-sans">
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Custom Design Voice Note */}
-                            {suitItem.customDesign && (
-                              <div className="mt-2 text-xl font-bold leading-relaxed text-right text-gray-800">
-                                {suitItem.customDesign}
-                              </div>
-                            )}
+                            {/* Worker QR Code for specific suit measurements */}
+                            <div className="flex flex-col items-center bg-white p-1.5 border-2 border-black shrink-0" dir="ltr">
+                              <img 
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(`${window.location.origin}/track/suit/${suitItem._id}`)}`} 
+                                alt="Suit QR" 
+                                className="w-16 h-16"
+                              />
+                              <span className="text-[7px] text-black font-black mt-1 font-sans tracking-wide uppercase">Suit #{suitItem.displayNum} SPEC</span>
+                            </div>
                             
                           </div>
                         ))}
