@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useGetOrders, useUpdateOrder, useDeleteOrder } from '../hooks/useOrder';
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiPrinter, FiTrash2, FiBox, FiFilter, FiEye, FiX, FiCalendar, FiDollarSign, FiUser, FiScissors } from 'react-icons/fi';
+import { FiSearch, FiPrinter, FiTrash2, FiBox, FiFilter, FiEye, FiX, FiCalendar, FiCreditCard, FiUser, FiScissors } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { useGetWorkers, useAssignWorker, useMarkSuitStitched } from '../hooks/useWorkers';
 
 const Allorders = () => {
   const navigate = useNavigate();
@@ -201,7 +202,7 @@ const Allorders = () => {
       {/* ORDER DETAILS MODAL */}
       {viewingOrder && (
         <OrderDetailsModal 
-          order={viewingOrder} 
+          orderId={viewingOrder._id} 
           closeModal={() => setViewingOrder(null)} 
         />
       )}
@@ -212,7 +213,15 @@ const Allorders = () => {
 // -------------------------------------------------------------
 // COMPONENT: ORDER DETAILS MODAL
 // -------------------------------------------------------------
-const OrderDetailsModal = ({ order, closeModal }) => {
+const OrderDetailsModal = ({ orderId, closeModal }) => {
+  const { data: orders = [] } = useGetOrders();
+  const { data: workers = [] } = useGetWorkers();
+  const { mutate: assignWorker } = useAssignWorker();
+  const { mutate: markSuitStitched } = useMarkSuitStitched();
+
+  const order = orders.find(o => o._id === orderId);
+  if (!order) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
@@ -273,7 +282,7 @@ const OrderDetailsModal = ({ order, closeModal }) => {
             {/* Financial Overview */}
             <div className="bg-black text-white rounded-xl p-5 shadow-sm border border-gray-900">
               <h3 className="text-xs font-bold text-[#D4AF37] uppercase tracking-wider mb-3 flex items-center gap-1">
-                <FiDollarSign /> Payment Details
+                <FiCreditCard /> Payment Details
               </h3>
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
@@ -370,6 +379,20 @@ const OrderDetailsModal = ({ order, closeModal }) => {
                         <p className="font-black text-black text-sm">Rs {suit.price}</p>
                       </div>
 
+                      {/* Stitching Status Badge */}
+                      <div>
+                        <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Stitching Status</span>
+                        <span className={`inline-block text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border uppercase ${
+                          suit.stitchingStatus === 'Stitched' 
+                            ? 'bg-green-100 text-green-800 border-green-200' 
+                            : suit.stitchingStatus === 'Assigned' 
+                            ? 'bg-blue-100 text-blue-800 border-blue-200' 
+                            : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                        }`}>
+                          {suit.stitchingStatus || 'Pending'}
+                        </span>
+                      </div>
+
                     </div>
 
                     {/* Styling Tags */}
@@ -399,6 +422,41 @@ const OrderDetailsModal = ({ order, closeModal }) => {
                         No custom design instructions provided.
                       </div>
                     )}
+
+                    {/* Karigar (Worker) Assignment Selector */}
+                    <div className="bg-gray-50 p-4 border border-gray-150 rounded-xl mt-3">
+                      <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        Assign Stitching Karigar (Worker)
+                      </label>
+                      <select
+                        value={suit.assignedWorker?._id || suit.assignedWorker || ''}
+                        disabled={suit.stitchingStatus === 'Stitched'}
+                        onChange={(e) => assignWorker({
+                          orderId: order._id,
+                          suitId: suit._id,
+                          workerId: e.target.value
+                        })}
+                        className="w-full border border-gray-300 focus:border-black rounded-lg p-2.5 outline-none text-xs font-bold bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      >
+                        <option value="">-- No Worker Assigned (Pending) --</option>
+                        {workers.filter(w => w.isActive).map(w => (
+                          <option key={w._id} value={w._id}>{w.name} - Wage: Rs {w.perSuitWage}</option>
+                        ))}
+                      </select>
+
+                      {suit.assignedWorker && suit.stitchingStatus !== 'Stitched' && (
+                        <button
+                          onClick={() => {
+                            if (window.confirm('Kya aap waqai is suit ko stitched mark karna chahte hain? Isse karigar ke ledger mein stitching wages add ho jayengi.')) {
+                              markSuitStitched({ orderId: order._id, suitId: suit._id });
+                            }
+                          }}
+                          className="w-full mt-2 bg-black hover:bg-[#D4AF37] text-white hover:text-black font-black py-2 rounded-lg text-xs uppercase tracking-wider transition shadow-sm flex items-center justify-center gap-1"
+                        >
+                          <FiScissors className="text-sm" /> Mark as Stitched
+                        </button>
+                      )}
+                    </div>
 
                   </div>
 

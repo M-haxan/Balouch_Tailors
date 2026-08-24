@@ -21,6 +21,8 @@ import AdminMeasurements from './pages/AdminMeasurements';
 import CreateOrder from './pages/AdminOrder';
 import Allorders from './pages/Allorders';
 import InvoicePrint from './pages/InvoicePrinnt';
+import AdminWorkers from './pages/AdminWorkers';
+import WorkerDashboard from './pages/WorkerDashboard';
 
 const queryClient = new QueryClient();
 
@@ -38,8 +40,8 @@ function Home() {
 
 function App() {
   const location = useLocation();
-  // Yeh variable check karta hai ke URL /admin se shuru ho raha hai ya nahi
-  const hideHeaderAndFooter = location.pathname.startsWith('/admin');
+  // Yeh variable check karta hai ke URL /admin ya /worker se shuru ho raha hai ya nahi
+  const hideHeaderAndFooter = location.pathname.startsWith('/admin') || location.pathname.startsWith('/worker');
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -59,6 +61,9 @@ function App() {
           {/* Admin Login */}
           <Route path="/admin/login" element={<Login />} />
 
+          {/* Worker Protected Routes */}
+          <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+
           {/* Admin Protected Routes */}
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<h1 className="text-2xl font-bold p-6">Welcome Admin!</h1>} />
@@ -67,9 +72,10 @@ function App() {
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/customers" element={<AdminCustomers />} />
             <Route path="/admin/measurements" element={<AdminMeasurements />} />
+            <Route path="/admin/workers" element={<AdminWorkers />} />
             <Route path="/admin/orders/create" element={<CreateOrder />} />
             <Route path="/admin/allorders" element={<Allorders />} />
-     <Route path="/admin/print/:id" element={<InvoicePrint />} />
+            <Route path="/admin/print/:id" element={<InvoicePrint />} />
           </Route>
         </Routes>
       </main>

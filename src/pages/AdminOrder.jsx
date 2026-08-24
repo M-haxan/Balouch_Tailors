@@ -3,7 +3,7 @@ import { useGetCustomers } from '../hooks/useCustomers';
 import { useCreateOrder } from '../hooks/useOrder';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FiPlus, FiTrash2, FiSave, FiMic, FiUser, FiCalendar, FiDollarSign, FiScissors, FiX } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiSave, FiMic, FiUser, FiCalendar, FiCreditCard, FiScissors, FiX } from 'react-icons/fi';
 
 // Shop ke common smart tags
 const COMMON_TAGS = ['Ban', 'Collar', 'Gol Kaf', 'Chor Kaf', 'Double Silai', 'Front Pocket', '2 Side Pockets', 'Shalwar Poket'];
@@ -410,7 +410,7 @@ const CreateOrder = () => {
           {/* SECTION 3: INVOICE & DATES */}
           <div className="bg-black p-6 rounded-2xl shadow-xl border border-gray-800 text-white">
             <h3 className="text-sm font-bold text-[#D4AF37] uppercase tracking-wider mb-6 flex items-center gap-2">
-              <FiDollarSign /> 3. Invoice & Delivery
+              <FiCreditCard /> 3. Invoice & Delivery
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

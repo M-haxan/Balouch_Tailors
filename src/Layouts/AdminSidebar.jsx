@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FiShoppingBag, FiCreditCard, FiLogOut } from 'react-icons/fi';
+import { FiShoppingBag, FiCreditCard, FiLogOut, FiUsers } from 'react-icons/fi';
 import { CgProfile } from "react-icons/cg";
 import { GiPencilRuler } from "react-icons/gi";
 import { IoMdSettings } from "react-icons/io";
@@ -38,7 +38,7 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
       `}
     >
       {/* Upper Menu Section */}
-      <div className="py-6 pb-20  h-full">
+      <div className="py-6 pb-4 h-[calc(100%-4.5rem)] overflow-y-auto">
         {!collapsed && (
           <p className="px-6 text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
             Management
@@ -62,6 +62,10 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
             <GiPencilRuler className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Measure</span>}
           </NavLink>
+          <NavLink to="/admin/workers" className={getLinkStyle} onClick={onCloseMobile}>
+            <FiUsers className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
+            {!collapsed && <span>Workers</span>}
+          </NavLink>
           <NavLink to="/admin/orders/create" className={getLinkStyle} onClick={onCloseMobile}>
             <FiShoppingBag className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Orders</span>}
@@ -71,7 +75,7 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
             {!collapsed && <span>All Orders</span>}
           </NavLink>
            <NavLink to="/admin/settings" className={getLinkStyle} onClick={onCloseMobile}>
-            < IoMdSettings className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
+            <IoMdSettings className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Settings</span>}
           </NavLink>
 

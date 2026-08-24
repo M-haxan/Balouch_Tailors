@@ -37,3 +37,36 @@ export const useLoginMutation = () => {
     }
   });
 };
+
+export const useWorkerLoginMutation = () => {
+  const loginSuccess = useAuthStore((state) => state.loginSuccess);
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: async ({ phone, password }) => {
+      const response = await API.post('/auth/worker-login', { phone: Number(phone), password });
+      return response.data;
+    },
+
+    onSuccess: (data) => {
+      const payload = data?.data || data?.result || data;
+      const token = payload?.token || payload?.accessToken || payload?.jwt || data?.token || data?.accessToken || data?.jwt || null;
+      const userPayload = payload?.user || data?.user || {
+        id: payload?._id || data?._id,
+        name: payload?.name || data?.name,
+        phone: payload?.phone || data?.phone,
+        role: payload?.role || data?.role || 'worker',
+      };
+
+      loginSuccess(userPayload, token);
+      toast.success('Worker login successful!');
+      navigate('/worker/dashboard');
+    },
+
+    onError: (error) => {
+      const msg = error.response?.data?.message || error.message || 'Worker login failed';
+      console.error('Worker Login Process Failed:', msg);
+      toast.error(msg);
+    }
+  });
+};
