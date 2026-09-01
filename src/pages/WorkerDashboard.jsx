@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGetWorkerDashboard, useMarkSuitStitched, useGetWorkerLedger, useGetWorkerPayments } from '../hooks/useWorkers';
+import { useGetWorkerDashboard, useSubmitSuitForInspection, useGetWorkerLedger, useGetWorkerPayments } from '../hooks/useWorkers';
 import useAuthStore from '../Store/authStore';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -12,9 +12,9 @@ import {
   FiImage, 
   FiBox, 
   FiInfo, 
-  FiPhone,
-  FiBook,
-  FiX
+  FiPhone, 
+  FiAlertTriangle,
+  FiClock
 } from 'react-icons/fi';
 import Preloader from '../components/Preloader';
 
@@ -26,11 +26,11 @@ const WorkerDashboard = () => {
   const workerId = user?.id || user?._id;
   
   const { data: dashboardData, isLoading, refetch } = useGetWorkerDashboard();
-  const { mutate: markStitched, isPending: isUpdatingStatus } = useMarkSuitStitched();
+  const { mutate: submitForQC, isPending: isSubmitting } = useSubmitSuitForInspection();
   const { data: ledgerData = [], isLoading: loadingLedger } = useGetWorkerLedger(workerId);
   const { data: paymentsData = [], isLoading: loadingPayments } = useGetWorkerPayments(workerId);
   
-  const [activeTab, setActiveTab] = useState('assigned'); // 'assigned', 'completed', or 'ledger'
+  const [activeTab, setActiveTab] = useState('assigned'); // 'assigned', 'inspection', 'rework', 'completed', or 'ledger'
   const [viewingPayment, setViewingPayment] = useState(null);
 
   const handleLogout = () => {
@@ -38,9 +38,9 @@ const WorkerDashboard = () => {
     navigate('/admin/login');
   };
 
-  const handleMarkStitched = (orderId, suitId) => {
-    if (window.confirm('Kya aapne yeh suit mukammal sil liya hai?')) {
-      markStitched({ orderId, suitId }, {
+  const handleSubmitForQC = (orderId, suitId) => {
+    if (window.confirm('Kya aapne yeh suit mukammal sil liya hai aur Admin Inspection ke liye submit karna chahte hain?')) {
+      submitForQC({ orderId, suitId }, {
         onSuccess: () => {
           refetch();
         }
@@ -56,7 +56,14 @@ const WorkerDashboard = () => {
     );
   }
 
-  const { worker = {}, stats = {}, assignedSuits = [], stitchedSuits = [] } = dashboardData || {};
+  const { 
+    worker = {}, 
+    stats = {}, 
+    assignedSuits = [], 
+    underInspectionSuits = [], 
+    reworkSuits = [], 
+    stitchedSuits = [] 
+  } = dashboardData || {};
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12 font-sans">
@@ -98,24 +105,24 @@ const WorkerDashboard = () => {
           {/* Earnings Card */}
           <div className="bg-black text-white p-4 rounded-2xl shadow-sm border border-gray-900 flex flex-col justify-between">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Earnings</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Approved Earnings</span>
               <span className="text-[#D4AF37] text-xs font-black select-none">PKR</span>
             </div>
             <div className="mt-2">
               <p className="text-2xl font-black text-[#D4AF37]">Rs {stats.totalEarnings}</p>
-              <p className="text-[9px] text-gray-500 font-bold mt-1">Based on stitching wage</p>
+              <p className="text-[9px] text-gray-500 font-bold mt-1">QC Approved Wages</p>
             </div>
           </div>
 
           {/* Stitched Count Card */}
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-between">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Stitched Suits</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Approved Suits</span>
               <FiCheckCircle className="text-green-500 text-lg" />
             </div>
             <div className="mt-2">
               <p className="text-2xl font-black text-black">{stats.totalStitched}</p>
-              <p className="text-[9px] text-gray-400 font-bold mt-1">Completed orders</p>
+              <p className="text-[9px] text-gray-400 font-bold mt-1">Completed & Passed</p>
             </div>
           </div>
 
@@ -141,7 +148,7 @@ const WorkerDashboard = () => {
               <p className={`text-2xl font-black ${stats.balanceDue >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                 Rs {stats.balanceDue}
               </p>
-              <p className="text-[9px] text-gray-400 font-bold mt-1">Remaining payment</p>
+              <p className="text-[9px] text-gray-400 font-bold mt-1">Ready for Settle</p>
             </div>
           </div>
 
@@ -173,41 +180,60 @@ const WorkerDashboard = () => {
         <section className="space-y-4">
           
           {/* TAB SELECTORS */}
-          <div className="flex bg-gray-200/80 p-1 rounded-xl">
+          <div className="flex overflow-x-auto bg-gray-200/80 p-1 rounded-xl gap-1">
             <button
               onClick={() => setActiveTab('assigned')}
-              className={`flex-1 py-3 text-sm font-black rounded-lg transition-all flex items-center justify-center gap-2 ${
-                activeTab === 'assigned' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+              className={`flex-1 min-w-[100px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'assigned' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'
               }`}
             >
-              Assigned Work ({assignedSuits.length})
+              Assigned ({assignedSuits.length})
             </button>
             <button
-              onClick={() => setActiveTab('completed')}
-              className={`flex-1 py-3 text-sm font-black rounded-lg transition-all flex items-center justify-center gap-2 ${
-                activeTab === 'completed' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+              onClick={() => setActiveTab('inspection')}
+              className={`flex-1 min-w-[110px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'inspection' ? 'bg-amber-400 text-black shadow-sm font-black' : 'text-gray-600 hover:text-black'
               }`}
             >
-              Completed ({stitchedSuits.length})
+              <FiClock /> In QC ({underInspectionSuits.length})
+            </button>
+            {reworkSuits.length > 0 && (
+              <button
+                onClick={() => setActiveTab('rework')}
+                className={`flex-1 min-w-[110px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                  activeTab === 'rework' ? 'bg-red-600 text-white shadow-sm font-black animate-pulse' : 'text-red-600 hover:bg-red-100'
+                }`}
+              >
+                <FiAlertTriangle /> Rework ({reworkSuits.length})
+              </button>
+            )}
+            <button
+              onClick={() => setActiveTab('completed')}
+              className={`flex-1 min-w-[100px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'completed' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'
+              }`}
+            >
+              Approved ({stitchedSuits.length})
             </button>
             <button
               onClick={() => setActiveTab('ledger')}
-              className={`flex-1 py-3 text-sm font-black rounded-lg transition-all flex items-center justify-center gap-2 ${
-                activeTab === 'ledger' ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+              className={`flex-1 min-w-[90px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'ledger' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'
               }`}
             >
-              Ledger & History
+              Ledger
             </button>
           </div>
 
           {/* TAB CONTENT */}
           <div className="space-y-4">
             
-            {activeTab === 'assigned' ? (
+            {/* 1. ASSIGNED TAB */}
+            {activeTab === 'assigned' && (
               assignedSuits.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl shadow-sm">
                   <FiBox className="text-4xl text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-400 font-bold text-sm">Abhi koi suit assign nahi kiya gaya.</p>
+                  <p className="text-gray-400 font-bold text-sm">Abhi koi pending suit assign nahi hai.</p>
                   <p className="text-xs text-gray-400 mt-0.5">Admin se assignments ke liye rabta karein.</p>
                 </div>
               ) : (
@@ -215,7 +241,7 @@ const WorkerDashboard = () => {
                   <div key={idx} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4 flex flex-col md:flex-row md:items-start gap-5">
                     
                     {/* Fabric Image Container */}
-                    <div className="w-full md:w-40 h-40 bg-gray-55 rounded-xl border border-gray-150 overflow-hidden flex items-center justify-center bg-gray-50 shrink-0 relative">
+                    <div className="w-full md:w-40 h-40 bg-gray-50 rounded-xl border border-gray-150 overflow-hidden flex items-center justify-center shrink-0 relative">
                       {item.fabricImage?.url ? (
                         <img 
                           src={item.fabricImage.url} 
@@ -271,23 +297,23 @@ const WorkerDashboard = () => {
                         {/* Custom instructions */}
                         {item.customDesign && (
                           <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-right" dir="rtl">
-                            <span className="block text-[9px] font-bold text-amber-800 uppercase tracking-wider mb-1 text-left" dir="ltr">Styling Notes</span>
+                            <span className="block text-[9px] font-bold text-amber-800 uppercase tracking-wider mb-1 text-left" dir="ltr">Special Tailor Notes</span>
                             <p className="text-xs font-bold text-gray-800 leading-relaxed font-sans">{item.customDesign}</p>
                           </div>
                         )}
                       </div>
 
-                      {/* Action Mark Done */}
-                      <div className="pt-2 border-t border-gray-50 flex justify-between items-center gap-3">
+                      {/* Action Submit for QC */}
+                      <div className="pt-3 border-t border-gray-100 flex justify-between items-center gap-3">
                         <span className="text-xs font-bold text-gray-400">
-                          Wage: <span className="text-black font-black">Rs {worker.perSuitWage}</span>
+                          Expected Wage: <span className="text-black font-black">Rs {worker.perSuitWage}</span>
                         </span>
                         <button
-                          onClick={() => handleMarkStitched(item.orderId, item.suitId)}
-                          disabled={isUpdatingStatus}
+                          onClick={() => handleSubmitForQC(item.orderId, item.suitId)}
+                          disabled={isSubmitting}
                           className="bg-black hover:bg-[#D4AF37] hover:text-black text-white text-xs font-black px-5 py-2.5 rounded-xl transition shadow-md flex items-center gap-1.5"
                         >
-                          <FiCheckCircle /> Stitching Complete
+                          <FiCheckCircle /> Submit for QC Inspection
                         </button>
                       </div>
 
@@ -296,11 +322,85 @@ const WorkerDashboard = () => {
                   </div>
                 ))
               )
-            ) : activeTab === 'completed' ? (
+            )}
+
+            {/* 2. UNDER INSPECTION TAB */}
+            {activeTab === 'inspection' && (
+              underInspectionSuits.length === 0 ? (
+                <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl shadow-sm">
+                  <FiClock className="text-4xl text-amber-400 mx-auto mb-2" />
+                  <p className="text-gray-500 font-bold text-sm">Abhi koi suit Admin Inspection mein nahi hai.</p>
+                </div>
+              ) : (
+                underInspectionSuits.map((item, idx) => (
+                  <div key={idx} className="bg-white border border-amber-200 rounded-2xl p-5 shadow-sm space-y-3 border-l-4 border-l-amber-500">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
+                          <FiClock /> Waiting for Admin Quality Approval
+                        </span>
+                        <h4 className="font-black text-base text-gray-900 mt-2 uppercase">{item.fabricDetails}</h4>
+                        <p className="text-xs text-gray-500 mt-0.5">Order #BT-{item.orderNumber} | Wearer: <span className="font-bold">{item.wearerName}</span></p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-black text-amber-700 block">Rs {worker.perSuitWage}</span>
+                        <span className="text-[9px] text-gray-400 font-bold uppercase">Wage On Hold</span>
+                      </div>
+                    </div>
+                    <p className="text-xs text-amber-800 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100 font-medium">
+                      ℹ️ Yeh suit aapne complete kar diya hai. Jaise hi Admin physically check karke approve karega, aapke ledger me Rs {worker.perSuitWage} add ho jayenge.
+                    </p>
+                  </div>
+                ))
+              )
+            )}
+
+            {/* 3. REWORK REQUIRED TAB */}
+            {activeTab === 'rework' && (
+              reworkSuits.length === 0 ? (
+                <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl shadow-sm">
+                  <FiCheckCircle className="text-4xl text-green-500 mx-auto mb-2" />
+                  <p className="text-gray-500 font-bold text-sm">Koi alteration ya rework pending nahi hai!</p>
+                </div>
+              ) : (
+                reworkSuits.map((item, idx) => (
+                  <div key={idx} className="bg-white border border-red-200 rounded-2xl p-5 shadow-sm space-y-4 border-l-4 border-l-red-600">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-[10px] bg-red-100 text-red-900 border border-red-200 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
+                          <FiAlertTriangle /> Alteration / Rework Needed
+                        </span>
+                        <h4 className="font-black text-base text-gray-900 mt-2 uppercase">{item.fabricDetails}</h4>
+                        <p className="text-xs text-gray-500">Order #BT-{item.orderNumber} | Wearer: <span className="font-bold">{item.wearerName}</span></p>
+                      </div>
+                    </div>
+
+                    {/* Admin rework instruction notes */}
+                    <div className="bg-red-50 border border-red-100 rounded-xl p-3.5 space-y-1">
+                      <span className="text-[10px] font-black text-red-700 uppercase tracking-wider block">Admin Alteration Instructions:</span>
+                      <p className="text-xs font-bold text-red-900">{item.reworkNotes || 'Silayi theek karein aur dobara submit karein.'}</p>
+                    </div>
+
+                    <div className="pt-2 flex justify-end">
+                      <button
+                        onClick={() => handleSubmitForQC(item.orderId, item.suitId)}
+                        disabled={isSubmitting}
+                        className="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-5 py-2 rounded-xl transition shadow flex items-center gap-1.5"
+                      >
+                        <FiCheckCircle /> Alteration Done - Re-Submit for QC
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )
+            )}
+
+            {/* 4. COMPLETED & APPROVED TAB */}
+            {activeTab === 'completed' && (
               stitchedSuits.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl shadow-sm">
                   <FiCheckCircle className="text-4xl text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-400 font-bold text-sm">Abhi tak koi suit complete nahi kiya.</p>
+                  <p className="text-gray-400 font-bold text-sm">Abhi tak koi suit approved nahi hua.</p>
                 </div>
               ) : (
                 stitchedSuits.map((item, idx) => (
@@ -308,17 +408,19 @@ const WorkerDashboard = () => {
                     <div className="space-y-1">
                       <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Order #BT-{item.orderNumber}</span>
                       <h4 className="font-bold text-gray-900 text-sm">{item.fabricDetails}</h4>
-                      <p className="text-xs text-gray-500">Stitched for wearer: <span className="font-bold">{item.wearerName}</span></p>
+                      <p className="text-xs text-gray-500">Stitched for: <span className="font-bold">{item.wearerName}</span></p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-black text-green-600">+ Rs {worker.perSuitWage}</p>
-                      <p className="text-[10px] text-gray-400 font-medium">Completed</p>
+                      <p className="text-[10px] text-green-700 font-bold uppercase">QC Passed & Credited</p>
                     </div>
                   </div>
                 ))
               )
-            ) : (
-              /* LEDGER TAB */
+            )}
+
+            {/* 5. LEDGER TAB */}
+            {activeTab === 'ledger' && (
               <div className="space-y-6 animate-fade-in">
                 {/* Active Ledger table */}
                 <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">

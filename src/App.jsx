@@ -13,6 +13,7 @@ import VisitTailor from './components/VisitTailor';
 import Footer from './components/Footer';
 import Login from './pages/Login';
 import AdminLayout from './Layouts/AdminLayout';
+import AdminDashboard from './pages/AdminDashboard';
 import AdminCatalogue from './pages/AdminCatalogue';
 import AdminPricing from './pages/AdminPricing';
 import AdminSettings from './pages/AdminSettings';
@@ -72,7 +73,8 @@ function App() {
 
           {/* Admin Protected Routes */}
           <Route element={<AdminLayout />}>
-            <Route path="/admin/dashboard" element={<h1 className="text-2xl font-bold p-6">Welcome Admin!</h1>} />
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/catalogue" element={<AdminCatalogue />} />
             <Route path="/admin/pricing" element={<AdminPricing />} />
             <Route path="/admin/settings" element={<AdminSettings />} />

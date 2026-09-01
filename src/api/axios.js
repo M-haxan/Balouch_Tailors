@@ -2,10 +2,9 @@ import axios from 'axios';
 import useAuthStore from '../Store/authStore';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || 'https://bt-backend-5d1ec458f8eb.herokuapp.com/api',
+  baseURL: import.meta.env.VITE_BACKEND_URL || 'https://bt-backend-5d1ec458f8eb.herokuapp.com/api' || 'http://localhost:3000/api',
   withCredentials: true,
 });
-
 API.interceptors.request.use(
   (config) => {
     config.withCredentials = true;

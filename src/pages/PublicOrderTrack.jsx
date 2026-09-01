@@ -51,16 +51,19 @@ const PublicOrderTrack = () => {
     );
   }
 
-  // Stepper logic calculation based on Order & Suit status
+  // Stepper logic calculation based on Order & Suit stages
   const getActiveStep = () => {
-    if (order.orderStatus === 'Completed') return 4;
+    if (order.orderStatus === 'Completed') return 5;
     
     // Check individual suit statuses
     const suits = order.suits || [];
+    const allStitched = suits.length > 0 && suits.every(s => s.stitchingStatus === 'Stitched');
     const hasStitched = suits.some(s => s.stitchingStatus === 'Stitched');
-    const hasAssigned = suits.some(s => s.stitchingStatus === 'Assigned' || s.stitchingStatus === 'Stitched');
+    const hasUnderQC = suits.some(s => s.stitchingStatus === 'Submitted for Inspection');
+    const hasAssigned = suits.some(s => s.stitchingStatus === 'Assigned' || s.stitchingStatus === 'Submitted for Inspection' || s.stitchingStatus === 'Stitched');
     
-    if (order.orderStatus === 'In Progress' || hasStitched) return 3;
+    if (allStitched || order.orderStatus === 'In Progress') return 4;
+    if (hasStitched || hasUnderQC) return 3;
     if (hasAssigned) return 2;
     return 1;
   };
@@ -68,10 +71,11 @@ const PublicOrderTrack = () => {
   const activeStep = getActiveStep();
 
   const steps = [
-    { number: 1, label: 'Order Booked', description: 'Order system mein register ho gaya hai.', icon: FiClock },
-    { number: 2, label: 'Karigar Assigned', description: 'Stitching master ko kapra allot kar diya hai.', icon: FiScissors },
-    { number: 3, label: 'Stitching In Progress', description: 'Aap ka suit silayi ho raha hai.', icon: FiScissors },
-    { number: 4, label: 'Completed & Ready', description: 'Suit ready hai, aap shop se collect kar sakte hain.', icon: FiSmile }
+    { number: 1, label: 'Order Booked', urdu: 'آرڈر بک ہو گیا', description: 'Order system mein register ho gaya hai.', icon: FiClock },
+    { number: 2, label: 'Cutting & Allocation', urdu: 'کٹنگ مکمل', description: 'Kapre ki cutting aur master allocation mukammal.', icon: FiScissors },
+    { number: 3, label: 'Stitching & QC Inspection', urdu: 'سلائی اور معیار کی جانچ', description: 'Aap ka suit silayi aur quality check mein hai.', icon: FiScissors },
+    { number: 4, label: 'Pressing & Packing', urdu: 'پریس اور فنشنگ', description: 'Suit ki final pressing aur packing jari hai.', icon: FiCheck },
+    { number: 5, label: 'Ready for Collection', urdu: 'وصولی کے لیے تیار', description: 'Suit bilkul tayyar hai, aap shop se collect kar sakte hain.', icon: FiSmile }
   ];
 
   return (
@@ -112,21 +116,24 @@ const PublicOrderTrack = () => {
 
         {/* Stepper Timeline */}
         <div className="bg-gray-800/80 backdrop-blur border border-gray-700/50 rounded-2xl p-6 md:p-8 shadow-xl space-y-8">
-          <h3 className="font-black text-sm uppercase text-gray-400 tracking-wider">Order Timeline</h3>
+          <div className="flex justify-between items-center border-b border-gray-700/50 pb-3">
+            <h3 className="font-black text-sm uppercase text-gray-300 tracking-wider">Live Progress Stepper</h3>
+            <span className="text-[11px] font-black bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 px-2.5 py-0.5 rounded-full">
+              Stage {activeStep} of 5
+            </span>
+          </div>
           
           <div className="relative pl-8 border-l-2 border-gray-700 space-y-8 ml-3">
             {steps.map((step) => {
-              const Icon = step.icon;
               const isCompleted = step.number < activeStep;
               const isActive = step.number === activeStep;
-              const isPending = step.number > activeStep;
 
               return (
                 <div key={step.number} className="relative">
                   {/* Step indicator circle */}
                   <span className={`absolute -left-[41px] top-0.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition shadow-md border ${
                     isCompleted ? 'bg-green-600 border-green-600 text-white' : 
-                    isActive ? 'bg-[#D4AF37] border-[#D4AF37] text-black animate-pulse' : 
+                    isActive ? 'bg-[#D4AF37] border-[#D4AF37] text-black animate-pulse font-black' : 
                     'bg-gray-800 border-gray-700 text-gray-500'
                   }`}>
                     {isCompleted ? <FiCheck /> : step.number}
@@ -134,13 +141,16 @@ const PublicOrderTrack = () => {
 
                   {/* Step Description */}
                   <div className="space-y-1">
-                    <h4 className={`text-sm font-black uppercase tracking-wider ${
-                      isCompleted ? 'text-green-500' :
-                      isActive ? 'text-[#D4AF37]' :
-                      'text-gray-500'
-                    }`}>
-                      {step.label}
-                    </h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className={`text-sm font-black uppercase tracking-wider ${
+                        isCompleted ? 'text-green-500' :
+                        isActive ? 'text-[#D4AF37]' :
+                        'text-gray-500'
+                      }`}>
+                        {step.label}
+                      </h4>
+                      <span className="text-[11px] text-gray-400 font-serif" dir="rtl">({step.urdu})</span>
+                    </div>
                     <p className={`text-xs ${isActive ? 'text-gray-200 font-medium' : 'text-gray-400'}`}>
                       {step.description}
                     </p>
@@ -165,10 +175,11 @@ const PublicOrderTrack = () => {
                 <div>
                   <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border ${
                     suit.stitchingStatus === 'Stitched' ? 'bg-green-950/40 border-green-800/50 text-green-400' :
+                    suit.stitchingStatus === 'Submitted for Inspection' ? 'bg-amber-950/40 border-amber-800/50 text-amber-400' :
                     suit.stitchingStatus === 'Assigned' ? 'bg-blue-950/40 border-blue-800/50 text-blue-400' :
                     'bg-yellow-950/40 border-yellow-800/50 text-yellow-400'
                   }`}>
-                    {suit.stitchingStatus}
+                    {suit.stitchingStatus === 'Submitted for Inspection' ? 'Under QC' : suit.stitchingStatus}
                   </span>
                 </div>
               </div>

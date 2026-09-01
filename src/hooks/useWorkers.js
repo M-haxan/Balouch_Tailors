@@ -100,7 +100,101 @@ export const useGetWorkerDashboard = () => {
   });
 };
 
-// 7. Worker: Mark Suit as Stitched
+// 7. Worker: Submit Suit for QC Inspection
+export const useSubmitSuitForInspection = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ orderId, suitId }) => {
+      const response = await API.put(`/workers/suits/${orderId}/${suitId}/submit`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Suit submitted for admin inspection!');
+      queryClient.invalidateQueries({ queryKey: ['workerDashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to submit suit for inspection.');
+    }
+  });
+};
+
+// 7.1 Admin: Approve Suit & Credit Wage
+export const useApproveSuit = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ orderId, suitId }) => {
+      const response = await API.put(`/workers/suits/${orderId}/${suitId}/approve`);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Suit QC Approved & Wage Credited!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['workerDashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['financialSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['workers'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to approve suit.');
+    }
+  });
+};
+
+// 7.2 Admin: Reject Suit / Request Rework
+export const useRejectSuit = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ orderId, suitId, reworkNotes }) => {
+      const response = await API.put(`/workers/suits/${orderId}/${suitId}/reject`, { reworkNotes });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.info(data?.message || 'Suit sent for rework.');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['workerDashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['financialSummary'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to reject suit.');
+    }
+  });
+};
+
+// 7.3 Admin: Assign Stage (Cutting, Stitching, Finishing, Self/Worker)
+export const useAssignSuitStage = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ orderId, suitId, data }) => {
+      const response = await API.put(`/workers/suits/${orderId}/${suitId}/assign-stage`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Suit stage assigned successfully!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['financialSummary'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to assign stage.');
+    }
+  });
+};
+
+// 7.4 Admin: Get Shop Financial & Labor Summary
+export const useGetFinancialSummary = () => {
+  return useQuery({
+    queryKey: ['financialSummary'],
+    queryFn: async () => {
+      const response = await API.get('/workers/analytics/financial-summary');
+      return response.data;
+    }
+  });
+};
+
+// 7.5 Worker: Mark Suit as Stitched (Legacy compatibility)
 export const useMarkSuitStitched = () => {
   const queryClient = useQueryClient();
   
@@ -110,9 +204,10 @@ export const useMarkSuitStitched = () => {
       return response.data;
     },
     onSuccess: () => {
-      toast.success('Suit marked as Stitched!');
+      toast.success('Suit updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['workerDashboard'] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['financialSummary'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to update suit status.');
