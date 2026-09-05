@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGetOrders, useUpdateOrder, useDeleteOrder } from '../hooks/useOrder';
+import { useGetOrders, useUpdateOrder, useDeleteOrder, useDeliverOrder } from '../hooks/useOrder';
 import { useNavigate } from 'react-router-dom';
 import { 
   FiSearch, 
@@ -16,7 +16,10 @@ import {
   FiCheckCircle, 
   FiAlertTriangle, 
   FiClock,
-  FiCheck
+  FiCheck,
+  FiSend,
+  FiDollarSign,
+  FiShoppingBag
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { 
@@ -39,6 +42,9 @@ const Allorders = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [viewingOrder, setViewingOrder] = useState(null);
 
+  // NEW: Delivery & Handover modal state
+  const [deliveryModalOrder, setDeliveryModalOrder] = useState(null);
+
   // Count suits waiting for inspection across all orders
   let totalPendingQC = 0;
   orders.forEach(ord => {
@@ -47,8 +53,8 @@ const Allorders = () => {
     });
   });
 
-  // Order Status Options
-  const statusOptions = ['Pending', 'In Progress', 'Completed', 'Cancelled'];
+  // Order Status Options (Including Delivered)
+  const statusOptions = ['Pending', 'In Progress', 'Completed', 'Delivered', 'Cancelled'];
 
   // Filter Logic
   const filteredOrders = orders.filter(order => {
@@ -74,8 +80,12 @@ const Allorders = () => {
   });
 
   // Handlers
-  const handleStatusChange = (id, newStatus) => {
-    updateOrder({ id, data: { orderStatus: newStatus } });
+  const handleStatusChange = (order, newStatus) => {
+    if (newStatus === 'Delivered') {
+      setDeliveryModalOrder(order);
+    } else {
+      updateOrder({ id: order._id, data: { orderStatus: newStatus } });
+    }
   };
 
   const handleDelete = (id) => {
@@ -90,6 +100,7 @@ const Allorders = () => {
       case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'In Progress': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'Completed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'Delivered': return 'bg-purple-100 text-purple-800 border-purple-200';
       case 'Cancelled': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -224,7 +235,7 @@ const Allorders = () => {
                     <td className="p-4 text-center">
                       <select
                         value={order.orderStatus}
-                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                        onChange={(e) => handleStatusChange(order, e.target.value)}
                         className={`text-xs font-bold px-3 py-1.5 rounded-full border outline-none cursor-pointer text-center ${getStatusColor(order.orderStatus)}`}
                       >
                         {statusOptions.map(opt => <option key={opt} value={opt} className="bg-white text-black">{opt}</option>)}
@@ -233,7 +244,18 @@ const Allorders = () => {
 
                     {/* Actions */}
                     <td className="p-4 text-right">
-                      <div className="flex justify-end gap-2">
+                      <div className="flex justify-end gap-1.5">
+                        {/* Quick Deliver Button */}
+                        {order.orderStatus !== 'Delivered' && (
+                          <button
+                            onClick={() => setDeliveryModalOrder(order)}
+                            className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-black px-2.5 py-1.5 rounded-lg transition shadow flex items-center gap-1"
+                            title="Deliver Suit & Receive Payment"
+                          >
+                            <FiCheckCircle /> Deliver
+                          </button>
+                        )}
+
                         <button 
                           onClick={() => setViewingOrder(order)}
                           className={`p-2 rounded-lg transition shadow-sm ${
@@ -276,6 +298,15 @@ const Allorders = () => {
         <OrderDetailsModal 
           orderId={viewingOrder._id} 
           closeModal={() => setViewingOrder(null)} 
+          onOpenDelivery={(ord) => setDeliveryModalOrder(ord)}
+        />
+      )}
+
+      {/* ORDER HANDOVER & DELIVERY MODAL */}
+      {deliveryModalOrder && (
+        <OrderDeliveryModal
+          order={deliveryModalOrder}
+          closeModal={() => setDeliveryModalOrder(null)}
         />
       )}
     </div>
@@ -285,7 +316,7 @@ const Allorders = () => {
 // -------------------------------------------------------------
 // COMPONENT: ORDER DETAILS & QC INSPECTION MODAL
 // -------------------------------------------------------------
-const OrderDetailsModal = ({ orderId, closeModal }) => {
+const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
   const { data: orders = [] } = useGetOrders();
   const { data: workers = [] } = useGetWorkers();
   const { mutate: assignWorker } = useAssignWorker();
@@ -628,6 +659,17 @@ const OrderDetailsModal = ({ orderId, closeModal }) => {
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
+          {order.orderStatus !== 'Delivered' && onOpenDelivery && (
+            <button
+              onClick={() => {
+                closeModal();
+                onOpenDelivery(order);
+              }}
+              className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center gap-1.5"
+            >
+              <FiCheckCircle /> Deliver & Settle Payment
+            </button>
+          )}
           <button 
             onClick={closeModal} 
             className="bg-black hover:bg-gray-900 text-[#D4AF37] px-6 py-2.5 rounded-lg text-sm font-bold transition shadow-md"
@@ -689,6 +731,155 @@ const OrderDetailsModal = ({ orderId, closeModal }) => {
         </div>
       )}
 
+    </div>
+  );
+};
+
+// -------------------------------------------------------------
+// COMPONENT: ORDER DELIVERY & CASH/KHATA SETTLEMENT MODAL
+// -------------------------------------------------------------
+const OrderDeliveryModal = ({ order, closeModal }) => {
+  const { mutate: deliverOrder, isPending } = useDeliverOrder();
+  
+  const balanceDue = Number(order.balanceAmount) || 0;
+  const [receivedAmount, setReceivedAmount] = useState(balanceDue.toString());
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
+
+  const numReceived = Number(receivedAmount) || 0;
+  const diff = balanceDue - numReceived;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    deliverOrder({
+      id: order._id,
+      data: {
+        receivedAmount: numReceived,
+        paymentMethod
+      }
+    }, {
+      onSuccess: () => {
+        closeModal();
+      }
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-5 border border-gray-200 animate-scale-up">
+        
+        {/* Modal Header */}
+        <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+          <div className="flex items-center gap-2 text-purple-700">
+            <FiCheckCircle className="text-2xl" />
+            <div>
+              <h3 className="text-base font-black uppercase tracking-wider text-black">Handover Suit & Receive Payment</h3>
+              <p className="text-[11px] text-gray-500 font-medium">Order #BT-{order.orderNumber} | Customer: {order.customer?.name || 'Customer'}</p>
+            </div>
+          </div>
+          <button onClick={closeModal} className="text-gray-400 hover:text-black font-black text-lg">✕</button>
+        </div>
+
+        {/* Financial Snapshot */}
+        <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl space-y-2">
+          <div className="flex justify-between text-xs font-bold text-gray-600">
+            <span>Total Bill:</span>
+            <span className="text-black font-black font-sans">Rs {order.totalAmount}</span>
+          </div>
+          <div className="flex justify-between text-xs font-bold text-gray-600">
+            <span>Advance Paid Earlier:</span>
+            <span className="text-green-600 font-black font-sans">Rs {order.advancePaid || 0}</span>
+          </div>
+          <div className="flex justify-between text-sm font-black text-black pt-2 border-t border-gray-200">
+            <span>Remaining Balance Due:</span>
+            <span className="text-red-600 font-black font-sans">Rs {balanceDue}</span>
+          </div>
+        </div>
+
+        {/* Handover Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[11px] font-black text-gray-700 uppercase mb-1">
+              Amount Receiving Now at Handover (وصول ہونے والی رقم):
+            </label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-xs">Rs</span>
+              <input
+                type="number"
+                min="0"
+                required
+                value={receivedAmount}
+                onChange={(e) => setReceivedAmount(e.target.value)}
+                placeholder="0"
+                className="w-full pl-9 pr-3 py-2.5 border-2 border-gray-200 focus:border-purple-600 rounded-xl text-sm font-black outline-none font-sans"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-black text-gray-700 uppercase mb-1">
+              Payment Method:
+            </label>
+            <select
+              value={paymentMethod}
+              onChange={(e) => setPaymentMethod(e.target.value)}
+              className="w-full border-2 border-gray-200 focus:border-purple-600 rounded-xl p-2.5 text-xs font-bold outline-none"
+            >
+              <option value="Cash">Cash (کیش)</option>
+              <option value="JazzCash">JazzCash</option>
+              <option value="EasyPaisa">EasyPaisa</option>
+              <option value="Bank">Bank Transfer / Card</option>
+            </select>
+          </div>
+
+          {/* Dynamic Khata Feedback Alert */}
+          <div className={`p-3.5 rounded-xl border text-xs font-bold ${
+            diff > 0 
+              ? 'bg-red-50 border-red-200 text-red-800' 
+              : diff < 0 
+              ? 'bg-green-50 border-green-200 text-green-800' 
+              : 'bg-gray-100 border-gray-200 text-gray-800'
+          }`}>
+            {diff > 0 && (
+              <p className="flex items-center gap-1.5">
+                <FiAlertTriangle className="text-red-600 shrink-0" />
+                <span>⚠️ Rs {diff.toLocaleString()} Baqiya Udhar customer ke Khate me add ho jayega.</span>
+              </p>
+            )}
+            {diff < 0 && (
+              <p className="flex items-center gap-1.5">
+                <FiCheck className="text-green-600 shrink-0" />
+                <span>🟢 Rs {Math.abs(diff).toLocaleString()} Extra customer ke Advance Credit me save ho jayenge.</span>
+              </p>
+            )}
+            {diff === 0 && (
+              <p className="flex items-center gap-1.5 text-green-700">
+                <FiCheck />
+                <span>✅ Poori raqam wasool ho chuki hai. Khata clear rahega.</span>
+              </p>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded-lg transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-black px-6 py-2.5 rounded-xl transition shadow flex items-center gap-1.5"
+            >
+              <FiCheckCircle /> {isPending ? 'Processing...' : 'Confirm Delivery & Update Khata'}
+            </button>
+          </div>
+        </form>
+
+      </div>
     </div>
   );
 };

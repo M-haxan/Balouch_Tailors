@@ -21,17 +21,45 @@ const CreateOrder = () => {
   const [savedOrder, setSavedOrder] = useState(null); // Nayi state
   const [alterations, setAlterations] = useState([]);
   
+  // NEW: Khata Adjustment Toggle
+  const [adjustKhata, setAdjustKhata] = useState(true);
+
+  const selectedCustomer = customers.find(c => c._id === customerId);
+  const customerKhataBal = Number(selectedCustomer?.khataBalance) || 0;
+  
   // Suits ki dynamic array state
   const [suits, setSuits] = useState([
     { fabricDetails: '', volumeNo: '', staticTags: [], customDesign: '', price: '', wearer:'', fabricimage:'null' }
   ]);
 
   // --- FINANCIAL CALCULATIONS (Auto-magic) ---
-  const totalAmount = useMemo(() => {
+  const rawSubtotal = useMemo(() => {
     const suitsTotal = suits.reduce((total, suit) => total + (Number(suit.price) || 0), 0);
     const altsTotal = alterations.reduce((total, alt) => total + (Number(alt.price) || 0), 0);
-    return suitsTotal + altsTotal; // Dono ko jama kar diya
+    return suitsTotal + altsTotal;
   }, [suits, alterations]);
+
+  // Dynamic Khata adjustment calculation
+  const khataAdjustment = useMemo(() => {
+    if (!adjustKhata || customerKhataBal === 0) return { type: 'none', amount: 0 };
+    if (customerKhataBal > 0) {
+      // Previous due added
+      return { type: 'added_due', amount: customerKhataBal };
+    } else {
+      // Advance credit deducted
+      const maxDeductible = Math.min(rawSubtotal, Math.abs(customerKhataBal));
+      return { type: 'deducted_advance', amount: maxDeductible };
+    }
+  }, [adjustKhata, customerKhataBal, rawSubtotal]);
+
+  const totalAmount = useMemo(() => {
+    if (khataAdjustment.type === 'added_due') {
+      return rawSubtotal + khataAdjustment.amount;
+    } else if (khataAdjustment.type === 'deducted_advance') {
+      return Math.max(0, rawSubtotal - khataAdjustment.amount);
+    }
+    return rawSubtotal;
+  }, [rawSubtotal, khataAdjustment]);
 
   const balanceAmount = useMemo(() => {
     return totalAmount - (Number(advancePaid) || 0);
@@ -142,6 +170,7 @@ const CreateOrder = () => {
     formData.append('advancePaid', Number(advancePaid) || 0);
     formData.append('balanceAmount', balanceAmount);
     formData.append('deliveryDate', deliveryDate);
+    formData.append('previousKhataAdjusted', JSON.stringify(khataAdjustment));
 
     // 1. Suits ka data (Images ko nikal kar baqi data ko text/string bana kar bhejenge)
     const suitsData = suits.map(s => ({
@@ -229,7 +258,7 @@ const CreateOrder = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* SECTION 1: CUSTOMER SELECTION */}
+          {/* SECTION 1: CUSTOMER SELECTION & KHATA AUTO-ALERT */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <h3 className="text-sm font-bold text-[#D4AF37] uppercase tracking-wider mb-4 flex items-center gap-2">
               <FiUser /> 1. Select Client
@@ -244,10 +273,50 @@ const CreateOrder = () => {
                 className="w-full border-2 border-gray-200 focus:border-black rounded-xl p-3 outline-none font-semibold text-gray-800 transition"
               >
                 <option value="">-- Choose an existing customer --</option>
-                {customers.map(c => (
-                  <option key={c._id} value={c._id}>{c.name} - {c.phone}</option>
-                ))}
+                {customers.map(c => {
+                  const bal = Number(c.khataBalance) || 0;
+                  const balBadge = bal > 0 ? ` [Udhar: Rs ${bal}]` : bal < 0 ? ` [Credit: Rs ${Math.abs(bal)}]` : '';
+                  return (
+                    <option key={c._id} value={c._id}>
+                      {c.name} - {c.phone}{balBadge}
+                    </option>
+                  );
+                })}
               </select>
+            )}
+
+            {/* Smart Khata Auto-Adjustment Banner */}
+            {selectedCustomer && customerKhataBal !== 0 && (
+              <div className={`mt-4 p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                customerKhataBal > 0 
+                  ? 'bg-red-50/80 border-red-200 text-red-900' 
+                  : 'bg-green-50/80 border-green-200 text-green-900'
+              }`}>
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-black uppercase tracking-wider block opacity-75">
+                    {customerKhataBal > 0 ? '🔴 Previous Due (پچھلا ادھار موجود ہے)' : '🟢 Stored Credit (گاہک کے پیسے جمع ہیں)'}
+                  </span>
+                  <p className="text-sm font-black">
+                    {customerKhataBal > 0 
+                      ? `Rs ${customerKhataBal.toLocaleString()} (Pending from past orders)` 
+                      : `Rs ${Math.abs(customerKhataBal).toLocaleString()} (Available advance credit)`}
+                  </p>
+                </div>
+
+                <label className="flex items-center gap-2 text-xs font-bold cursor-pointer bg-white px-3 py-2 rounded-lg border shadow-sm shrink-0">
+                  <input 
+                    type="checkbox" 
+                    checked={adjustKhata} 
+                    onChange={(e) => setAdjustKhata(e.target.checked)}
+                    className="w-4 h-4 text-black rounded accent-black cursor-pointer"
+                  />
+                  <span>
+                    {customerKhataBal > 0 
+                      ? 'Include in this invoice (+)' 
+                      : 'Deduct from this bill (-)'}
+                  </span>
+                </label>
+              </div>
             )}
           </div>
 
@@ -433,13 +502,32 @@ const CreateOrder = () => {
               </div>
 
               {/* Financials */}
-              <div className="space-y-4 bg-gray-900 p-5 rounded-xl border border-gray-800">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400 font-bold">Total Bill:</span>
-                  <span className="text-2xl font-black text-[#D4AF37]">Rs {totalAmount}</span>
+              <div className="space-y-3 bg-gray-900 p-5 rounded-xl border border-gray-800 text-xs">
+                <div className="flex justify-between items-center text-gray-400 font-bold">
+                  <span>Order Items Subtotal:</span>
+                  <span className="text-white font-black font-sans text-sm">Rs {rawSubtotal}</span>
+                </div>
+
+                {khataAdjustment.type === 'added_due' && (
+                  <div className="flex justify-between items-center text-red-400 font-bold">
+                    <span>+ Previous Udhar Added:</span>
+                    <span className="font-black font-sans">+ Rs {khataAdjustment.amount}</span>
+                  </div>
+                )}
+
+                {khataAdjustment.type === 'deducted_advance' && (
+                  <div className="flex justify-between items-center text-green-400 font-bold">
+                    <span>- Advance Credit Deducted:</span>
+                    <span className="font-black font-sans">- Rs {khataAdjustment.amount}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center pt-2 border-t border-gray-800 text-sm">
+                  <span className="text-white font-black uppercase">Net Total Bill:</span>
+                  <span className="text-2xl font-black text-[#D4AF37] font-sans">Rs {totalAmount}</span>
                 </div>
                 
-                <div className="flex justify-between items-center gap-4">
+                <div className="flex justify-between items-center gap-4 pt-1">
                   <span className="text-gray-400 font-bold whitespace-nowrap">Advance Paid:</span>
                   <input 
                     type="number" 
@@ -453,8 +541,8 @@ const CreateOrder = () => {
                 </div>
 
                 <div className="flex justify-between items-center pt-3 border-t border-gray-800">
-                  <span className="text-white font-black">Remaining Balance:</span>
-                  <span className={`text-xl font-black ${balanceAmount > 0 ? 'text-red-400' : 'text-green-400'}`}>
+                  <span className="text-white font-black">Remaining Balance Due:</span>
+                  <span className={`text-xl font-black font-sans ${balanceAmount > 0 ? 'text-red-400' : 'text-green-400'}`}>
                     Rs {balanceAmount}
                   </span>
                 </div>

@@ -81,3 +81,25 @@ export const useDeleteOrder = () => {
     }
   });
 };
+
+// 6. Deliver Order (Mark delivered & settle payment / update khata)
+export const useDeliverOrder = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, data }) => {
+      const response = await API.put(`/orders/${id}/deliver`, data);
+      return response.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message || 'Order delivered successfully!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to deliver order.');
+    }
+  });
+};

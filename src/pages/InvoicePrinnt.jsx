@@ -107,6 +107,18 @@ const InvoicePrint = () => {
 
           <div className="flex justify-end text-sm">
             <div className="w-72 space-y-2 bg-gray-50 p-4 rounded-lg border border-gray-100">
+              {order.previousKhataAdjusted?.type === 'added_due' && (
+                <div className="flex justify-between font-bold text-red-600 text-xs">
+                  <span>+ Previous Udhar Added:</span>
+                  <span>+ Rs {order.previousKhataAdjusted.amount}</span>
+                </div>
+              )}
+              {order.previousKhataAdjusted?.type === 'deducted_advance' && (
+                <div className="flex justify-between font-bold text-green-700 text-xs">
+                  <span>- Stored Advance Adjusted:</span>
+                  <span>- Rs {order.previousKhataAdjusted.amount}</span>
+                </div>
+              )}
               <div className="flex justify-between font-bold text-gray-600"><span>Total Bill:</span> <span>Rs {order.totalAmount}</span></div>
               <div className="flex justify-between font-bold text-gray-600"><span>Advance Paid:</span> <span>Rs {order.advancePaid}</span></div>
               <div className="flex justify-between text-xl font-black border-t-2 border-black pt-2 mt-2 text-black">

@@ -2,7 +2,7 @@ import axios from 'axios';
 import useAuthStore from '../Store/authStore';
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL || 'https://bt-backend-5d1ec458f8eb.herokuapp.com/api' || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_BACKEND_URL || (import.meta.env.DEV ? 'http://localhost:3000/api' : 'https://bt-backend-5d1ec458f8eb.herokuapp.com/api'),
   withCredentials: true,
 });
 API.interceptors.request.use(

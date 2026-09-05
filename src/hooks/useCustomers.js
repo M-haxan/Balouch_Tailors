@@ -89,3 +89,50 @@ export const useDeleteCustomer = () => {
     }
   });
 };
+
+// 6. Get Customer Khata Ledger Statement
+export const useGetCustomerLedger = (customerId) => {
+  return useQuery({
+    queryKey: ['customerLedger', customerId],
+    queryFn: async () => {
+      if (!customerId) return null;
+      const response = await API.get(`/customer/${customerId}/ledger`);
+      return response.data;
+    },
+    enabled: Boolean(customerId)
+  });
+};
+
+// 7. Settle Khata (Record Payment, Refund, Manual Adjustment)
+export const useSettleCustomerKhata = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ customerId, data }) => {
+      const response = await API.post(`/customer/${customerId}/settle`, data);
+      return response.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message || 'Khata updated successfully!');
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['customerKhata'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to settle Khata.');
+    }
+  });
+};
+
+// 8. Quick Fetch Customer Khata Balance (by ID or Phone)
+export const useGetCustomerKhata = (identifier) => {
+  return useQuery({
+    queryKey: ['customerKhata', identifier],
+    queryFn: async () => {
+      if (!identifier) return null;
+      const response = await API.get(`/customer/khata/${identifier}`);
+      return response.data;
+    },
+    enabled: Boolean(identifier)
+  });
+};

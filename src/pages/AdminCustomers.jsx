@@ -4,10 +4,29 @@ import {
   useAddCustomer, 
   useUpdateCustomer, 
   useUpdateMeasurements, 
-  useDeleteCustomer 
+  useDeleteCustomer,
+  useGetCustomerLedger,
+  useSettleCustomerKhata
 } from '../hooks/useCustomers';
 import { useGetTemplates } from '../hooks/useTemplates';
-import { FiEdit, FiTrash2, FiPlus, FiSearch, FiX, FiUser, FiPhone, FiMapPin, FiEye, FiClock, FiScissors } from 'react-icons/fi';
+import { 
+  FiEdit, 
+  FiTrash2, 
+  FiPlus, 
+  FiSearch, 
+  FiX, 
+  FiUser, 
+  FiPhone, 
+  FiMapPin, 
+  FiEye, 
+  FiClock, 
+  FiScissors,
+  FiBook,
+  FiDollarSign,
+  FiSend,
+  FiCheckCircle,
+  FiAlertTriangle
+} from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
 const AdminCustomers = () => {
@@ -18,8 +37,11 @@ const AdminCustomers = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
   
-  // NEW STATE: View profile ke liye
+  // View profile modal
   const [viewingCustomer, setViewingCustomer] = useState(null);
+
+  // NEW: Khata / Ledger modal state
+  const [khataCustomer, setKhataCustomer] = useState(null);
 
   // Search Logic
   const filteredCustomers = customers.filter(c => {
@@ -41,12 +63,12 @@ const AdminCustomers = () => {
   };
 
   return (
-    <div className="bg-white  shadow-sm p-6 relative min-h-[80vh]">
+    <div className="bg-white shadow-sm p-6 relative min-h-[80vh]">
       {/* HEADER & SEARCH */}
       <div className="flex flex-col md:flex-row justify-between items-center border-b pb-4 mb-6 gap-4">
         <div>
           <h2 className="text-2xl font-black text-gray-900">Manage Customers</h2>
-          <p className="text-sm text-gray-500 mt-1">Directory of all clients and their records.</p>
+          <p className="text-sm text-gray-500 mt-1">Directory of all clients, measurements, and khata balances.</p>
         </div>
         
         <div className="flex w-full md:w-auto gap-3">
@@ -55,7 +77,7 @@ const AdminCustomers = () => {
             <input 
               type="text" 
               placeholder="Search by phone or name..." 
-              className="w-full pl-10 pr-4 py-2 border-2 border-gray-100 focus:border-black  outline-none transition"
+              className="w-full pl-10 pr-4 py-2 border-2 border-gray-100 focus:border-black outline-none transition"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -73,7 +95,7 @@ const AdminCustomers = () => {
       {isLoading ? (
         <div className="text-center py-20 text-gray-500 font-medium">Loading customers...</div>
       ) : filteredCustomers.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50  border-2 border-dashed border-gray-200">
+        <div className="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200">
           <p className="text-gray-500 mb-2">No customers found.</p>
         </div>
       ) : (
@@ -83,49 +105,86 @@ const AdminCustomers = () => {
               <tr className="bg-black text-[#D4AF37] text-sm uppercase tracking-wider">
                 <th className="p-4 rounded-tl-md">Client Name</th>
                 <th className="p-4">Contact</th>
+                <th className="p-4">Khata Balance</th>
                 <th className="p-4">Address</th>
                 <th className="p-4 rounded-tr-md text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredCustomers.map((customer) => (
-                <tr key={customer._id} className="hover:bg-gray-50 transition">
-                  <td className="p-4 font-bold text-gray-900">
-                    <div className="flex items-center gap-3">
-                      {customer.profileImage?.url ? (
-                        <img
-                          src={customer.profileImage.url} 
-                          alt={customer.name} 
-                          className="w-8 h-8 rounded-full object-cover border border-gray-200" 
-                        />
+              {filteredCustomers.map((customer) => {
+                const bal = Number(customer.khataBalance) || 0;
+                return (
+                  <tr key={customer._id} className="hover:bg-gray-50 transition text-sm">
+                    <td className="p-4 font-bold text-gray-900">
+                      <div className="flex items-center gap-3">
+                        {customer.profileImage?.url ? (
+                          <img
+                            src={customer.profileImage.url} 
+                            alt={customer.name} 
+                            className="w-8 h-8 rounded-full object-cover border border-gray-200" 
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-black uppercase">
+                            {customer.name[0]}
+                          </div>
+                        )}
+                        <span>{customer.name}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 text-gray-600 font-medium">{customer.phone}</td>
+                    
+                    {/* KHATA BALANCE BADGE */}
+                    <td className="p-4">
+                      {bal > 0 ? (
+                        <span className="inline-flex items-center gap-1 bg-red-50 border border-red-200 text-red-700 px-2.5 py-1 rounded-full text-xs font-black">
+                          <FiAlertTriangle className="text-xs" /> Udhar: Rs {bal.toLocaleString()}
+                        </span>
+                      ) : bal < 0 ? (
+                        <span className="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-700 px-2.5 py-1 rounded-full text-xs font-black">
+                          <FiCheckCircle className="text-xs" /> Credit: Rs {Math.abs(bal).toLocaleString()}
+                        </span>
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-black uppercase">
-                          {customer.name[0]}
-                        </div>
+                        <span className="inline-flex items-center bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full text-xs font-bold">
+                          Settled (Rs 0)
+                        </span>
                       )}
-                      <span>{customer.name}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-gray-600">{customer.phone}</td>
-                  <td className="p-4 text-gray-600 text-sm max-w-xs truncate">{customer.address || '-'}</td>
-                  <td className="p-4 flex justify-end gap-1">
-                    {/* 1. Naya View Button Lagaya */}
-                    <button 
-                      onClick={() => setViewingCustomer(customer)} 
-                      className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition text-lg"
-                      title="View Details"
-                    >
-                      <FiEye />
-                    </button>
-                    <button onClick={() => openFormModal(customer)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition text-lg" title="Edit Info">
-                      <FiEdit />
-                    </button>
-                    <button onClick={() => handleDelete(customer._id)} disabled={isDeleting} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition text-lg" title="Delete">
-                      <FiTrash2 />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+
+                    <td className="p-4 text-gray-600 text-sm max-w-xs truncate">{customer.address || '-'}</td>
+                    
+                    {/* ACTION BUTTONS */}
+                    <td className="p-4 flex justify-end gap-1">
+                      {/* Khata Ledger Button */}
+                      <button 
+                        onClick={() => setKhataCustomer(customer)} 
+                        className="px-2.5 py-1.5 bg-amber-50 hover:bg-[#D4AF37] text-amber-900 hover:text-black font-black rounded-lg transition text-xs flex items-center gap-1 border border-amber-200"
+                        title="Khata & Statement"
+                      >
+                        <FiBook className="text-sm" /> Khata
+                      </button>
+                      
+                      {/* View Measurements */}
+                      <button 
+                        onClick={() => setViewingCustomer(customer)} 
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition text-lg"
+                        title="View Measurements"
+                      >
+                        <FiEye />
+                      </button>
+                      
+                      {/* Edit */}
+                      <button onClick={() => openFormModal(customer)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition text-lg" title="Edit Info">
+                        <FiEdit />
+                      </button>
+                      
+                      {/* Delete */}
+                      <button onClick={() => handleDelete(customer._id)} disabled={isDeleting} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition text-lg" title="Delete">
+                        <FiTrash2 />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -139,11 +198,19 @@ const AdminCustomers = () => {
         />
       )}
 
-      {/* 2. NAYA DETAILED PROFILE VIEW MODAL */}
+      {/* DETAILED PROFILE VIEW MODAL */}
       {viewingCustomer && (
         <CustomerViewModal 
           customer={viewingCustomer} 
           closeModal={() => setViewingCustomer(null)} 
+        />
+      )}
+
+      {/* NEW: CUSTOMER KHATA STATEMENT & SETTLEMENT MODAL */}
+      {khataCustomer && (
+        <CustomerKhataModal
+          customer={khataCustomer}
+          closeModal={() => setKhataCustomer(null)}
         />
       )}
     </div>
@@ -466,6 +533,253 @@ const CustomerFormModal = ({ customer, closeModal }) => {
             {isPending ? 'Saving...' : 'Save Profile'}
           </button>
         </div>
+      </div>
+    </div>
+  );
+};
+
+// -------------------------------------------------------------
+// COMPONENT: CUSTOMER KHATA STATEMENT & SETTLEMENT MODAL
+// -------------------------------------------------------------
+const CustomerKhataModal = ({ customer, closeModal }) => {
+  const { data: ledgerData, isLoading } = useGetCustomerLedger(customer._id);
+  const { mutate: settleKhata, isPending: isSettling } = useSettleCustomerKhata();
+
+  const [settleForm, setSettleForm] = useState({
+    type: 'payment',
+    amount: '',
+    description: ''
+  });
+
+  const khataBalance = ledgerData ? ledgerData.khataBalance : (customer.khataBalance || 0);
+  const entries = ledgerData?.entries || [];
+
+  const handleSettleSubmit = (e) => {
+    e.preventDefault();
+    if (!settleForm.amount || Number(settleForm.amount) <= 0) {
+      toast.error('Baraye meherbani durust raqam darj karein.');
+      return;
+    }
+
+    settleKhata({
+      customerId: customer._id,
+      data: {
+        type: settleForm.type,
+        amount: Number(settleForm.amount),
+        description: settleForm.description || (settleForm.type === 'payment' ? 'Counter Cash Received' : 'Khata Settlement')
+      }
+    }, {
+      onSuccess: () => {
+        setSettleForm({ type: 'payment', amount: '', description: '' });
+      }
+    });
+  };
+
+  const handleShareWhatsApp = () => {
+    const phone = customer.phone ? customer.phone.toString() : '';
+    const cleanPhone = phone.startsWith('0') ? '92' + phone.slice(1) : phone;
+    
+    let balanceText = '';
+    if (khataBalance > 0) {
+      balanceText = `Aapki taraf Baqiya Udhar: Rs ${khataBalance.toLocaleString()} (Payable to shop).`;
+    } else if (khataBalance < 0) {
+      balanceText = `Aapka Jama Advance Credit: Rs ${Math.abs(khataBalance).toLocaleString()} (Shop owes you).`;
+    } else {
+      balanceText = `Aapka hisaab kitab bilkul clear hai (Rs 0).`;
+    }
+
+    const message = `*BALOUCH TAILORS - KHATA STATEMENT*\nMohtaram *${customer.name}* Sahab,\n\n${balanceText}\n\nDate: ${new Date().toLocaleDateString()}\nShukriya!\n*Balouch Tailors*`;
+    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-200">
+        
+        {/* Header */}
+        <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-950 text-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#D4AF37] text-black flex items-center justify-center font-black text-lg">
+              <FiBook />
+            </div>
+            <div>
+              <h2 className="text-lg font-black text-white">{customer.name} - Khata Statement (کھاتہ)</h2>
+              <p className="text-xs text-gray-400 font-medium">Phone: {customer.phone} | Address: {customer.address || '-'}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleShareWhatsApp}
+              className="bg-green-600 hover:bg-green-700 text-white text-xs font-black px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow"
+            >
+              <FiSend className="text-sm" /> WhatsApp Statement
+            </button>
+            <button onClick={closeModal} className="text-gray-400 hover:text-white p-2 text-xl font-bold">✕</button>
+          </div>
+        </div>
+
+        <div className="p-6 overflow-y-auto space-y-6">
+          
+          {/* Running Balance Banner */}
+          <div className={`p-5 rounded-2xl border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
+            khataBalance > 0 
+              ? 'bg-red-50/70 border-red-200 text-red-900' 
+              : khataBalance < 0 
+              ? 'bg-green-50/70 border-green-200 text-green-900' 
+              : 'bg-gray-50 border-gray-200 text-gray-800'
+          }`}>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider block opacity-75">Current Khata Status (موجودہ بقایا)</span>
+              <p className="text-2xl font-black font-sans mt-0.5">
+                {khataBalance > 0 ? (
+                  <span className="text-red-700">🔴 Customer Owes: Rs {khataBalance.toLocaleString()} (Udhar)</span>
+                ) : khataBalance < 0 ? (
+                  <span className="text-green-700">🟢 Customer Credit: Rs {Math.abs(khataBalance).toLocaleString()} (Jama Advance)</span>
+                ) : (
+                  <span className="text-gray-600">⚪ Fully Settled (Rs 0)</span>
+                )}
+              </p>
+            </div>
+
+            <div className="text-xs font-medium text-gray-600 max-w-xs">
+              {khataBalance > 0 && "⚠️ Grahak ne pichla udhar ada karna hai. Naye bill me khud adjust ho sakta hai."}
+              {khataBalance < 0 && "✅ Grahak ki taraf se ziada raqam jama hai. Naye bill se minus ho sakti hai."}
+              {khataBalance === 0 && "Dukan aur grahak ka hisaab bilkul barabar hai."}
+            </div>
+          </div>
+
+          {/* Direct Settlement Form */}
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5 space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
+              <FiDollarSign className="text-[#D4AF37]" /> Record Payment / Settlement on Counter (کھاتہ ادائیگی یا واپسی)
+            </h3>
+
+            <form onSubmit={handleSettleSubmit} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Transaction Type</label>
+                <select
+                  value={settleForm.type}
+                  onChange={(e) => setSettleForm({ ...settleForm, type: e.target.value })}
+                  className="w-full bg-white border-2 border-gray-200 focus:border-black rounded-xl p-2.5 text-xs font-bold outline-none"
+                >
+                  <option value="payment">Payment Received (کیش وصولی)</option>
+                  <option value="refund">Refund Given (رقم واپسی)</option>
+                  <option value="debit">Add Manual Debt (ادھار شامل کریں)</option>
+                  <option value="credit">Add Manual Credit (رعایت / جمع)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Amount (Rs)</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  placeholder="e.g. 500"
+                  value={settleForm.amount}
+                  onChange={(e) => setSettleForm({ ...settleForm, amount: e.target.value })}
+                  className="w-full bg-white border-2 border-gray-200 focus:border-black rounded-xl p-2.5 text-xs font-bold outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Notes / Reason</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Cash received on counter"
+                  value={settleForm.description}
+                  onChange={(e) => setSettleForm({ ...settleForm, description: e.target.value })}
+                  className="w-full bg-white border-2 border-gray-200 focus:border-black rounded-xl p-2.5 text-xs font-medium outline-none"
+                />
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="submit"
+                  disabled={isSettling}
+                  className="w-full bg-black hover:bg-[#D4AF37] text-[#D4AF37] hover:text-black font-black p-2.5 rounded-xl text-xs transition shadow flex items-center justify-center gap-1.5"
+                >
+                  {isSettling ? 'Saving...' : 'Post Entry'}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Statement Timeline Table */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-black uppercase tracking-wider text-gray-700">
+              Transaction History Statement ({entries.length})
+            </h3>
+
+            {isLoading ? (
+              <div className="text-center py-8 text-xs text-gray-400">Loading ledger statement...</div>
+            ) : entries.length === 0 ? (
+              <div className="text-center py-8 bg-gray-50 border border-dashed border-gray-200 rounded-xl text-xs text-gray-400">
+                No past transactions recorded yet for this customer.
+              </div>
+            ) : (
+              <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] border-b border-gray-200">
+                      <th className="p-3">Date & Time</th>
+                      <th className="p-3">Description & Ref</th>
+                      <th className="p-3 text-right">Debit (+)</th>
+                      <th className="p-3 text-right">Credit (-)</th>
+                      <th className="p-3 text-right">Running Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {entries.map((entry) => (
+                      <tr key={entry._id} className="hover:bg-gray-50/80 transition font-medium">
+                        <td className="p-3 text-gray-500 whitespace-nowrap">
+                          {new Date(entry.date || entry.createdAt).toLocaleDateString()} {new Date(entry.date || entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="p-3 font-semibold text-gray-800">
+                          {entry.description}
+                          {entry.orderNumber && (
+                            <span className="ml-2 bg-black text-[#D4AF37] px-2 py-0.5 rounded text-[10px] font-black">
+                              #BT-{entry.orderNumber}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-3 text-right font-black text-red-600 font-sans">
+                          {entry.type === 'debit' ? `+ Rs ${entry.amount.toLocaleString()}` : '-'}
+                        </td>
+                        <td className="p-3 text-right font-black text-green-600 font-sans">
+                          {entry.type === 'credit' || entry.type === 'payment' ? `- Rs ${entry.amount.toLocaleString()}` : '-'}
+                        </td>
+                        <td className="p-3 text-right font-black font-sans">
+                          <span className={`px-2 py-0.5 rounded text-xs ${
+                            entry.runningBalance > 0 ? 'text-red-700 bg-red-50' :
+                            entry.runningBalance < 0 ? 'text-green-700 bg-green-50' :
+                            'text-gray-700 bg-gray-100'
+                          }`}>
+                            Rs {entry.runningBalance.toLocaleString()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-end">
+          <button
+            onClick={closeModal}
+            className="bg-black hover:bg-gray-900 text-white font-bold px-6 py-2 rounded-xl text-xs transition"
+          >
+            Close Statement
+          </button>
+        </div>
+
       </div>
     </div>
   );
