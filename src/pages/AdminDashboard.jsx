@@ -82,22 +82,20 @@ const AdminDashboard = () => {
     <div className="space-y-8 pb-12 font-sans">
       
       {/* 1. EXECUTIVE WELCOME BANNER & QUICK ACTIONS */}
-      <section className="bg-gradient-to-r from-gray-950 via-black to-gray-900 text-white rounded-3xl p-6 md:p-8 border border-gray-800 shadow-2xl relative overflow-hidden">
+      <section className="bg-gradient-to-r from-gray-950 via-black to-gray-900 text-white rounded p-6 md:p-8 border border-gray-800 shadow-2xl relative overflow-hidden">
         {/* Background ambient lighting */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none"></div>
+        {/* <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none"></div> */}
 
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 relative z-10">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/40 px-3 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider">
-                Shop Executive Control
-              </span>
+             
               <span className="text-xs text-gray-400 font-medium">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-              Balouch Tailors <span className="text-[#D4AF37]">Command Center</span>
+              Balouch Tailors
             </h1>
             <p className="text-xs md:text-sm text-gray-400 mt-1 max-w-xl font-medium">
               Real-time oversight of tailoring stages, QC approvals, Karigar wages, customer pipeline, and pure business profit.
@@ -105,35 +103,38 @@ const AdminDashboard = () => {
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex flex-wrap gap-2.5 w-full lg:w-auto">
+          <div className="grid grid-cols-2 gap-2 sm:gap-2.5 w-full sm:w-80 shrink-0">
             <button
               onClick={() => navigate('/admin/orders/create')}
-              className="bg-[#D4AF37] hover:bg-white text-black font-black px-4 py-2.5 rounded-xl text-xs transition shadow-lg flex items-center gap-1.5"
+              className="w-full h-11 bg-[#D4AF37] hover:bg-white text-black font-black px-2 sm:px-3 rounded text-[11px] sm:text-xs transition shadow-lg flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              <FiPlus className="text-base" /> New Order
+              <FiPlus className="text-sm shrink-0" /> 
+              <span>New Order</span>
             </button>
             <button
               onClick={() => navigate('/admin/allorders')}
-              className={`px-4 py-2.5 rounded-xl text-xs font-black transition border flex items-center gap-1.5 ${
+              className={`w-full h-11 px-2 sm:px-3 rounded text-[11px] sm:text-xs font-black transition border flex items-center justify-center gap-1.5 whitespace-nowrap ${
                 counts.pendingInspectionCount > 0 
                   ? 'bg-amber-400 text-black border-amber-500 shadow-lg animate-pulse' 
                   : 'bg-gray-800 hover:bg-gray-700 text-white border-gray-700'
               }`}
             >
-              <FiClock className="text-sm" /> 
-              QC Approvals ({counts.pendingInspectionCount || 0})
+              <FiClock className="text-xs shrink-0" /> 
+              <span>QC Approvals ({counts.pendingInspectionCount || 0})</span>
             </button>
             <button
               onClick={() => navigate('/admin/customers')}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-gray-700 flex items-center gap-1.5"
+              className="w-full h-11 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold px-2 sm:px-3 rounded text-[11px] sm:text-xs transition border border-gray-700 flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              <FiUsers className="text-sm" /> Customers
+              <FiUsers className="text-xs shrink-0" /> 
+              <span>Customers</span>
             </button>
             <button
               onClick={() => navigate('/admin/workers')}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold px-4 py-2.5 rounded-xl text-xs transition border border-gray-700 flex items-center gap-1.5"
+              className="w-full h-11 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold px-2 sm:px-3 rounded text-[11px] sm:text-xs transition border border-gray-700 flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              <FiScissors className="text-sm" /> Workers
+              <FiScissors className="text-xs shrink-0" /> 
+              <span>Workers</span>
             </button>
           </div>
         </div>
