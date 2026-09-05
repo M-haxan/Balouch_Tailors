@@ -413,7 +413,7 @@ const CreateOrder = () => {
                         type="button"
                         onClick={() => startListening(index)}
                         title="Urdu Voice Typing"
-                        className="absolute right-3 top-3 text-white bg-blue-600 hover:bg-blue-700 p-2 rounded-full shadow-md transition-transform active:scale-95"
+                        className="absolute right-3 top-3 text-[#0F172A] bg-[#DFAC43] hover:bg-black hover:text-[#DFAC43] p-2 rounded-full shadow-md transition-all active:scale-95"
                       >
                         <FiMic />
                       </button>
@@ -554,7 +554,7 @@ const CreateOrder = () => {
               <button 
                 type="submit" 
                 disabled={isPending}
-                className="bg-[#D4AF37] hover:bg-yellow-500 text-black px-8 py-3 rounded-xl font-black transition-all shadow-[0_0_15px_rgba(212,175,55,0.4)] disabled:opacity-70 flex items-center gap-2 text-lg"
+                className="bg-[#DFAC43] hover:bg-white text-[#0F172A] px-8 py-3 rounded-xl font-black transition-all shadow-lg disabled:opacity-70 flex items-center gap-2 text-lg"
               >
                 <FiSave /> {isPending ? 'Saving Order...' : 'Generate Invoice'}
               </button>

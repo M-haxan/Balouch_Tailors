@@ -27,21 +27,21 @@ const AdminCatalogue = () => {
         <h2 className="text-2xl font-bold text-gray-800">Manage Catalogue</h2>
         <button
           onClick={() => setIsFormOpen(true)}
-          className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 transition"
+          className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] px-4 py-2 rounded text-sm font-bold transition shadow-sm"
         >
           + Add New Design
         </button>
       </div>
 
       {/* CATEGORY TABS */}
-      <div className="flex space-x-4 mb-6">
+      <div className="flex space-x-3 mb-6 overflow-x-auto pb-2">
         {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setActiveTab(cat)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab === cat
-                ? 'bg-blue-100 text-blue-700 border-2 border-blue-700'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeTab === cat
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
           >
             {cat}
@@ -69,10 +69,9 @@ const AdminCatalogue = () => {
 
                 {/* ACTION BUTTONS */}
                 <div className="flex justify-end gap-2 mt-4 pt-4 border-t">
-                  {/* Update abhi placeholder hai, isey aage chal kar banayenge */}
                   <button
-                    onClick={() => setEditingItem(item)} // <-- Yahan click par data state mein bhej diya
-                    className="text-blue-600 hover:text-blue-800 text-sm font-medium px-2 py-1 bg-blue-50 rounded"
+                    onClick={() => setEditingItem(item)}
+                    className="text-gray-700 hover:text-black hover:bg-gray-100 text-sm font-bold px-2.5 py-1 bg-gray-50 border border-gray-200 rounded transition"
                   >
                     Edit
                   </button>
@@ -81,7 +80,7 @@ const AdminCatalogue = () => {
                       if (window.confirm('Are you sure you want to delete this design?')) deleteItem(item._id)
                     }}
                     disabled={isDeleting}
-                    className="text-red-600 hover:text-red-800 text-sm font-medium px-2 py-1 bg-red-50 rounded"
+                    className="text-red-600 hover:text-red-800 text-sm font-bold px-2.5 py-1 bg-red-50 rounded transition"
                   >
                     Delete
                   </button>
@@ -254,7 +253,7 @@ const EditDesignModal = ({ item, closeModal, categories }) => {
             <p className="text-xs text-gray-400 mt-1">Leave empty to keep the current image.</p>
           </div>
 
-          <button disabled={isPending} type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">
+          <button disabled={isPending} type="submit" className="w-full bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-bold p-2.5 rounded transition shadow-sm">
             {isPending ? 'Updating...' : 'Update Design'}
           </button>
         </form>

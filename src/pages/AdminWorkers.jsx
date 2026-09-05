@@ -100,7 +100,7 @@ const AdminWorkers = () => {
           </div>
           <button 
             onClick={() => openFormModal()}
-            className="bg-[#D4AF37] text-black hover:bg-black hover:text-[#D4AF37] px-4 py-2 text-sm font-bold rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="bg-[#DFAC43] text-[#0F172A] hover:bg-[#0F172A] hover:text-[#DFAC43] px-4 py-2 text-sm font-black rounded transition shadow-sm flex items-center gap-2 whitespace-nowrap"
           >
             <FiPlus className="text-lg" /> Add Worker
           </button>
@@ -118,14 +118,14 @@ const AdminWorkers = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-black text-[#D4AF37] text-sm uppercase tracking-wider whitespace-nowrap">
-                <th className="p-4 rounded-tl-md">Karigar Name</th>
+              <tr className="bg-[#0F172A] text-[#DFAC43] text-sm uppercase tracking-wider whitespace-nowrap">
+                <th className="p-4 rounded-tl">Karigar Name</th>
                 <th className="p-4">Phone Number</th>
                 <th className="p-4">Stitching Wage</th>
                 <th className="p-4">Advance Taken</th>
                 <th className="p-4">Specialization</th>
                 <th className="p-4">Address</th>
-                <th className="p-4 rounded-tr-md text-right">Actions</th>
+                <th className="p-4 rounded-tr text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -140,34 +140,34 @@ const AdminWorkers = () => {
                           className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-sm" 
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-gray-150 text-black flex items-center justify-center text-sm font-black uppercase shadow-sm">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center text-sm font-black uppercase shadow-sm">
                           {worker.name[0]}
                         </div>
                       )}
                       <div>
                         <span>{worker.name}</span>
                         {!worker.isActive && (
-                          <span className="ml-2 bg-red-100 text-red-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                          <span className="ml-2 bg-red-100 text-red-700 text-[10px] px-1.5 py-0.5 rounded font-bold">
                             Inactive
                           </span>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="p-8 text-gray-600 font-medium whitespace-nowrap">{worker.phone}</td>
-                  <td className="p-4 text-black font-extrabold whitespace-nowrap">Rs {worker.perSuitWage} <span className="text-xs text-gray-400 font-medium">/ suit</span></td>
+                  <td className="p-4 text-gray-600 font-medium whitespace-nowrap">{worker.phone}</td>
+                  <td className="p-4 text-gray-900 font-extrabold whitespace-nowrap">Rs {worker.perSuitWage} <span className="text-xs text-gray-400 font-medium">/ suit</span></td>
                   <td className="p-4 text-red-600 font-extrabold whitespace-nowrap">Rs {worker.advanceAmount}</td>
                   <td className="p-4 whitespace-nowrap">
-                    <span className="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-md border border-blue-100 font-bold uppercase tracking-wider">
+                    <span className="bg-slate-100 text-gray-800 text-xs px-2.5 py-1 rounded border border-gray-200 font-bold uppercase tracking-wider">
                       {worker.specialization || 'Complete Suit Stitcher'}
                     </span>
                   </td>
-                  <td className="p-4 text-gray-650 text-sm max-w-xs truncate">{worker.address || '-'}</td>
+                  <td className="p-4 text-gray-600 text-sm max-w-xs truncate">{worker.address || '-'}</td>
                   <td className="p-4 flex justify-end gap-1.5 items-center whitespace-nowrap">
                     {/* Ledger & Salary button */}
                     <button 
                       onClick={() => openLedgerModal(worker)} 
-                      className="bg-black hover:bg-[#D4AF37] text-white hover:text-black font-bold px-2.5 py-1.5 rounded-lg text-xs transition-colors border border-black whitespace-nowrap"
+                      className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black px-2.5 py-1.5 rounded text-xs transition border border-[#0F172A] whitespace-nowrap"
                       title="Ledger & Salary Manager"
                     >
                       Ledger & Salary
@@ -175,14 +175,14 @@ const AdminWorkers = () => {
                     {/* Advance Manage button */}
                     <button 
                       onClick={() => openAdvanceModal(worker)} 
-                      className="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2.5 py-1.5 rounded-lg text-xs transition-colors border border-red-100 whitespace-nowrap"
+                      className="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2.5 py-1.5 rounded text-xs transition border border-red-100 whitespace-nowrap"
                       title="Manage Advance Amount"
                     >
                       ± Advance
                     </button>
                     <button 
                       onClick={() => openFormModal(worker)} 
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition text-lg" 
+                      className="p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded transition text-lg" 
                       title="Edit Profile"
                     >
                       <FiEdit />
@@ -190,7 +190,7 @@ const AdminWorkers = () => {
                     <button 
                       onClick={() => handleDelete(worker._id)} 
                       disabled={isDeleting} 
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition text-lg" 
+                      className="p-2 text-red-600 hover:bg-red-50 rounded transition text-lg" 
                       title="Delete Worker"
                     >
                       <FiTrash2 />

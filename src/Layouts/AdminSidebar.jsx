@@ -20,9 +20,9 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
   const sidebarWidth = collapsed ? 'md:w-20' : 'md:w-64';
 
   const getLinkStyle = ({ isActive }) => {
-    const baseStyle = "flex items-center px-6 py-3 my-1 text-base font-medium rounded-r-full transition-colors";
-    const activeStyle = "bg-blue-50 text-blue-700 border-l-4 border-blue-700";
-    const inactiveStyle = "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-l-4 border-transparent";
+    const baseStyle = "flex items-center px-6 py-3 my-1 text-sm font-semibold rounded-r-full transition-colors";
+    const activeStyle = "bg-amber-50 text-black font-black border-l-4 border-[#DFAC43]";
+    const inactiveStyle = "text-gray-600 hover:bg-gray-100 hover:text-black border-l-4 border-transparent";
     const collapsedStyle = collapsed ? 'justify-center px-3' : '';
     return `${baseStyle} ${isActive ? activeStyle : inactiveStyle} ${collapsedStyle}`;
   };

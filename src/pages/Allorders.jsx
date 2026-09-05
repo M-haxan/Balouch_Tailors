@@ -97,11 +97,11 @@ const Allorders = () => {
   // Badge Color Logic
   const getStatusColor = (status) => {
     switch(status) {
-      case 'Pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'In Progress': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Completed': return 'bg-green-100 text-green-800 border-green-200';
-      case 'Delivered': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'Cancelled': return 'bg-red-100 text-red-800 border-red-200';
+      case 'Pending': return 'bg-amber-50 text-amber-900 border-amber-200';
+      case 'In Progress': return 'bg-slate-100 text-gray-800 border-slate-200';
+      case 'Completed': return 'bg-amber-50 text-[#DFAC43] border-[#DFAC43]';
+      case 'Delivered': return 'bg-[#0F172A] text-white border-[#0F172A]';
+      case 'Cancelled': return 'bg-red-50 text-red-700 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
@@ -172,13 +172,13 @@ const Allorders = () => {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-black text-[#D4AF37] text-xs uppercase tracking-widest">
-                <th className="p-4 rounded-tl-lg">Order ID & Date</th>
+              <tr className="bg-[#0F172A] text-[#DFAC43] text-xs uppercase tracking-widest">
+                <th className="p-4 rounded-tl">Order ID & Date</th>
                 <th className="p-4">Customer Details</th>
                 <th className="p-4 text-center">Suits & QC Status</th>
                 <th className="p-4">Financials</th>
                 <th className="p-4 text-center">Status</th>
-                <th className="p-4 rounded-tr-lg text-right">Actions</th>
+                <th className="p-4 rounded-tr text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -193,7 +193,7 @@ const Allorders = () => {
                     <td className="p-4">
                       <p className="font-black text-black text-sm uppercase">#BT-{order.orderNumber}</p>
                       <p className="text-[11px] text-gray-500 font-bold mt-1">Booked: {new Date(order.bookingDate).toLocaleDateString()}</p>
-                      <p className="text-[11px] text-red-500 font-black">Due: {new Date(order.deliveryDate).toLocaleDateString()}</p>
+                      <p className="text-[11px] text-amber-900 font-black">Due: {new Date(order.deliveryDate).toLocaleDateString()}</p>
                     </td>
 
                     {/* Customer Info */}
@@ -205,16 +205,16 @@ const Allorders = () => {
                     {/* Suit Count & QC Badges */}
                     <td className="p-4 text-center">
                       <div className="flex flex-col items-center gap-1">
-                        <span className="bg-gray-100 text-black font-black px-3 py-0.5 rounded-full text-xs">
+                        <span className="bg-gray-100 text-black font-black px-3 py-0.5 rounded text-xs">
                           {order.suits?.length || 0} Suits
                         </span>
                         {hasPendingQC && (
-                          <span className="bg-amber-400 text-black text-[10px] font-black px-2 py-0.5 rounded-full uppercase inline-flex items-center gap-1 animate-pulse">
+                          <span className="bg-[#DFAC43] text-[#0F172A] text-[10px] font-black px-2 py-0.5 rounded uppercase inline-flex items-center gap-1 animate-pulse">
                             <FiClock /> Needs QC Pass
                           </span>
                         )}
                         {hasRework && (
-                          <span className="bg-red-100 text-red-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase inline-flex items-center gap-1">
+                          <span className="bg-red-100 text-red-800 text-[10px] font-black px-2 py-0.5 rounded uppercase inline-flex items-center gap-1">
                             <FiAlertTriangle /> In Rework
                           </span>
                         )}
@@ -225,9 +225,9 @@ const Allorders = () => {
                     <td className="p-4">
                       <p className="text-sm font-black text-black">Rs {order.totalAmount}</p>
                       {order.balanceAmount > 0 ? (
-                        <p className="text-[11px] font-bold text-red-500">Balance: Rs {order.balanceAmount}</p>
+                        <p className="text-[11px] font-bold text-amber-900">Balance: Rs {order.balanceAmount}</p>
                       ) : (
-                        <p className="text-[11px] font-bold text-green-600">Fully Paid</p>
+                        <p className="text-[11px] font-bold text-gray-600">Fully Paid</p>
                       )}
                     </td>
 
@@ -236,7 +236,7 @@ const Allorders = () => {
                       <select
                         value={order.orderStatus}
                         onChange={(e) => handleStatusChange(order, e.target.value)}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-full border outline-none cursor-pointer text-center ${getStatusColor(order.orderStatus)}`}
+                        className={`text-xs font-bold px-3 py-1.5 rounded border outline-none cursor-pointer text-center ${getStatusColor(order.orderStatus)}`}
                       >
                         {statusOptions.map(opt => <option key={opt} value={opt} className="bg-white text-black">{opt}</option>)}
                       </select>
@@ -249,7 +249,7 @@ const Allorders = () => {
                         {order.orderStatus !== 'Delivered' && (
                           <button
                             onClick={() => setDeliveryModalOrder(order)}
-                            className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-black px-2.5 py-1.5 rounded-lg transition shadow flex items-center gap-1"
+                            className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] text-xs font-black px-2.5 py-1.5 rounded transition shadow flex items-center gap-1"
                             title="Deliver Suit & Receive Payment"
                           >
                             <FiCheckCircle /> Deliver
@@ -258,10 +258,10 @@ const Allorders = () => {
 
                         <button 
                           onClick={() => setViewingOrder(order)}
-                          className={`p-2 rounded-lg transition shadow-sm ${
+                          className={`p-2 rounded transition shadow-sm ${
                             hasPendingQC 
-                              ? 'bg-amber-400 text-black font-bold hover:bg-amber-500 ring-2 ring-amber-400' 
-                              : 'bg-green-50 hover:bg-green-100 text-green-600'
+                              ? 'bg-[#DFAC43] text-[#0F172A] font-bold hover:bg-white ring-2 ring-[#DFAC43]' 
+                              : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
                           }`}
                           title="View Details / QC Inspect"
                         >
@@ -269,7 +269,7 @@ const Allorders = () => {
                         </button>
                         <button 
                           onClick={() => navigate(`/admin/print/${order._id}`)}
-                          className="bg-black hover:bg-gray-800 text-[#D4AF37] p-2 rounded-lg transition shadow-sm"
+                          className="bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] p-2 rounded transition shadow-sm"
                           title="Print Invoice"
                         >
                           <FiPrinter />
@@ -277,7 +277,7 @@ const Allorders = () => {
                         <button 
                           onClick={() => handleDelete(order._id)}
                           disabled={isDeleting}
-                          className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded-lg transition shadow-sm"
+                          className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded transition shadow-sm"
                           title="Delete Order"
                         >
                           <FiTrash2 />

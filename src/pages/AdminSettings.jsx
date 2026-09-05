@@ -37,7 +37,7 @@ const AdminSettings = () => {
             onClick={() => setActiveTab('templates')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold transition-all ${
               activeTab === 'templates' 
-                ? 'bg-black text-[#D4AF37] shadow-md' 
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -49,7 +49,7 @@ const AdminSettings = () => {
             onClick={() => setActiveTab('general')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-bold transition-all ${
               activeTab === 'general' 
-                ? 'bg-black text-[#D4AF37] shadow-md' 
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -72,7 +72,7 @@ const AdminSettings = () => {
               </div>
               <button 
                 onClick={() => openModal()}
-                className="bg-[#D4AF37] text-black hover:bg-black hover:text-[#D4AF37] px-4 py-2 rounded-md text-sm font-bold transition-colors flex items-center gap-2 shadow-sm"
+                className="bg-[#DFAC43] text-[#0F172A] hover:bg-[#0F172A] hover:text-[#DFAC43] px-4 py-2 rounded text-sm font-black transition flex items-center gap-2 shadow-sm"
               >
                 <FiPlus className="text-lg" /> Add New Template
               </button>

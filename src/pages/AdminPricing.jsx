@@ -35,7 +35,7 @@ const AdminPricing = () => {
         </div>
         <button
           onClick={() => openModal()}
-          className="bg-black text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-800 transition"
+          className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] px-4 py-2 rounded text-sm font-bold transition shadow-sm"
         >
           + Add New Pricing
         </button>
@@ -50,7 +50,7 @@ const AdminPricing = () => {
             <div key={item._id} className="border border-gray-100 rounded-lg p-5 shadow-sm hover:shadow-md transition">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-bold text-lg text-gray-900">{item.serviceName}</h3>
-                <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">
+                <span className="bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold px-2 py-1 rounded">
                   {item.deliveryTime}
                 </span>
               </div>
@@ -60,7 +60,7 @@ const AdminPricing = () => {
 
               <div className="bg-gray-50 p-3 rounded mb-4">
                 <p className="text-xs text-gray-500 uppercase tracking-wider font-semibold mb-1">Estimated Range</p>
-                <p className="text-xl font-black text-[#D4AF37]">
+                <p className="text-xl font-black text-[#DFAC43]">
                   Rs. {item.minPrice} - {item.maxPrice}
                 </p>
               </div>
@@ -68,14 +68,14 @@ const AdminPricing = () => {
               <div className="flex justify-end gap-2 border-t pt-3">
                 <button
                   onClick={() => openModal(item)}
-                  className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1.5 bg-blue-50 rounded"
+                  className="flex items-center gap-1 text-gray-700 hover:text-black text-sm font-bold px-3 py-1.5 bg-gray-100 rounded transition"
                 >
                   <FiEdit className="w-4 h-4" /> Edit
                 </button>
                 <button
                   onClick={() => handleDelete(item._id)}
                   disabled={isDeleting}
-                  className="flex items-center gap-1 text-red-600 hover:text-red-800 text-sm font-medium px-3 py-1.5 bg-red-50 rounded"
+                  className="flex items-center gap-1 text-red-600 hover:text-red-800 text-sm font-bold px-3 py-1.5 bg-red-50 rounded transition"
                 >
                   <FiTrash2 className="w-4 h-4" /> Delete
                 </button>

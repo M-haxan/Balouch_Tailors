@@ -84,7 +84,7 @@ const AdminCustomers = () => {
           </div>
           <button 
             onClick={() => openFormModal()}
-            className="bg-[#D4AF37] text-black hover:bg-black hover:text-[#D4AF37] px-4 py-2 text-sm font-bold transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="bg-[#DFAC43] text-[#0F172A] hover:bg-[#0F172A] hover:text-[#DFAC43] px-4 py-2 text-sm font-black rounded transition shadow-sm flex items-center gap-2 whitespace-nowrap"
           >
             <FiPlus className="text-lg" /> Add Customer
           </button>
@@ -95,19 +95,19 @@ const AdminCustomers = () => {
       {isLoading ? (
         <div className="text-center py-20 text-gray-500 font-medium">Loading customers...</div>
       ) : filteredCustomers.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200">
+        <div className="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded">
           <p className="text-gray-500 mb-2">No customers found.</p>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-black text-[#D4AF37] text-sm uppercase tracking-wider">
-                <th className="p-4 rounded-tl-md">Client Name</th>
+              <tr className="bg-[#0F172A] text-[#DFAC43] text-sm uppercase tracking-wider">
+                <th className="p-4 rounded-tl">Client Name</th>
                 <th className="p-4">Contact</th>
                 <th className="p-4">Khata Balance</th>
                 <th className="p-4">Address</th>
-                <th className="p-4 rounded-tr-md text-right">Actions</th>
+                <th className="p-4 rounded-tr text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -124,7 +124,7 @@ const AdminCustomers = () => {
                             className="w-8 h-8 rounded-full object-cover border border-gray-200" 
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-black uppercase">
+                          <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-700 flex items-center justify-center text-xs font-black uppercase">
                             {customer.name[0]}
                           </div>
                         )}
@@ -136,15 +136,15 @@ const AdminCustomers = () => {
                     {/* KHATA BALANCE BADGE */}
                     <td className="p-4">
                       {bal > 0 ? (
-                        <span className="inline-flex items-center gap-1 bg-red-50 border border-red-200 text-red-700 px-2.5 py-1 rounded-full text-xs font-black">
-                          <FiAlertTriangle className="text-xs" /> Udhar: Rs {bal.toLocaleString()}
+                        <span className="inline-flex items-center gap-1 bg-amber-50 border border-amber-200 text-amber-900 px-2.5 py-1 rounded text-xs font-black">
+                          <FiAlertTriangle className="text-xs text-[#DFAC43]" /> Udhar: Rs {bal.toLocaleString()}
                         </span>
                       ) : bal < 0 ? (
-                        <span className="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-700 px-2.5 py-1 rounded-full text-xs font-black">
-                          <FiCheckCircle className="text-xs" /> Credit: Rs {Math.abs(bal).toLocaleString()}
+                        <span className="inline-flex items-center gap-1 bg-gray-100 border border-gray-200 text-gray-800 px-2.5 py-1 rounded text-xs font-black">
+                          <FiCheckCircle className="text-xs text-gray-700" /> Credit: Rs {Math.abs(bal).toLocaleString()}
                         </span>
                       ) : (
-                        <span className="inline-flex items-center bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full text-xs font-bold">
+                        <span className="inline-flex items-center bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-xs font-bold">
                           Settled (Rs 0)
                         </span>
                       )}
@@ -157,7 +157,7 @@ const AdminCustomers = () => {
                       {/* Khata Ledger Button */}
                       <button 
                         onClick={() => setKhataCustomer(customer)} 
-                        className="px-2.5 py-1.5 bg-amber-50 hover:bg-[#D4AF37] text-amber-900 hover:text-black font-black rounded-lg transition text-xs flex items-center gap-1 border border-amber-200"
+                        className="px-2.5 py-1.5 bg-amber-50 hover:bg-[#DFAC43] text-amber-950 hover:text-[#0F172A] font-black rounded transition text-xs flex items-center gap-1 border border-amber-200"
                         title="Khata & Statement"
                       >
                         <FiBook className="text-sm" /> Khata
@@ -166,19 +166,19 @@ const AdminCustomers = () => {
                       {/* View Measurements */}
                       <button 
                         onClick={() => setViewingCustomer(customer)} 
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition text-lg"
+                        className="p-2 text-[#0F172A] hover:text-[#DFAC43] hover:bg-amber-50 rounded transition text-lg"
                         title="View Measurements"
                       >
                         <FiEye />
                       </button>
                       
                       {/* Edit */}
-                      <button onClick={() => openFormModal(customer)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition text-lg" title="Edit Info">
+                      <button onClick={() => openFormModal(customer)} className="p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded transition text-lg" title="Edit Info">
                         <FiEdit />
                       </button>
                       
                       {/* Delete */}
-                      <button onClick={() => handleDelete(customer._id)} disabled={isDeleting} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition text-lg" title="Delete">
+                      <button onClick={() => handleDelete(customer._id)} disabled={isDeleting} className="p-2 text-red-600 hover:bg-red-50 rounded transition text-lg" title="Delete">
                         <FiTrash2 />
                       </button>
                     </td>
