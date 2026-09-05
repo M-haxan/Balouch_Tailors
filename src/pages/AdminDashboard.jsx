@@ -46,7 +46,10 @@ const AdminDashboard = () => {
     totalAdvanceReceived = 0,
     totalBalanceReceivable = 0,
     totalSuitsCount = 0,
+    totalKharcha = 0,
+    totalShopExpenses = 0,
     workerExpenses = {},
+    supplierExpenses = {},
     ownerLabor = {},
     counts = {},
     netShopBusinessProfit = 0
@@ -127,92 +130,121 @@ const AdminDashboard = () => {
               <span>Customers</span>
             </button>
             <button
-              onClick={() => navigate('/admin/workers')}
+              onClick={() => navigate('/admin/expenses')}
               className="w-full h-11 bg-[#1E293B] hover:bg-gray-800 text-gray-200 hover:text-white font-bold px-2 sm:px-3 rounded text-[11px] sm:text-xs transition border border-gray-700 flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              <FiScissors className="text-xs shrink-0" /> 
-              <span>Workers</span>
+              <FiCreditCard className="text-xs shrink-0" /> 
+              <span>Expenses</span>
             </button>
           </div>
         </div>
       </section>
 
-      {/* 2. CORE FINANCIAL & PROFIT MATRIX (4 PRIMARY CARDS) */}
-      <section className="space-y-3">
+      {/* 2. COMPLETE 7-METRIC FINANCIAL & PROFIT MATRIX */}
+      <section className="space-y-4">
         <div className="flex justify-between items-center px-1">
           <h2 className="text-sm font-black uppercase text-gray-800 tracking-wider flex items-center gap-2">
             <span className="w-1.5 h-3.5 bg-[#DFAC43] rounded-sm"></span>
-            Financial & Profit Summary
+            Financial & Profit Matrix
           </h2>
           <span className="text-xs text-gray-400 font-bold">Live Auto-Calculated</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* PRIMARY FINANCIAL ROW (3 KEY METRICS) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
-          {/* 1. Gross Revenue */}
+          {/* 1. Total Kaam (Sales) */}
           <div className="bg-white p-5 rounded border border-gray-200 shadow-sm space-y-3 hover:border-[#DFAC43]/40 transition">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Shop Revenue</span>
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Work/Sale</span>
               <span className="p-2 bg-amber-50 text-[#DFAC43] rounded text-sm"><FiCreditCard /></span>
             </div>
             <div>
-              <p className="text-2xl font-black text-[#0F172A] font-sans">Rs {totalRevenue.toLocaleString()}</p>
-              <div className="flex justify-between text-[11px] font-bold text-gray-500 mt-2 pt-2 border-t border-gray-100">
-                <span className="text-gray-800">Recv: Rs {totalAdvanceReceived.toLocaleString()}</span>
-                <span className="text-amber-800">Due: Rs {totalBalanceReceivable.toLocaleString()}</span>
-              </div>
+              <p className="text-2xl md:text-3xl font-black text-[#0F172A] font-sans">Rs {totalRevenue.toLocaleString()}</p>
+              <p className="text-[11px] font-bold text-gray-500 mt-2 pt-2 border-t border-gray-100">
+                Sum of all customer bills ({orders.length} orders)
+              </p>
             </div>
           </div>
 
-          {/* 2. Worker Labor Expense */}
+          {/* 2. Total Kharcha */}
           <div className="bg-white p-5 rounded border border-gray-200 shadow-sm space-y-3 hover:border-gray-400 transition">
             <div className="flex justify-between items-start">
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Worker Wage Expenses</span>
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Expenses</span>
               <span className="p-2 bg-gray-100 text-gray-700 rounded text-sm"><FiScissors /></span>
             </div>
             <div>
-              <p className="text-2xl font-black text-gray-900 font-sans">
-                Rs {(workerExpenses.totalWorkerWagesIncurred || 0).toLocaleString()}
+              <p className="text-2xl md:text-3xl font-black text-gray-900 font-sans">
+                Rs {((workerExpenses.totalWorkerWagesIncurred || 0) + (totalShopExpenses || 0)).toLocaleString()}
               </p>
               <div className="flex justify-between text-[11px] font-bold text-gray-500 mt-2 pt-2 border-t border-gray-100">
-                <span className="text-gray-600">Settled: Rs {(workerExpenses.totalWorkerWagesPaid || 0).toLocaleString()}</span>
-                <span className="text-gray-900 font-black">Pending: Rs {(workerExpenses.totalWorkerWagesPending || 0).toLocaleString()}</span>
+                <span>Karigar: Rs {(workerExpenses.totalWorkerWagesIncurred || 0).toLocaleString()}</span>
+                <span>Shop Exp: Rs {(totalShopExpenses || 0).toLocaleString()}</span>
               </div>
             </div>
           </div>
 
-          {/* 3. Owner Self-Work Worth */}
-          <div className="bg-white p-5 rounded border border-[#DFAC43]/30 shadow-sm space-y-3 hover:border-[#DFAC43] transition bg-gradient-to-br from-white to-amber-50/30">
-            <div className="flex justify-between items-start">
-              <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider flex items-center gap-1">
-                Owner Personal Labor
-              </span>
-              <span className="p-2 bg-[#DFAC43]/10 text-[#DFAC43] rounded text-sm"><FiAward /></span>
-            </div>
-            <div>
-              <p className="text-2xl font-black text-[#DFAC43] font-sans">
-                Rs {(ownerLabor.totalOwnerLaborEarnings || 0).toLocaleString()}
-              </p>
-              <p className="text-[11px] font-bold text-gray-600 mt-2 pt-2 border-t border-amber-100">
-                {counts.ownerStitchedCount || 0} Suits Stitched | {counts.ownerCuttingCount || 0} Cuts Done
-              </p>
-            </div>
-          </div>
-
-          {/* 4. Pure Net Business Profit */}
+          {/* 3. Pure Net Business Profit */}
           <div className="bg-[#0F172A] text-white p-5 rounded border border-gray-800 shadow-sm space-y-3 hover:border-[#DFAC43]/40 transition relative overflow-hidden">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider">Net Business Profit</span>
               <span className="p-2 bg-[#DFAC43]/10 text-[#DFAC43] border border-[#DFAC43]/20 rounded text-sm"><FiTrendingUp /></span>
             </div>
             <div>
-              <p className="text-2xl font-black text-[#DFAC43] font-sans">
+              <p className="text-2xl md:text-3xl font-black text-[#DFAC43] font-sans">
                 Rs {netShopBusinessProfit.toLocaleString()}
               </p>
               <p className="text-[10px] text-gray-400 font-medium mt-2 pt-2 border-t border-gray-800">
-                Gross Revenue minus Worker Wages
+                Total Sales minus Total Expenses
               </p>
             </div>
+          </div>
+
+        </div>
+
+        {/* SECONDARY CASH FLOW & OUTSTANDING DEBTS ROW (4 METRICS) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          {/* 4. Total Receiving (Cash Collected) */}
+          <div className="bg-white p-4 rounded border border-gray-200 shadow-sm space-y-2 hover:border-gray-300 transition">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Receiving</span>
+              <span className="text-xs text-green-600 font-black">Cash Collected</span>
+            </div>
+            <p className="text-xl font-black text-gray-900 font-sans">Rs {totalAdvanceReceived.toLocaleString()}</p>
+            <p className="text-[10px] text-gray-400 font-medium">Customer advances & settlements</p>
+          </div>
+
+          {/* 5. Abhi Lenay Hain (Customers Udhar) */}
+          <div className="bg-white p-4 rounded border border-gray-200 shadow-sm space-y-2 hover:border-amber-300 transition">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Amount Receivable</span>
+              <span className="text-[10px] bg-amber-50 text-amber-900 px-1.5 py-0.5 rounded font-black border border-amber-200">Customer Credits</span>
+            </div>
+            <p className="text-xl font-black text-[#DFAC43] font-sans">Rs {totalBalanceReceivable.toLocaleString()}</p>
+            <p className="text-[10px] text-gray-400 font-medium">Outstanding customer receivables</p>
+          </div>
+
+          {/* 6. Abhi Denay Hain (Karigar Wages) */}
+          <div className="bg-white p-4 rounded border border-gray-200 shadow-sm space-y-2 hover:border-gray-300 transition">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider">Amount Payable</span>
+              <span className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded font-black">Karigar Wages</span>
+            </div>
+            <p className="text-xl font-black text-gray-900 font-sans">Rs {(workerExpenses.totalWorkerWagesPending || 0).toLocaleString()}</p>
+            <p className="text-[10px] text-gray-400 font-medium">Unsettled Karigar wages</p>
+          </div>
+
+          {/* 7. Abhi Denay Hain (Material Walon Ko) */}
+          <div className="bg-white p-4 rounded border border-[#DFAC43]/30 shadow-sm space-y-2 hover:border-[#DFAC43] transition bg-gradient-to-br from-white to-amber-50/20">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Amount Payable</span>
+              <span className="text-[10px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-black border border-amber-300">Material</span>
+            </div>
+            <p className="text-xl font-black text-[#DFAC43] font-sans">
+              Rs {(supplierExpenses.totalSupplierPayable || 0).toLocaleString()}
+            </p>
+            <p className="text-[10px] text-gray-500 font-medium">Bukram, Kaj, Button & Thread shops</p>
           </div>
 
         </div>

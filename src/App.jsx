@@ -26,6 +26,7 @@ import AdminWorkers from './pages/AdminWorkers';
 import WorkerDashboard from './pages/WorkerDashboard';
 import PublicOrderTrack from './pages/PublicOrderTrack';
 import PublicSuitTrack from './pages/PublicSuitTrack';
+import AdminExpenses from './pages/AdminExpenses';
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ function App() {
             <Route path="/admin/customers" element={<AdminCustomers />} />
             <Route path="/admin/measurements" element={<AdminMeasurements />} />
             <Route path="/admin/workers" element={<AdminWorkers />} />
+            <Route path="/admin/expenses" element={<AdminExpenses />} />
             <Route path="/admin/orders/create" element={<CreateOrder />} />
             <Route path="/admin/allorders" element={<Allorders />} />
             <Route path="/admin/print/:id" element={<InvoicePrint />} />

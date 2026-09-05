@@ -70,6 +70,10 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
             <FiUsers className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Workers</span>}
           </NavLink>
+          <NavLink to="/admin/expenses" className={getLinkStyle} onClick={onCloseMobile}>
+            <FiCreditCard className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
+            {!collapsed && <span>Expenses</span>}
+          </NavLink>
           <NavLink to="/admin/orders/create" className={getLinkStyle} onClick={onCloseMobile}>
             <FiShoppingBag className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Orders</span>}
