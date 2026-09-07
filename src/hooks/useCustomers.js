@@ -44,6 +44,7 @@ export const useUpdateCustomer = () => {
     onSuccess: () => {
       toast.success('Customer profile updated!');
       queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to update customer.');
@@ -64,9 +65,30 @@ export const useUpdateMeasurements = () => {
     onSuccess: () => {
       toast.success('Measurements updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to save measurements.');
+    }
+  });
+};
+
+// 4.1 Delete Measurement Category
+export const useDeleteMeasurementCategory = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, category }) => {
+      const response = await API.delete(`/customer/${id}/measurements/${encodeURIComponent(category)}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Measurement category deleted successfully!');
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to delete measurement category.');
     }
   });
 };
@@ -115,6 +137,7 @@ export const useSettleCustomerKhata = () => {
     onSuccess: (res) => {
       toast.success(res.message || 'Khata updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
       queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
       queryClient.invalidateQueries({ queryKey: ['customerKhata'] });
     },
@@ -136,3 +159,16 @@ export const useGetCustomerKhata = (identifier) => {
     enabled: Boolean(identifier)
   });
 };
+
+// 9. Comprehensive Customer Profile (Details, Metrics, Orders, Measurements History, Khata)
+export const useGetCustomerProfile = (id) => {
+  return useQuery({
+    queryKey: ['customerProfile', id],
+    queryFn: async () => {
+      if (!id) return null;
+      const response = await API.get(`/customer/${id}/profile`);
+      return response.data;
+    },
+    enabled: Boolean(id)
+  });
+};

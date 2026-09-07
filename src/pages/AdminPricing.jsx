@@ -26,7 +26,7 @@ const AdminPricing = () => {
   if (isError) return <div className="text-red-500 text-center py-10">Failed to load pricing data.</div>;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 relative">
+    <div className="bg-white rounded shadow-sm p-6 relative">
       {/* Header Section */}
       <div className="flex justify-between items-center border-b pb-4 mb-6">
         <div>
@@ -47,7 +47,7 @@ const AdminPricing = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {pricingList.map((item) => (
-            <div key={item._id} className="border border-gray-100 rounded-lg p-5 shadow-sm hover:shadow-md transition">
+            <div key={item._id} className="border border-gray-100 rounded  p-5 shadow-sm hover:shadow-md transition">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-bold text-lg text-gray-900">{item.serviceName}</h3>
                 <span className="bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold px-2 py-1 rounded">

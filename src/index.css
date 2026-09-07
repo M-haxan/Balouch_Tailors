@@ -8,4 +8,28 @@
   body {
     @apply font-sans antialiased text-gray-800 bg-white;
   }
+
+  /* Hide scrollbar for Chrome, Safari, Edge, Opera */
+  ::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    display: none;
+    background: transparent;
+  }
+
+  /* Hide scrollbar for Firefox, IE, and Edge */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 }
+
+/* Utility class for hiding scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

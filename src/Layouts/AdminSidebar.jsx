@@ -20,7 +20,7 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
   const sidebarWidth = collapsed ? 'md:w-20' : 'md:w-64';
 
   const getLinkStyle = ({ isActive }) => {
-    const baseStyle = "flex items-center px-6 py-3 my-1 text-sm font-semibold rounded-r-full transition-colors";
+    const baseStyle = "flex items-center px-6 py-3 my-1 text-sm font-semibold rounded-r transition-colors";
     const activeStyle = "bg-amber-50 text-black font-black border-l-4 border-[#DFAC43]";
     const inactiveStyle = "text-gray-600 hover:bg-gray-100 hover:text-black border-l-4 border-transparent";
     const collapsedStyle = collapsed ? 'justify-center px-3' : '';
@@ -38,7 +38,7 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
       `}
     >
       {/* Upper Menu Section */}
-      <div className="py-6 pb-4 h-[calc(100%-4.5rem)] overflow-y-auto">
+      <div className="py-6 pb-4 h-[calc(100%-4.5rem)] overflow-y-auto no-scrollbar">
         {!collapsed && (
           <p className="px-6 text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
             Management

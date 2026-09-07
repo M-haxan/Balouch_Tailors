@@ -21,7 +21,7 @@ const AdminCatalogue = () => {
   if (isError) return <div className="text-red-500 text-center py-10">Failed to load catalogue.</div>;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 relative">
+    <div className="bg-white rounded shadow-sm p-6 relative">
       {/* HEADER: Title aur Add Button */}
       <div className="flex justify-between items-center border-b pb-4 mb-6">
         <h2 className="text-2xl font-bold text-gray-800">Manage Catalogue</h2>
@@ -39,7 +39,7 @@ const AdminCatalogue = () => {
           <button
             key={cat}
             onClick={() => setActiveTab(cat)}
-            className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${activeTab === cat
+            className={`px-4 py-2 rounded text-sm font-bold transition-all ${activeTab === cat
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
@@ -55,7 +55,7 @@ const AdminCatalogue = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredData.map((item) => (
-            <div key={item._id} className="border rounded-lg overflow-hidden shadow-sm group">
+            <div key={item._id} className=" rounded overflow-hidden shadow-sm group">
               <div className="h-48 overflow-hidden bg-gray-100">
                 <img
                   src={item.imageUrl}

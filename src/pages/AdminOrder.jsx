@@ -1,21 +1,43 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useGetCustomers } from '../hooks/useCustomers';
 import { useCreateOrder } from '../hooks/useOrder';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FiPlus, FiTrash2, FiSave, FiMic, FiUser, FiCalendar, FiCreditCard, FiScissors, FiX } from 'react-icons/fi';
 
 // Shop ke common smart tags
-const COMMON_TAGS = ['Ban', 'Collar', 'Gol Kaf', 'Chor Kaf', 'Double Silai', 'Front Pocket', '2 Side Pockets', 'Shalwar Poket'];
+const COMMON_TAGS = [
+  'Half Bain', 
+  'Full Bain', 
+  'Collar', 
+  'Gol Bazu (گول بازو)', 
+  'Gol Kaf', 
+  'Chor Kaf', 
+  'Gol Daman',
+  'Choras Daman',
+  'Front Pocket', 
+  '2 Side Pockets', 
+  'Shalwar Poket',
+  'Gum Patti',
+  'Double Silai'
+];
 
 const CreateOrder = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { data: customers = [], isLoading: loadingCustomers } = useGetCustomers();
   const { mutate: createOrder, isPending } = useCreateOrder();
 
-
   // --- STATE MANAGEMENT ---
-  const [customerId, setCustomerId] = useState('');
+  const [customerId, setCustomerId] = useState(searchParams.get('customerId') || '');
+
+  useEffect(() => {
+    const paramCustId = searchParams.get('customerId');
+    if (paramCustId) {
+      setCustomerId(paramCustId);
+    }
+  }, [searchParams]);
+
   const [deliveryDate, setDeliveryDate] = useState('');
   const [advancePaid, setAdvancePaid] = useState('');
   const [savedOrder, setSavedOrder] = useState(null); // Nayi state
@@ -31,6 +53,39 @@ const CreateOrder = () => {
   const [suits, setSuits] = useState([
     { fabricDetails: '', volumeNo: '', staticTags: [], customDesign: '', price: '', wearer:'', fabricimage:'null' }
   ]);
+
+  // Auto-apply customer preferences when customer selected
+  useEffect(() => {
+    if (selectedCustomer?.stitchingPreferences) {
+      const prefs = selectedCustomer.stitchingPreferences;
+      const prefTags = prefs.tags && prefs.tags.length > 0 ? prefs.tags : [
+        prefs.collar,
+        prefs.sleeves,
+        prefs.daman,
+        prefs.frontPocket,
+        prefs.sidePockets,
+        prefs.shalwarPocket,
+        prefs.patti,
+        prefs.stitchingStyle,
+        prefs.otherPreferences
+      ].filter(Boolean);
+
+      if (prefTags.length > 0 && suits.length === 1 && suits[0].staticTags.length === 0 && !suits[0].fabricDetails) {
+        const extraNote = [prefs.otherPreferences, prefs.customNotes].filter(Boolean).join('. ');
+        setSuits([
+          { 
+            fabricDetails: '', 
+            volumeNo: '', 
+            staticTags: prefTags, 
+            customDesign: extraNote, 
+            price: '', 
+            wearer: '', 
+            fabricimage: 'null' 
+          }
+        ]);
+      }
+    }
+  }, [customerId, selectedCustomer]);
 
   // --- FINANCIAL CALCULATIONS (Auto-magic) ---
   const rawSubtotal = useMemo(() => {
