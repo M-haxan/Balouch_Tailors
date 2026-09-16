@@ -69,3 +69,22 @@ export const useDeletePricing = () => {
     },
   });
 };
+
+// Seed / Sync Default Rates
+export const useSeedPricing = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await API.post('/pricing/seed-defaults');
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Default rates synced successfully!');
+      queryClient.invalidateQueries({ queryKey: ['pricing'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to sync rates');
+    },
+  });
+};

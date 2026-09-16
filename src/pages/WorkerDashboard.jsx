@@ -35,7 +35,7 @@ const WorkerDashboard = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
+    navigate('/worker/login');
   };
 
   const handleSubmitForQC = (orderId, suitId) => {

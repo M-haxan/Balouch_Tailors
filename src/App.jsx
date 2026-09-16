@@ -12,6 +12,7 @@ import Pricing from './components/Pricing';
 import VisitTailor from './components/VisitTailor';
 import Footer from './components/Footer';
 import Login from './pages/Login';
+import WorkerLogin from './pages/WorkerLogin';
 import AdminLayout from './Layouts/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminCatalogue from './pages/AdminCatalogue';
@@ -28,6 +29,7 @@ import WorkerDashboard from './pages/WorkerDashboard';
 import PublicOrderTrack from './pages/PublicOrderTrack';
 import PublicSuitTrack from './pages/PublicSuitTrack';
 import AdminExpenses from './pages/AdminExpenses';
+import AdminFinancialReports from './pages/AdminFinancialReports';
 
 const queryClient = new QueryClient();
 
@@ -70,6 +72,10 @@ function App() {
           {/* Admin Login */}
           <Route path="/admin/login" element={<Login />} />
 
+          {/* Worker Login */}
+          <Route path="/worker/login" element={<WorkerLogin />} />
+          <Route path="/worker-login" element={<Navigate to="/worker/login" replace />} />
+
           {/* Worker Protected Routes */}
           <Route path="/worker/dashboard" element={<WorkerDashboard />} />
 
@@ -85,6 +91,7 @@ function App() {
             <Route path="/admin/measurements" element={<AdminMeasurements />} />
             <Route path="/admin/workers" element={<AdminWorkers />} />
             <Route path="/admin/expenses" element={<AdminExpenses />} />
+            <Route path="/admin/financial-reports" element={<AdminFinancialReports />} />
             <Route path="/admin/orders/create" element={<CreateOrder />} />
             <Route path="/admin/allorders" element={<Allorders />} />
             <Route path="/admin/print/:id" element={<InvoicePrint />} />

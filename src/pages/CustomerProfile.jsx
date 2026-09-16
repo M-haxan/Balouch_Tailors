@@ -1,36 +1,36 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { 
-  useGetCustomerProfile, 
-  useUpdateCustomer, 
-  useUpdateMeasurements, 
+import {
+  useGetCustomerProfile,
+  useUpdateCustomer,
+  useUpdateMeasurements,
   useDeleteMeasurementCategory,
   useSettleCustomerKhata,
-  useDeleteCustomer 
+  useDeleteCustomer
 } from '../hooks/useCustomers';
 import { useGetTemplates } from '../hooks/useTemplates';
-import { 
-  FiUser, 
-  FiPhone, 
-  FiMapPin, 
-  FiShoppingBag, 
-  FiTrendingUp, 
-  FiCreditCard, 
-  FiScissors, 
-  FiClock, 
-  FiEdit, 
-  FiPlus, 
-  FiArrowLeft, 
-  FiCheckCircle, 
+import {
+  FiUser,
+  FiPhone,
+  FiMapPin,
+  FiShoppingBag,
+  FiTrendingUp,
+  FiCreditCard,
+  FiScissors,
+  FiClock,
+  FiEdit,
+  FiPlus,
+  FiArrowLeft,
+  FiCheckCircle,
   FiAlertTriangle,
-  FiAlertCircle, 
-  FiBook, 
-  FiDollarSign, 
-  FiPrinter, 
-  FiLayers, 
-  FiCalendar, 
-  FiCheck, 
-  FiX, 
+  FiAlertCircle,
+  FiBook,
+  FiDollarSign,
+  FiPrinter,
+  FiLayers,
+  FiCalendar,
+  FiCheck,
+  FiX,
   FiTrash2,
   FiExternalLink,
   FiRefreshCw,
@@ -50,7 +50,7 @@ const CustomerProfile = () => {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'measurements' | 'orders' | 'khata'
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isEditPreferencesOpen, setIsEditPreferencesOpen] = useState(false);
-  
+
   // State for measurement recording modal
   // modalMode: 'new' (fresh blank form) | 'update' (updating an existing category)
   const [measurementModalConfig, setMeasurementModalConfig] = useState(null); // null or { mode: 'new' | 'update', category: '...' }
@@ -75,8 +75,8 @@ const CustomerProfile = () => {
         <FiUser className="text-5xl text-gray-400 mx-auto mb-4" />
         <h2 className="text-2xl font-black text-gray-900 mb-2">Customer Not Found</h2>
         <p className="text-gray-500 mb-6 text-sm">The requested customer record could not be found or has been deleted.</p>
-        <Link 
-          to="/admin/customers" 
+        <Link
+          to="/admin/customers"
           className="inline-flex items-center gap-2 bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-6 py-2.5 rounded font-black text-sm transition"
         >
           <FiArrowLeft /> Back to Customers Directory
@@ -90,9 +90,9 @@ const CustomerProfile = () => {
 
   // 100% Robust metric calculations (from metrics object or directly aggregated from orders & customer)
   const totalOrdersCount = metrics.totalOrders ?? metrics.totalOrdersCount ?? orders.length ?? 0;
-  
-  const totalSpent = metrics.totalSpent !== undefined 
-    ? Number(metrics.totalSpent) 
+
+  const totalSpent = metrics.totalSpent !== undefined
+    ? Number(metrics.totalSpent)
     : orders.reduce((sum, o) => sum + (Number(o.totalAmount) || 0), 0);
 
   const khataBal = Number(metrics.khataBalance ?? customer.khataBalance ?? 0);
@@ -124,7 +124,7 @@ const CustomerProfile = () => {
     }
     const cleanPhone = rawNum.toString().replace(/[^0-9]/g, '');
     const finalPhone = cleanPhone.startsWith('0') ? '92' + cleanPhone.slice(1) : cleanPhone.startsWith('92') ? cleanPhone : '92' + cleanPhone;
-    
+
     const text = `Assalam-o-Alaikum ${customer.name} Sahab,\nThis message is from *Balouch Tailors*.\n\nYour Customer ID: *${formattedCustomerId}*`;
     window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(text)}`, '_blank');
   };
@@ -141,11 +141,11 @@ const CustomerProfile = () => {
 
   return (
     <div className="bg-white min-h-[90vh] p-3 sm:p-6 md:p-8 space-y-4 sm:space-y-6 max-w-full overflow-x-hidden">
-      
+
       {/* 1. TOP NAVIGATION & BREADCRUMB */}
       <div className="flex flex-wrap justify-between items-center gap-3 pb-2 border-b border-gray-100">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <button 
+          <button
             onClick={() => navigate('/admin/customers')}
             className="p-2 rounded bg-gray-100 hover:bg-gray-200 text-gray-700 transition flex items-center gap-1.5 text-xs font-bold"
           >
@@ -159,14 +159,14 @@ const CustomerProfile = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          {/* <button
             onClick={() => refetch()}
             title="Refresh Data"
             className="p-2 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded border border-gray-200 transition text-sm"
           >
             <FiRefreshCw />
-          </button>
-          <button 
+          </button> */}
+          <button
             onClick={handleDeleteProfile}
             disabled={isDeleting}
             className="px-3 py-1.5 bg-red-50 hover:bg-red-600 text-red-700 hover:text-white rounded text-xs font-bold transition flex items-center gap-1 border border-red-200"
@@ -179,13 +179,13 @@ const CustomerProfile = () => {
       {/* 2. TOP EXECUTIVE INFORMATION CARD */}
       <div className="bg-gradient-to-br from-white to-gray-50/70 border border-gray-200 rounded p-4 sm:p-6 shadow-sm relative overflow-hidden">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5 sm:gap-6">
-          
+
           {/* Avatar & Contact Info */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 w-full lg:w-auto">
             {customer.profileImage?.url ? (
-              <img 
-                src={customer.profileImage.url} 
-                alt={customer.name} 
+              <img
+                src={customer.profileImage.url}
+                alt={customer.name}
                 className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover border-2 border-[#DFAC43] shadow-md shrink-0"
               />
             ) : (
@@ -213,9 +213,9 @@ const CustomerProfile = () => {
                   <FiPhone className="text-[#DFAC43] shrink-0" />
                   <span className="font-semibold text-gray-900">{customer.phone}</span>
                 </div>
-                
+
                 {customer.whatsapp && (
-                  <button 
+                  <button
                     onClick={handleOpenWhatsApp}
                     className="flex items-center gap-1.5 text-green-700 bg-green-50 hover:bg-green-100 px-2.5 py-0.5 rounded font-bold transition border border-green-200"
                     title="Send WhatsApp Message"
@@ -268,7 +268,7 @@ const CustomerProfile = () => {
 
       {/* 3. 5 HIGHLIGHT METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-        
+
         {/* Metric 1: Total Orders Count */}
         <div className="bg-white border border-gray-200 rounded p-4 sm:p-5 shadow-sm hover:border-[#DFAC43] transition">
           <div className="flex justify-between items-start mb-2">
@@ -296,24 +296,21 @@ const CustomerProfile = () => {
         </div>
 
         {/* Metric 3: Outstanding Khata Balance */}
-        <div className={`border rounded p-4 sm:p-5 shadow-sm transition ${
-          khataBal > 0 
-            ? 'bg-red-50/50 border-red-200' 
-            : khataBal < 0 
-            ? 'bg-green-50/50 border-green-200' 
-            : 'bg-white border-gray-200'
-        }`}>
+        <div className={`border rounded p-4 sm:p-5 shadow-sm transition ${khataBal > 0
+            ? 'bg-red-50/50 border-red-200'
+            : khataBal < 0
+              ? 'bg-green-50/50 border-green-200'
+              : 'bg-white border-gray-200'
+          }`}>
           <div className="flex justify-between items-start mb-2">
             <span className="text-[11px] font-black uppercase tracking-wider text-gray-500">Khata Balance</span>
-            <div className={`w-8 h-8 rounded flex items-center justify-center text-base ${
-              khataBal > 0 ? 'bg-red-100 text-red-600' : khataBal < 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-            }`}>
+            <div className={`w-8 h-8 rounded flex items-center justify-center text-base ${khataBal > 0 ? 'bg-red-100 text-red-600' : khataBal < 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+              }`}>
               <FiCreditCard />
             </div>
           </div>
-          <p className={`text-2xl font-black font-sans ${
-            khataBal > 0 ? 'text-red-700' : khataBal < 0 ? 'text-green-700' : 'text-gray-900'
-          }`}>
+          <p className={`text-2xl font-black font-sans ${khataBal > 0 ? 'text-red-700' : khataBal < 0 ? 'text-green-700' : 'text-gray-900'
+            }`}>
             Rs {Math.abs(khataBal).toLocaleString()}
           </p>
           <div className="mt-1">
@@ -382,11 +379,10 @@ const CustomerProfile = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-3 sm:py-3.5 px-3 sm:px-4 font-black text-xs sm:text-sm flex items-center gap-2 border-b-2 transition whitespace-nowrap ${
-                  isActive 
-                    ? 'border-[#DFAC43] text-[#0F172A] bg-amber-50/40 rounded-t' 
+                className={`py-3 sm:py-3.5 px-3 sm:px-4 font-black text-xs sm:text-sm flex items-center gap-2 border-b-2 transition whitespace-nowrap ${isActive
+                    ? 'border-[#DFAC43] text-[#0F172A] bg-amber-50/40 rounded-t'
                     : 'border-transparent text-gray-500 hover:text-black hover:border-gray-300'
-                }`}
+                  }`}
               >
                 <Icon className={isActive ? 'text-[#DFAC43]' : 'text-gray-400'} />
                 {tab.label}
@@ -398,14 +394,14 @@ const CustomerProfile = () => {
 
       {/* 5. TAB CONTENT PANELS */}
       <div className="space-y-4 sm:space-y-6">
-        
+
         {/* ============================================================ */}
         {/* TAB 1: PURE PROFILE OVERVIEW */}
         {/* ============================================================ */}
         {activeTab === 'overview' && (
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="bg-white border border-gray-200 rounded p-6 sm:p-8 shadow-sm space-y-6">
-              
+
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-5">
                 <div>
                   <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
@@ -423,7 +419,7 @@ const CustomerProfile = () => {
 
               {/* Grid of Profile Attributes */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                
+
                 <div className="space-y-4">
                   <div className="p-4 rounded bg-gray-50 border border-gray-100 space-y-1">
                     <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Full Legal Name</span>
@@ -498,9 +494,9 @@ const CustomerProfile = () => {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100 pb-5">
                 <div>
                   <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
-                    <FiSliders className="text-[#DFAC43]" /> Permanent Stitching Preferences (مستقل سلائی ترجیحات)
+                    <FiSliders className="text-[#DFAC43]" /> Permanent Stitching Preferences
                   </h3>
-                  <p className="text-xs text-gray-500 mt-1">Default tailoring style & personal habits recorded for this customer.</p>
+                  <p className="text-xs text-gray-500 mt-1">Default tailoring style and personal preferences recorded for this customer.</p>
                 </div>
                 <button
                   onClick={() => setIsEditPreferencesOpen(true)}
@@ -512,10 +508,10 @@ const CustomerProfile = () => {
 
               {/* Preferences Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-                
+
                 {/* Collar / Bain */}
                 <div className="p-4 rounded bg-gray-50 border border-gray-100 space-y-1.5">
-                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Collar / Bain (بین / کالر)</span>
+                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Collar / Bain</span>
                   <p className="text-sm font-black text-gray-900">
                     {customer.stitchingPreferences?.collar || <span className="text-gray-400 font-normal italic">Default / Standard</span>}
                   </p>
@@ -523,7 +519,7 @@ const CustomerProfile = () => {
 
                 {/* Sleeves / Bazu */}
                 <div className="p-4 rounded bg-gray-50 border border-gray-100 space-y-1.5">
-                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Sleeves / بازو (کف یا گول بازو)</span>
+                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Sleeves</span>
                   <p className="text-sm font-black text-gray-900">
                     {customer.stitchingPreferences?.sleeves || <span className="text-gray-400 font-normal italic">Default / Standard</span>}
                   </p>
@@ -531,7 +527,7 @@ const CustomerProfile = () => {
 
                 {/* Daman */}
                 <div className="p-4 rounded bg-gray-50 border border-gray-100 space-y-1.5">
-                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Daman (دامن)</span>
+                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Daman</span>
                   <p className="text-sm font-black text-gray-900">
                     {customer.stitchingPreferences?.daman || <span className="text-gray-400 font-normal italic">Default / Standard</span>}
                   </p>
@@ -539,7 +535,7 @@ const CustomerProfile = () => {
 
                 {/* Front Pocket */}
                 <div className="p-4 rounded bg-gray-50 border border-gray-100 space-y-1.5">
-                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Front Pocket (سامنے جیب)</span>
+                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Front Pocket</span>
                   <p className="text-sm font-black text-gray-900">
                     {customer.stitchingPreferences?.frontPocket || <span className="text-gray-400 font-normal italic">Default / Standard</span>}
                   </p>
@@ -547,7 +543,7 @@ const CustomerProfile = () => {
 
                 {/* Side Pockets */}
                 <div className="p-4 rounded bg-gray-50 border border-gray-100 space-y-1.5">
-                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Side Pockets (سائیڈ جیبیں)</span>
+                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Side Pockets </span>
                   <p className="text-sm font-black text-gray-900">
                     {customer.stitchingPreferences?.sidePockets || <span className="text-gray-400 font-normal italic">Default / Standard</span>}
                   </p>
@@ -555,7 +551,7 @@ const CustomerProfile = () => {
 
                 {/* Shalwar Pocket */}
                 <div className="p-4 rounded bg-gray-50 border border-gray-100 space-y-1.5">
-                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Shalwar Pocket (شلوار جیب)</span>
+                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Shalwar Pocket </span>
                   <p className="text-sm font-black text-gray-900">
                     {customer.stitchingPreferences?.shalwarPocket || <span className="text-gray-400 font-normal italic">Default / Standard</span>}
                   </p>
@@ -563,7 +559,7 @@ const CustomerProfile = () => {
 
                 {/* Button Patti */}
                 <div className="p-4 rounded bg-gray-50 border border-gray-100 space-y-1.5">
-                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Patti / Buttons (بٹن پٹی)</span>
+                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Patti / Buttons </span>
                   <p className="text-sm font-black text-gray-900">
                     {customer.stitchingPreferences?.patti || <span className="text-gray-400 font-normal italic">Default / Standard</span>}
                   </p>
@@ -571,7 +567,7 @@ const CustomerProfile = () => {
 
                 {/* Stitching Style */}
                 <div className="p-4 rounded bg-gray-50 border border-gray-100 space-y-1.5">
-                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Stitching Style (سلائی انداز)</span>
+                  <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Stitching Style </span>
                   <p className="text-sm font-black text-gray-900">
                     {customer.stitchingPreferences?.stitchingStyle || <span className="text-gray-400 font-normal italic">Default / Standard</span>}
                   </p>
@@ -579,7 +575,7 @@ const CustomerProfile = () => {
 
                 {/* Other / Custom Preference */}
                 <div className="p-4 rounded bg-amber-50/60 border border-amber-200 space-y-1.5">
-                  <span className="text-[10px] font-black uppercase text-amber-900 block tracking-wider">Other / Custom (دیگر ترجیحات)</span>
+                  <span className="text-[10px] font-black uppercase text-amber-900 block tracking-wider">Other / Custom</span>
                   <p className="text-sm font-black text-gray-900">
                     {customer.stitchingPreferences?.otherPreferences || <span className="text-gray-400 font-normal italic">None</span>}
                   </p>
@@ -604,7 +600,7 @@ const CustomerProfile = () => {
         {/* TAB 2: MEASUREMENTS */}
         {/* ============================================================ */}
         {activeTab === 'measurements' && (
-          <MeasurementsTab 
+          <MeasurementsTab
             customer={customer}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
@@ -617,10 +613,10 @@ const CustomerProfile = () => {
         {/* TAB 3: ORDERS HISTORY */}
         {/* ============================================================ */}
         {activeTab === 'orders' && (
-          <OrdersTab 
-            orders={orders} 
-            customer={customer} 
-            newOrderUrl={`/admin/orders/create?customerId=${customer._id}`} 
+          <OrdersTab
+            orders={orders}
+            customer={customer}
+            newOrderUrl={`/admin/orders/create?customerId=${customer._id}`}
           />
         )}
 
@@ -628,11 +624,11 @@ const CustomerProfile = () => {
         {/* TAB 4: KHATA LEDGER & STATEMENTS */}
         {/* ============================================================ */}
         {activeTab === 'khata' && (
-          <KhataLedgerTab 
-            customer={customer} 
-            ledger={ledger} 
-            khataBalance={khataBal} 
-            openSettleModal={() => setIsSettleKhataModalOpen(true)} 
+          <KhataLedgerTab
+            customer={customer}
+            ledger={ledger}
+            khataBalance={khataBal}
+            openSettleModal={() => setIsSettleKhataModalOpen(true)}
           />
         )}
 
@@ -641,34 +637,34 @@ const CustomerProfile = () => {
       {/* 6. MODALS */}
       {/* Edit Profile Modal */}
       {isEditProfileOpen && (
-        <EditProfileModal 
-          customer={customer} 
-          closeModal={() => setIsEditProfileOpen(false)} 
+        <EditProfileModal
+          customer={customer}
+          closeModal={() => setIsEditProfileOpen(false)}
         />
       )}
 
       {/* Edit Stitching Preferences Modal */}
       {isEditPreferencesOpen && (
-        <StitchingPreferencesModal 
-          customer={customer} 
-          closeModal={() => setIsEditPreferencesOpen(false)} 
+        <StitchingPreferencesModal
+          customer={customer}
+          closeModal={() => setIsEditPreferencesOpen(false)}
         />
       )}
 
       {/* Record / Update Measurements Modal */}
       {measurementModalConfig && (
-        <MeasurementFormModal 
-          customer={customer} 
+        <MeasurementFormModal
+          customer={customer}
           config={measurementModalConfig}
-          closeModal={() => setMeasurementModalConfig(null)} 
+          closeModal={() => setMeasurementModalConfig(null)}
         />
       )}
 
       {/* Settle Khata Modal */}
       {isSettleKhataModalOpen && (
-        <SettleKhataModal 
-          customer={customer} 
-          closeModal={() => setIsSettleKhataModalOpen(false)} 
+        <SettleKhataModal
+          customer={customer}
+          closeModal={() => setIsSettleKhataModalOpen(false)}
         />
       )}
 
@@ -680,16 +676,16 @@ const CustomerProfile = () => {
 // ====================================================================
 // SUB-COMPONENT: MEASUREMENTS TAB (TABLE FORMAT)
 // ====================================================================
-const MeasurementsTab = ({ 
-  customer, 
-  selectedCategory, 
+const MeasurementsTab = ({
+  customer,
+  selectedCategory,
   setSelectedCategory,
   openRecordModal,
   openUpdateModal
 }) => {
   const { mutate: deleteMeasurementCategory, isPending: isDeletingMeasurement } = useDeleteMeasurementCategory();
   const measurements = customer.measurements || [];
-  
+
   // Set default category if not selected
   const activeCategory = selectedCategory || (measurements.length > 0 ? measurements[0].category : '');
   const currentMeas = measurements.find(m => m.category && m.category.toLowerCase() === activeCategory.toLowerCase());
@@ -706,7 +702,7 @@ const MeasurementsTab = ({
 
   return (
     <div className="bg-white border border-gray-200 rounded p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
-      
+
       {/* Category Selection Bar & Add Button */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 border-b border-gray-100 pb-4">
         <div>
@@ -719,11 +715,10 @@ const MeasurementsTab = ({
             <button
               key={m.category}
               onClick={() => setSelectedCategory(m.category)}
-              className={`px-3 sm:px-4 py-2 rounded text-xs font-black transition ${
-                activeCategory.toLowerCase() === m.category.toLowerCase()
+              className={`px-3 sm:px-4 py-2 rounded text-xs font-black transition ${activeCategory.toLowerCase() === m.category.toLowerCase()
                   ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-              }`}
+                }`}
             >
               {m.category}
             </button>
@@ -750,7 +745,7 @@ const MeasurementsTab = ({
         </div>
       ) : (
         <div className="space-y-4 sm:space-y-6">
-          
+
           {/* Active Category Header, Delete & Update Buttons */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50 p-3.5 sm:p-4 rounded border border-gray-200">
             <div>
@@ -762,7 +757,7 @@ const MeasurementsTab = ({
                 </p>
               )}
             </div>
-            
+
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
               <button
                 onClick={() => handleDeleteCategory(currentMeas.category)}
@@ -835,7 +830,7 @@ const OrdersTab = ({ orders = [], customer, newOrderUrl }) => {
 
   return (
     <div className="bg-white border border-gray-200 rounded p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
-      
+
       {/* Header & Filter */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 border-b border-gray-100 pb-4">
         <div>
@@ -912,11 +907,10 @@ const OrdersTab = ({ orders = [], customer, newOrderUrl }) => {
                       {order.suits?.[0]?.fabricDetails && ` (${order.suits[0].fabricDetails})`}
                     </td>
                     <td className="p-3.5 whitespace-nowrap">
-                      <span className={`px-2.5 py-1 rounded text-[10px] font-black uppercase ${
-                        order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-800' :
-                        order.orderStatus === 'Ready' ? 'bg-amber-100 text-amber-900' :
-                        'bg-blue-50 text-blue-800'
-                      }`}>
+                      <span className={`px-2.5 py-1 rounded text-[10px] font-black uppercase ${order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-800' :
+                          order.orderStatus === 'Ready' ? 'bg-amber-100 text-amber-900' :
+                            'bg-blue-50 text-blue-800'
+                        }`}>
                         {order.orderStatus || 'Pending'}
                       </span>
                     </td>
@@ -956,7 +950,7 @@ const OrdersTab = ({ orders = [], customer, newOrderUrl }) => {
 // SUB-COMPONENT: KHATA LEDGER TAB
 // ====================================================================
 const KhataLedgerTab = ({ customer, ledger = [], khataBalance = 0, openSettleModal }) => {
-  
+
   const handleShareWhatsAppStatement = () => {
     const rawNum = customer.whatsapp || customer.phone;
     if (!rawNum) {
@@ -986,18 +980,17 @@ const KhataLedgerTab = ({ customer, ledger = [], khataBalance = 0, openSettleMod
 
   return (
     <div className="bg-white border border-gray-200 rounded p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
-      
+
       {/* Running Balance Banner */}
-      <div className={`p-4 sm:p-6 rounded border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
-        khataBalance > 0 
-          ? 'bg-red-50/70 border-red-200 text-red-900' 
-          : khataBalance < 0 
-          ? 'bg-green-50/70 border-green-200 text-green-900' 
-          : 'bg-gray-50 border-gray-200 text-gray-800'
-      }`}>
+      <div className={`p-4 sm:p-6 rounded border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${khataBalance > 0
+          ? 'bg-red-50/70 border-red-200 text-red-900'
+          : khataBalance < 0
+            ? 'bg-green-50/70 border-green-200 text-green-900'
+            : 'bg-gray-50 border-gray-200 text-gray-800'
+        }`}>
         <div>
           <span className="text-[11px] font-black uppercase tracking-wider block opacity-75">
-            Current Account Balance (موجودہ کھاتہ بقایا)
+            Current Account Balance
           </span>
           <p className="text-2xl sm:text-3xl font-black font-sans mt-1">
             {khataBalance > 0 ? (
@@ -1027,7 +1020,7 @@ const KhataLedgerTab = ({ customer, ledger = [], khataBalance = 0, openSettleMod
             onClick={openSettleModal}
             className="flex-1 sm:flex-none justify-center bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] text-xs font-black px-4 py-2.5 rounded transition flex items-center gap-1.5 shadow whitespace-nowrap"
           >
-           Settle / Post Entry
+            Settle / Post Entry
           </button>
         </div>
       </div>
@@ -1075,11 +1068,10 @@ const KhataLedgerTab = ({ customer, ledger = [], khataBalance = 0, openSettleMod
                       {entry.type === 'credit' || entry.type === 'payment' ? `- Rs ${entry.amount.toLocaleString()}` : '-'}
                     </td>
                     <td className="p-3.5 text-right font-black font-sans whitespace-nowrap">
-                      <span className={`px-2.5 py-1 rounded text-xs ${
-                        entry.runningBalance > 0 ? 'text-red-700 bg-red-50' :
-                        entry.runningBalance < 0 ? 'text-green-700 bg-green-50' :
-                        'text-gray-700 bg-gray-100'
-                      }`}>
+                      <span className={`px-2.5 py-1 rounded text-xs ${entry.runningBalance > 0 ? 'text-red-700 bg-red-50' :
+                          entry.runningBalance < 0 ? 'text-green-700 bg-green-50' :
+                            'text-gray-700 bg-gray-100'
+                        }`}>
                         Rs {entry.runningBalance.toLocaleString()}
                       </span>
                     </td>
@@ -1144,8 +1136,8 @@ const EditProfileModal = ({ customer, closeModal }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1">Full Name *</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -1155,8 +1147,8 @@ const EditProfileModal = ({ customer, closeModal }) => {
 
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1">Phone Number *</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -1166,8 +1158,8 @@ const EditProfileModal = ({ customer, closeModal }) => {
 
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1">WhatsApp Number (Optional)</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="e.g. 03001234567"
                 value={formData.whatsapp}
                 onChange={(e) => setFormData({ ...formData, whatsapp: e.target.value })}
@@ -1177,8 +1169,8 @@ const EditProfileModal = ({ customer, closeModal }) => {
 
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1">City / Town</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="e.g. Quetta, Karachi"
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
@@ -1188,8 +1180,8 @@ const EditProfileModal = ({ customer, closeModal }) => {
 
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1">CNIC (Optional)</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="xxxxx-xxxxxxx-x"
                 value={formData.cnic}
                 onChange={(e) => setFormData({ ...formData, cnic: e.target.value })}
@@ -1199,8 +1191,8 @@ const EditProfileModal = ({ customer, closeModal }) => {
 
             <div>
               <label className="block text-xs font-bold text-gray-500 mb-1">Update Photo</label>
-              <input 
-                type="file" 
+              <input
+                type="file"
                 accept="image/*"
                 onChange={(e) => setImageFile(e.target.files[0])}
                 className="w-full border-2 border-gray-200 rounded p-1 text-xs outline-none"
@@ -1209,7 +1201,7 @@ const EditProfileModal = ({ customer, closeModal }) => {
 
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold text-gray-500 mb-1">Street Address</label>
-              <textarea 
+              <textarea
                 rows="2"
                 value={formData.address}
                 onChange={(e) => setFormData({ ...formData, address: e.target.value })}
@@ -1219,15 +1211,15 @@ const EditProfileModal = ({ customer, closeModal }) => {
           </div>
 
           <div className="flex justify-end gap-2 pt-4 border-t border-gray-100">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={closeModal}
               className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded text-xs transition"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isPending}
               className="px-6 py-2 bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] font-black rounded text-xs transition shadow"
             >
@@ -1320,15 +1312,15 @@ const MeasurementFormModal = ({ customer, config, closeModal }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded shadow-2xl w-full max-w-3xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-200 animate-fade-in">
-        
+
         <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50">
           <div>
             <h2 className="text-lg font-black text-gray-900">
               {config?.mode === 'update' ? `Update Size: ${config.category}` : `Record New Size (${customer.name})`}
             </h2>
             <p className="text-xs text-gray-500">
-              {config?.mode === 'update' 
-                ? 'Sizes updated here will automatically archive the previous size into history.' 
+              {config?.mode === 'update'
+                ? 'Sizes updated here will automatically archive the previous size into history.'
                 : 'Select garment templates to record fresh measurements for this client.'}
             </p>
           </div>
@@ -1338,7 +1330,7 @@ const MeasurementFormModal = ({ customer, config, closeModal }) => {
         </div>
 
         <form id="measForm" onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-6">
-          
+
           {/* Garment Template Selector Bar */}
           <div className="flex flex-wrap items-center gap-3 bg-amber-50/70 p-4 rounded border border-amber-200">
             <span className="text-xs font-black text-amber-900 uppercase">Select Garment Category:</span>
@@ -1365,13 +1357,13 @@ const MeasurementFormModal = ({ customer, config, closeModal }) => {
             <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded bg-gray-50/50 space-y-2">
               <FiScissors className="text-3xl text-gray-300 mx-auto" />
               <p className="text-gray-500 text-xs font-bold">No garment category added in this form yet.</p>
-              <p className="text-gray-400 text-[11px]">Select a garment template from above dropdown and click "+ Add to Form".</p>
+              <p className="text-gray-400 text-[11px]">Select a garment template from above dropdown and click "Add to Form".</p>
             </div>
           ) : (
             <div className="space-y-6">
               {categoriesList.map((meas, catIndex) => (
                 <div key={catIndex} className="bg-gray-50 border border-gray-200 p-5 rounded space-y-4 relative group">
-                  
+
                   {/* Category Header with Prominent Remove / Close Button */}
                   <div className="flex justify-between items-center border-b border-gray-200 pb-2.5">
                     <div className="flex items-center gap-2">
@@ -1573,43 +1565,43 @@ const StitchingPreferencesModal = ({ customer, closeModal }) => {
   const PRESETS = [
     {
       key: 'collar',
-      label: 'Collar / Bain (بین / کالر)',
+      label: 'Collar / Bain',
       options: ['Half Bain', 'Full Bain', 'Shirt Collar', 'Cut Bain', 'Gol Gala / No Collar']
     },
     {
       key: 'sleeves',
-      label: 'Sleeves / بازو (کف یا گول بازو)',
-      options: ['Gol Bazu (گول بازو)', 'Sada Open Astin', 'Single Cuff', 'Double Cuff', 'Gol Kaf', 'Chor Kaf']
+      label: 'Sleeves ',
+      options: ['Gol Bazu', 'Single Cuff', 'Double Cuff', 'Gol Kaf', 'Chor Kaf']
     },
     {
       key: 'daman',
-      label: 'Daman (دامن)',
-      options: ['Gol Daman (گول دامن)', 'Choras Daman (چورس دامن)']
+      label: 'Daman ',
+      options: ['Gol Daman', 'Choras Daman']
     },
     {
       key: 'frontPocket',
-      label: 'Front Pocket (سامنے جیب)',
+      label: 'Front Pocket ',
       options: ['1 Front Pocket', '2 Front Pockets', 'No Front Pocket']
     },
     {
       key: 'sidePockets',
-      label: 'Side Pockets (سائیڈ جیبیں)',
+      label: 'Side Pockets ',
       options: ['1 Side Pocket (Right)', '2 Side Pockets', '1 Side Pocket (Left)', 'No Side Pocket']
     },
     {
       key: 'shalwarPocket',
-      label: 'Shalwar Pocket (شلوار جیب)',
-      options: ['1 Shalwar Pocket', '2 Shalwar Pockets', 'Zip Pocket', 'No Shalwar Pocket']
+      label: 'Shalwar Pocket ',
+      options: ['1 Shalwar Pocket',  'No Shalwar Pocket']
     },
     {
       key: 'patti',
-      label: 'Button Patti (بٹن پٹی)',
-      options: ['Normal Patti', 'Gum Patti', 'Half Patti', 'Fancy Buttons']
+      label: 'Button Patti ',
+      options: ['small Patti','Half Patti',]
     },
     {
       key: 'stitchingStyle',
-      label: 'Stitching Style (سلائی انداز)',
-      options: ['Single Silai', 'Double Silai', 'Fancy Dhaga / Kaaj']
+      label: 'Stitching Style ',
+      options: ['Single Silai', 'Double Silai']
     }
   ];
 
@@ -1653,7 +1645,7 @@ const StitchingPreferencesModal = ({ customer, closeModal }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-200 animate-fade-in">
-        
+
         <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50">
           <div>
             <h2 className="text-lg font-black text-gray-900 flex items-center gap-2">
@@ -1667,7 +1659,7 @@ const StitchingPreferencesModal = ({ customer, closeModal }) => {
         </div>
 
         <form id="prefForm" onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-5 text-xs">
-          
+
           {PRESETS.map((group) => (
             <div key={group.key} className="space-y-2 bg-gray-50/70 p-3.5 rounded border border-gray-100">
               <label className="block font-black text-gray-700 uppercase tracking-wider text-[11px]">
@@ -1681,11 +1673,10 @@ const StitchingPreferencesModal = ({ customer, closeModal }) => {
                       type="button"
                       key={opt}
                       onClick={() => handleSelectOption(group.key, opt)}
-                      className={`px-3 py-1.5 rounded text-xs font-bold transition border ${
-                        isSelected
+                      className={`px-3 py-1.5 rounded text-xs font-bold transition border ${isSelected
                           ? 'bg-[#0F172A] text-[#DFAC43] border-[#0F172A] shadow-sm'
                           : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
-                      }`}
+                        }`}
                     >
                       {opt}
                     </button>
@@ -1698,7 +1689,7 @@ const StitchingPreferencesModal = ({ customer, closeModal }) => {
           {/* Other / Custom Preference Input */}
           <div className="space-y-1.5 bg-amber-50/50 p-4 rounded border border-amber-200">
             <label className="block font-black text-amber-900 uppercase tracking-wider text-[11px]">
-              Other / Custom Preferences (دیگر ترجیحات)
+              Other / Custom Preferences
             </label>
             <input
               type="text"
@@ -1713,7 +1704,7 @@ const StitchingPreferencesModal = ({ customer, closeModal }) => {
           {/* Special Fitting Notes */}
           <div className="space-y-1.5">
             <label className="block font-black text-gray-700 uppercase tracking-wider text-[11px]">
-              Special Fitting / Tailor Notes (اضافی ہدایات)
+              Special Fitting / Tailor Notes
             </label>
             <textarea
               rows="2"

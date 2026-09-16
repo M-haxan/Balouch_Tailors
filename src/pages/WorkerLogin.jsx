@@ -1,25 +1,25 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/BT_Logo.png';
-import { useLoginMutation } from '../hooks/useAuth';
+import { useWorkerLoginMutation } from '../hooks/useAuth';
 import Preloader from '../components/Preloader';
-import { FiEye, FiEyeOff, FiMail } from 'react-icons/fi';
+import { FiEye, FiEyeOff, FiPhone } from 'react-icons/fi';
 
-const Login = () => {
-  const [email, setEmail] = useState('');
+const WorkerLogin = () => {
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const adminLogin = useLoginMutation();
+  const workerLogin = useWorkerLoginMutation();
 
-  const isPending = adminLogin.isPending;
-  const isError = adminLogin.isError;
-  const error = adminLogin.error;
+  const isPending = workerLogin.isPending;
+  const isError = workerLogin.isError;
+  const error = workerLogin.error;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!email || !password) return;
-    adminLogin.mutate({ email, password });
+    if (!phone || !password) return;
+    workerLogin.mutate({ phone, password });
   };
 
   return (
@@ -47,14 +47,14 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div>
               <label className="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                <FiMail className="text-gray-400 text-xs sm:text-sm" /> Email Address
+                <FiPhone className="text-gray-400 text-xs sm:text-sm" /> Phone Number
               </label>
               <input
-                type="email"
+                type="tel"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@example.com"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 03001234567"
                 className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-gray-800 focus:outline-none focus:border-black transition-colors"
               />
             </div>
@@ -106,17 +106,10 @@ const Login = () => {
               {error?.response?.data?.message || error?.message || 'Login failed'}
             </p>
           )}
-
-          <p className="text-center text-[11px] sm:text-xs text-gray-500 mt-5 sm:mt-6">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-black font-semibold hover:underline">
-              Register
-            </Link>
-          </p>
         </div>
       </div>
     </div>
   );
 };
 
-export default Login;
+export default WorkerLogin;

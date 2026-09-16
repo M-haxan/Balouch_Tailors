@@ -88,25 +88,113 @@ const InvoicePrint = () => {
           <table className="w-full text-left text-sm mb-6 border-collapse">
             <thead>
               <tr className="border-b-2 border-black">
-                <th className="py-2 text-gray-600 uppercase text-xs">Fabric & Details</th>
-                <th className="py-2 text-right text-gray-600 uppercase text-xs">Stitching (Rs)</th>
+                <th className="py-2 text-gray-600 uppercase text-xs">Item / Service Details</th>
+                <th className="py-2 text-center text-gray-600 uppercase text-xs w-16">Qty</th>
+                <th className="py-2 text-right text-gray-600 uppercase text-xs w-28">Amount (Rs)</th>
               </tr>
             </thead>
             <tbody>
-              {order.suits.map((suit, idx) => (
-                <tr key={idx} className="border-b border-gray-100">
-                  <td className="py-3">
-                    <span className="font-black text-base">{suit.fabricDetails}</span> <span className="text-gray-500 font-bold">(Vol: {suit.volumeNo})</span><br/>
-                    <span className="text-xs font-semibold text-gray-500 block mt-1">Tags: {suit.staticTags?.join(', ')}</span>
+              {/* 1. Suits and their individual customizations as separate rows */}
+              {order.suits && order.suits.map((suit, suitIdx) => {
+                const suitCustoms = suit.customizations || [];
+                const customsSum = suitCustoms.reduce((acc, c) => acc + (Number(c.price) || 0), 0);
+                const baseRate = Number(suit.basePrice) > 0 
+                  ? Number(suit.basePrice) 
+                  : Math.max(0, (Number(suit.price) || 0) - customsSum);
+
+                return (
+                  <React.Fragment key={`suit-${suitIdx}`}>
+                    {/* Suit Base Row */}
+                    <tr className="border-b border-gray-100">
+                      <td className="py-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-base text-gray-900">
+                            {suit.serviceType ? `${suit.serviceType}` : 'Tailored Suit'} #{suitIdx + 1} (Base Stitching)
+                          </span>
+                          {suit.fabricDetails && (
+                            <span className="text-gray-600 font-medium text-xs">
+                              - {suit.fabricDetails}
+                            </span>
+                          )}
+                          {suit.volumeNo && (
+                            <span className="text-gray-500 text-[10px] font-bold bg-gray-100 px-1.5 py-0.5 rounded">
+                              Vol: {suit.volumeNo}
+                            </span>
+                          )}
+                        </div>
+                        {suit.staticTags && suit.staticTags.length > 0 && (
+                          <span className="text-[11px] font-semibold text-gray-400 block mt-0.5">
+                            Tags: {suit.staticTags.join(', ')}
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2.5 text-center font-bold text-gray-600">1</td>
+                      <td className="py-2.5 text-right font-black text-base font-sans">
+                        Rs {baseRate.toLocaleString()}
+                      </td>
+                    </tr>
+
+                    {/* Customization Rows */}
+                    {suitCustoms.map((cust, cIdx) => (
+                      <tr key={`suit-${suitIdx}-cust-${cIdx}`} className="border-b border-gray-100 bg-gray-50/40">
+                        <td className="py-2 pl-6">
+                          <span className="text-gray-800 font-bold text-xs">
+                            ↳ Suit #{suitIdx + 1} Add-on: {cust.name} {cust.urduName ? `(${cust.urduName})` : ''}
+                          </span>
+                        </td>
+                        <td className="py-2 text-center font-bold text-gray-600 text-xs">1</td>
+                        <td className="py-2 text-right font-black text-xs font-sans">
+                          Rs {Number(cust.price || 0).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </React.Fragment>
+                );
+              })}
+
+              {/* 2. Standalone Service Items (if any) */}
+              {order.orderItems && order.orderItems.map((item, idx) => (
+                <tr key={`item-${idx}`} className="border-b border-gray-100">
+                  <td className="py-2.5">
+                    <span className="font-black text-sm">{item.name}</span>
+                    {item.category && <span className="text-xs text-gray-500 font-bold ml-2">({item.category})</span>}
                   </td>
-                  <td className="py-3 text-right font-black text-base">{suit.price}</td>
+                  <td className="py-2.5 text-center font-bold text-gray-700">{item.quantity || 1}</td>
+                  <td className="py-2.5 text-right font-black text-base font-sans">
+                    Rs {item.total || (Number(item.rate || 0) * Number(item.quantity || 1))}
+                  </td>
+                </tr>
+              ))}
+
+              {/* 3. Alterations */}
+              {order.alterations && order.alterations.map((alt, idx) => (
+                <tr key={`alt-${idx}`} className="border-b border-gray-100">
+                  <td className="py-2.5">
+                    <span className="font-bold text-sm text-gray-800">Alteration: {alt.description}</span>
+                  </td>
+                  <td className="py-2.5 text-center font-bold text-gray-700">1</td>
+                  <td className="py-2.5 text-right font-black text-base font-sans">Rs {alt.price}</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
           <div className="flex justify-end text-sm">
-            <div className="w-72 space-y-2 bg-gray-50 p-4 rounded-lg border border-gray-100">
+            <div className="w-80 space-y-2 bg-gray-50 p-4 rounded-lg border border-gray-100">
+              {order.subtotal > 0 && (
+                <div className="flex justify-between font-bold text-gray-600 text-xs">
+                  <span>Gross Subtotal:</span>
+                  <span>Rs {order.subtotal}</span>
+                </div>
+              )}
+
+              {order.discountAmount > 0 && (
+                <div className="flex justify-between font-bold text-green-700 text-xs">
+                  <span>- Discount ({order.discountPercent || 0}%):</span>
+                  <span>- Rs {order.discountAmount}</span>
+                </div>
+              )}
+
               {order.previousKhataAdjusted?.type === 'added_due' && (
                 <div className="flex justify-between font-bold text-red-600 text-xs">
                   <span>+ Previous Udhar Added:</span>
@@ -119,14 +207,22 @@ const InvoicePrint = () => {
                   <span>- Rs {order.previousKhataAdjusted.amount}</span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-gray-600"><span>Total Bill:</span> <span>Rs {order.totalAmount}</span></div>
-              <div className="flex justify-between font-bold text-gray-600"><span>Advance Paid:</span> <span>Rs {order.advancePaid}</span></div>
+              <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-200">
+                <span>Total Bill:</span> 
+                <span className="font-black text-base">Rs {order.totalAmount}</span>
+              </div>
+              <div className="flex justify-between font-bold text-gray-600">
+                <span>Advance Paid:</span> 
+                <span>Rs {order.advancePaid}</span>
+              </div>
               <div className="flex justify-between text-xl font-black border-t-2 border-black pt-2 mt-2 text-black">
-                <span>Balance:</span> <span>Rs {order.balanceAmount}</span>
+                <span>Balance Due:</span> 
+                <span>Rs {order.balanceAmount}</span>
               </div>
             </div>
           </div>
         </div>
+
 
        {/* ========================================= */}
         {/* 2. KARIGAR SLIP (Smart Grouped Parchi)      */}
@@ -224,15 +320,26 @@ const InvoicePrint = () => {
                             
                             {/* Details (Right to left layout for Urdu compatibility) */}
                             <div className="flex-grow">
-                              {/* Suit Title & Volume */}
-                              <div className="flex justify-between items-center mb-3">
+                              {/* Suit Title, Category & Volume */}
+                              <div className="flex justify-between items-center mb-2">
                                 <span className="font-sans font-black text-xl uppercase" dir="ltr">
-                                  {suitItem.displayNum}. {suitItem.fabricDetails}
+                                  {suitItem.displayNum}. {suitItem.serviceType ? `${suitItem.serviceType} - ` : ''}{suitItem.fabricDetails}
                                 </span>
                                 <span className="bg-black text-white px-2 py-0.5 rounded text-xs font-sans font-bold tracking-wider" dir="ltr">
                                   VOL: {suitItem.volumeNo}
                                 </span>
                               </div>
+
+                              {/* Customizations / Add-ons Chips */}
+                              {suitItem.customizations && suitItem.customizations.length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mb-2" dir="ltr">
+                                  {suitItem.customizations.map((c, cIdx) => (
+                                    <span key={cIdx} className="bg-black text-[#D4AF37] px-2 py-0.5 rounded text-xs font-bold font-sans">
+                                      ★ {c.name} {c.urduName ? `(${c.urduName})` : ''}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
 
                               {/* Tags */}
                               {suitItem.staticTags && suitItem.staticTags.length > 0 && (
