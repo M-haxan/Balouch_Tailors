@@ -48,7 +48,7 @@ const InvoicePrint = () => {
         @media print {
           @page {
             size: ${paperSize === '56mm' ? '56mm auto' : paperSize === '80mm' ? '80mm auto' : 'A4 portrait'};
-            margin: ${paperSize === '56mm' ? '1.5mm' : paperSize === '80mm' ? '2.5mm' : '8mm'};
+            margin: ${paperSize === '56mm' ? '0mm' : paperSize === '80mm' ? '0mm' : '8mm'};
           }
           *, *:before, *:after {
             box-shadow: none !important;
@@ -60,26 +60,43 @@ const InvoicePrint = () => {
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          .no-print {
+          header, nav, aside, footer, .no-print, .Toastify {
             display: none !important;
           }
-          .printable-slip-wrapper {
+          main {
             padding: 0 !important;
             margin: 0 !important;
-            background: transparent !important;
-            min-height: auto !important;
-            display: block !important;
+            height: auto !important;
+            max-height: none !important;
+            overflow: visible !important;
           }
-          .printable-slip-box {
+          /* 1. Hide the entire application DOM */
+          body * {
+            visibility: hidden !important;
+          }
+          /* 2. Make ONLY the printable slip container and its children visible */
+          #printable-slip, #printable-slip * {
+            visibility: visible !important;
+          }
+          /* 3. Position the slip directly at the top-left for zero page bleed */
+          #printable-slip {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            right: 0 !important;
+            margin: 0 auto !important;
             box-shadow: none !important;
             border: none !important;
-            margin: 0 auto !important;
-            max-width: 100% !important;
-            width: ${paperSize === '56mm' ? '56mm' : paperSize === '80mm' ? '80mm' : '100%'} !important;
-            padding: ${paperSize === '56mm' ? '2mm' : paperSize === '80mm' ? '3mm' : '8mm'} !important;
+            width: ${paperSize === '56mm' ? '54mm' : paperSize === '80mm' ? '76mm' : '100%'} !important;
+            max-width: ${paperSize === '56mm' ? '54mm' : paperSize === '80mm' ? '76mm' : '100%'} !important;
+            padding: ${paperSize === '56mm' ? '1.5mm' : paperSize === '80mm' ? '2.5mm' : '0mm'} !important;
+            background: #ffffff !important;
           }
         }
       `}</style>
@@ -150,6 +167,7 @@ const InvoicePrint = () => {
 
       {/* --- PRINTABLE SLIP CONTAINER --- */}
       <div 
+        id="printable-slip"
         className={`bg-white shadow-xl border border-gray-200 text-black mx-auto overflow-hidden transition-all printable-slip-box ${containerWidthClass}`}
         style={{
           minHeight: paperSize === 'a4' ? '10in' : 'auto'
