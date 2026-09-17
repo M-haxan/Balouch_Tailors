@@ -71,7 +71,7 @@ const CustomerProfile = () => {
 
   if (!profileData?.customer) {
     return (
-      <div className="bg-white p-12 text-center max-w-xl mx-auto my-12 rounded-2xl border border-gray-200 shadow-sm">
+      <div className="bg-white p-12 text-center max-w-xl mx-auto my-12 rounded border border-gray-200 shadow-sm">
         <FiUser className="text-5xl text-gray-400 mx-auto mb-4" />
         <h2 className="text-2xl font-black text-gray-900 mb-2">Customer Not Found</h2>
         <p className="text-gray-500 mb-6 text-sm">The requested customer record could not be found or has been deleted.</p>
@@ -782,7 +782,7 @@ const MeasurementsTab = ({
               <thead>
                 <tr className="bg-[#0F172A] text-[#DFAC43] font-black uppercase text-[10px]">
                   <th className="p-3.5 w-16 text-center">#</th>
-                  <th className="p-3.5">Measurement Parameter (ناپ / تفصیل)</th>
+                  <th className="p-3.5">Measurement Parameter</th>
                   <th className="p-3.5 text-right pr-6">Size Value (Inches)</th>
                 </tr>
               </thead>
@@ -1490,10 +1490,10 @@ const SettleKhataModal = ({ customer, closeModal }) => {
               onChange={(e) => setForm({ ...form, type: e.target.value })}
               className="w-full border-2 border-gray-200 focus:border-black rounded p-2.5 text-xs font-bold outline-none"
             >
-              <option value="payment">Payment Received (کیش وصولی)</option>
-              <option value="refund">Refund Given (رقم واپسی)</option>
-              <option value="debit">Add Manual Debt (ادھار شامل کریں)</option>
-              <option value="credit">Add Manual Credit (رعایت / جمع)</option>
+              <option value="payment">Payment Received</option>
+              <option value="refund">Refund Given</option>
+              <option value="debit">Add Manual Debt</option>
+              <option value="credit">Add Manual Credit</option>
             </select>
           </div>
 

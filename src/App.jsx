@@ -30,6 +30,7 @@ import PublicOrderTrack from './pages/PublicOrderTrack';
 import PublicSuitTrack from './pages/PublicSuitTrack';
 import AdminExpenses from './pages/AdminExpenses';
 import AdminFinancialReports from './pages/AdminFinancialReports';
+import AdminPayments from './pages/AdminPayments';
 
 const queryClient = new QueryClient();
 
@@ -92,6 +93,7 @@ function App() {
             <Route path="/admin/workers" element={<AdminWorkers />} />
             <Route path="/admin/expenses" element={<AdminExpenses />} />
             <Route path="/admin/financial-reports" element={<AdminFinancialReports />} />
+            <Route path="/admin/payments" element={<AdminPayments />} />
             <Route path="/admin/orders/create" element={<CreateOrder />} />
             <Route path="/admin/allorders" element={<Allorders />} />
             <Route path="/admin/print/:id" element={<InvoicePrint />} />

@@ -124,7 +124,6 @@ const AdminCustomers = () => {
                         )}
                         <div>
                           <p className="font-black text-gray-900">{customer.name}</p>
-                          {/* {customer.city && <span className="text-[11px] text-gray-400 font-medium">📍 {customer.city}</span>} */}
                         </div>
                       </div>
                     </td>
@@ -133,11 +132,6 @@ const AdminCustomers = () => {
                     <td className="p-4 text-gray-600 font-medium whitespace-nowrap">
                       <div>
                         <p className="font-semibold text-gray-900">{customer.phone}</p>
-                        {/* {customer.whatsapp && (
-                          <span className="text-[11px] text-green-700 font-bold block">
-                            💬 {customer.whatsapp}
-                          </span>
-                        )} */}
                       </div>
                     </td>
                     

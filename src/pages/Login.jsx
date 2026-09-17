@@ -43,7 +43,7 @@ const Login = () => {
         </div>
 
         {/* Card */}
-        <div className="border border-gray-200 shadow-sm rounded-xl sm:rounded-2xl p-5 sm:p-8 bg-white">
+        <div className="border border-gray-200 shadow-sm rounded p-5 sm:p-8 bg-white">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div>
               <label className="block text-[11px] sm:text-xs font-bold text-gray-700 uppercase tracking-widest mb-1.5 flex items-center gap-1">

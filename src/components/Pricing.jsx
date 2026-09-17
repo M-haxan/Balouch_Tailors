@@ -79,7 +79,7 @@ const Pricing = () => {
                     <div className="w-24 h-1 bg-black mx-auto"></div>
                 </div>
 
-                <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-100 transform hover:-translate-y-1 transition-transform duration-500">
+                <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded overflow-hidden border border-gray-100 transform hover:-translate-y-1 transition-transform duration-500">
                     <div className="bg-black text-white px-8 py-6 flex justify-between items-center">
                         <h4 className="text-lg md:text-xl font-bold uppercase tracking-wider">Service Description</h4>
                         <h4 className="text-lg md:text-xl font-bold uppercase tracking-wider">Rate (Rs)</h4>

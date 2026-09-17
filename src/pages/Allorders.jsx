@@ -139,10 +139,10 @@ const Allorders = () => {
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="pl-9 pr-4 py-2 border-2 border-gray-100 focus:border-black rounded-lg outline-none font-bold text-sm bg-white appearance-none"
+              className="pl-9 pr-4 py-2 border-2 border-gray-100 focus:border-black rounded outline-none font-bold text-sm bg-white appearance-none"
             >
               <option value="All">All Statuses</option>
-              <option value="PendingQC">⚠️ Waiting QC Approval ({totalPendingQC})</option>
+              <option value="PendingQC">Waiting QC Approval ({totalPendingQC})</option>
               {statusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
           </div>
@@ -359,7 +359,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
+      <div className="bg-white rounded shadow-2xl w-full max-w-4xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
         
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
@@ -508,7 +508,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                         <div className="sm:col-span-2">
                           <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Stitching & QC Status</span>
                           <div className="flex flex-wrap gap-2 items-center">
-                            <span className={`inline-block text-[11px] font-black px-3 py-1 rounded-full border uppercase ${
+                            <span className={`inline-block text-[11px] font-black px-3 py-1 rounded border uppercase ${
                               isStitched ? 'bg-green-100 text-green-800 border-green-200' :
                               isUnderInspection ? 'bg-amber-400 text-black border-amber-500 animate-pulse' :
                               isRework ? 'bg-red-100 text-red-800 border-red-200' :
@@ -518,8 +518,8 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                               {suit.stitchingStatus || 'Pending'}
                             </span>
                             {suit.stitching?.isSelf && (
-                              <span className="bg-purple-100 text-purple-800 border border-purple-200 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
-                                👑 Stitched by Owner (Self)
+                              <span className="bg-purple-100 text-purple-800 border border-purple-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase">
+                                Stitched by Owner (Self)
                               </span>
                             )}
                           </div>
@@ -529,7 +529,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
 
                       {/* Rework Note if present */}
                       {isRework && suit.stitching?.reworkNotes && (
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-xs text-red-900">
+                        <div className="bg-red-50 border border-red-200 rounded p-3 text-xs text-red-900">
                           <strong className="block text-[10px] uppercase font-black text-red-700">Current Alteration Reason:</strong>
                           {suit.stitching.reworkNotes}
                         </div>
@@ -537,7 +537,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
 
                       {/* Custom Styling Instructions */}
                       {suit.customDesign && (
-                        <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-3 text-right" dir="rtl">
+                        <div className="bg-amber-50/50 border border-amber-100 rounded p-3 text-right" dir="rtl">
                           <span className="block text-[10px] font-bold text-amber-800 uppercase tracking-wider mb-1 text-left" dir="ltr">Custom Instructions</span>
                           <p className="text-xs font-bold text-gray-800 leading-relaxed font-sans">{suit.customDesign}</p>
                         </div>
@@ -545,7 +545,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
 
                       {/* QC APPROVAL / REWORK ACTIONS (PROMINENT BANNER) */}
                       {isUnderInspection && (
-                        <div className="bg-amber-100/70 border border-amber-300 rounded-xl p-4 space-y-3">
+                        <div className="bg-amber-100/70 border border-amber-300 rounded p-4 space-y-3">
                           <div className="flex items-center gap-2 text-amber-950 font-black text-xs">
                             <FiClock className="text-amber-800 text-base" />
                             <span>Karigar has finished this suit and submitted for QC Inspection!</span>
@@ -554,14 +554,14 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                             <button
                               onClick={() => handleApprove(suit._id)}
                               disabled={isApproving}
-                              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 px-4 rounded-xl transition shadow flex items-center justify-center gap-1.5"
+                              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2.5 px-4 rounded transition shadow flex items-center justify-center gap-1.5"
                             >
                               <FiCheck /> Approve & Credit Wage (+ Rs {suit.assignedWorker?.perSuitWage || 600})
                             </button>
                             <button
                               onClick={() => handleOpenReworkModal(suit)}
                               disabled={isRejecting}
-                              className="bg-red-600 hover:bg-red-700 text-white font-black text-xs py-2.5 px-4 rounded-xl transition shadow flex items-center justify-center gap-1.5"
+                              className="bg-red-600 hover:bg-red-700 text-white font-black text-xs py-2.5 px-4 rounded transition shadow flex items-center justify-center gap-1.5"
                             >
                               <FiAlertTriangle /> Send for Rework
                             </button>
@@ -570,7 +570,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                       )}
 
                       {/* Assignment Section (Worker OR Owner/Self) */}
-                      <div className="bg-gray-50 p-4 border border-gray-150 rounded-xl space-y-3">
+                      <div className="bg-gray-50 p-4 border border-gray-150 rounded space-y-3">
                         <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider">
                           Assign Stitcher (Worker vs. Owner Self-Stitch)
                         </label>
@@ -595,10 +595,10 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                                 });
                               }
                             }}
-                            className="flex-1 border border-gray-300 focus:border-black rounded-lg p-2.5 outline-none text-xs font-bold bg-white disabled:bg-gray-100"
+                            className="flex-1 border border-gray-300 focus:border-black rounded p-2.5 outline-none text-xs font-bold bg-white disabled:bg-gray-100"
                           >
                             <option value="">-- Unassigned (Pending) --</option>
-                            <option value="self">👑 Owner / Self (In-House Stitched)</option>
+                            <option value="self">Owner / Self (In-House Stitched)</option>
                             <optgroup label="Registered Karigars">
                               {workers.filter(w => w.isActive).map(w => (
                                 <option key={w._id} value={w._id}>{w.name} - Wage: Rs {w.perSuitWage}</option>
@@ -611,7 +611,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                             <button
                               onClick={() => handleApprove(suit._id)}
                               disabled={isApproving}
-                              className="bg-black hover:bg-[#D4AF37] text-white hover:text-black font-black px-4 py-2 rounded-lg text-xs uppercase tracking-wider transition shadow-sm shrink-0 flex items-center gap-1"
+                              className="bg-black hover:bg-[#D4AF37] text-white hover:text-black font-black px-4 py-2 rounded text-xs uppercase tracking-wider transition shadow-sm shrink-0 flex items-center gap-1"
                               title="Directly mark suit as QC Passed"
                             >
                               <FiScissors /> Pass & Stitched
@@ -626,7 +626,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                 );
               })
             ) : (
-              <div className="text-center py-6 bg-gray-50 border-2 border-dashed border-gray-150 rounded-xl">
+              <div className="text-center py-6 bg-gray-50 border-2 border-dashed border-gray-150 rounded">
                 <p className="text-sm text-gray-400 font-bold">No suits added to this order.</p>
               </div>
             )}
@@ -639,7 +639,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                 Alterations Details
               </h3>
               
-              <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-3">
+              <div className="bg-white border border-gray-200 rounded p-5 shadow-sm space-y-3">
                 {order.alterations.map((alt, idx) => (
                   <div key={idx} className="flex justify-between items-center text-sm py-2 border-b border-gray-100 last:border-b-0 last:pb-0">
                     <div className="flex flex-col">
@@ -665,14 +665,14 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                 closeModal();
                 onOpenDelivery(order);
               }}
-              className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition shadow-md flex items-center gap-1.5"
+              className="bg-purple-700 hover:bg-purple-800 text-white px-5 py-2.5 rounded text-sm font-bold transition shadow-md flex items-center gap-1.5"
             >
               <FiCheckCircle /> Deliver & Settle Payment
             </button>
           )}
           <button 
             onClick={closeModal} 
-            className="bg-black hover:bg-gray-900 text-[#D4AF37] px-6 py-2.5 rounded-lg text-sm font-bold transition shadow-md"
+            className="bg-black hover:bg-gray-900 text-[#D4AF37] px-6 py-2.5 rounded text-sm font-bold transition shadow-md"
           >
             Close Details
           </button>
@@ -683,7 +683,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
       {/* REWORK NOTES POPUP MODAL */}
       {reworkModalSuit && (
         <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4 border border-red-200 animate-scale-up">
+          <div className="bg-white rounded shadow-2xl w-full max-w-md p-6 space-y-4 border border-red-200 animate-scale-up">
             <div className="flex items-center gap-2 text-red-600">
               <FiAlertTriangle className="text-2xl" />
               <h3 className="text-base font-black uppercase tracking-wider">Send Suit for Rework / Alteration</h3>
@@ -695,26 +695,26 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
 
             <div className="space-y-1">
               <label className="block text-[11px] font-black text-gray-700 uppercase">
-                Alteration / Defect Reason (الٹریشن کی تفصیل):
+                Alteration / Defect Reason:
               </label>
               <textarea
                 rows={3}
                 value={reworkNotes}
                 onChange={(e) => setReworkNotes(e.target.value)}
-                placeholder="Maslan: Gala theek nahi hai, lambai 1 inch kam karein ya bazoo loose karein..."
-                className="w-full border-2 border-gray-200 focus:border-red-500 rounded-xl p-3 text-xs outline-none font-medium text-gray-800"
+                placeholder="e.g. Collar adjustment, shorten length by 1 inch, loosen sleeve..."
+                className="w-full border-2 border-gray-200 focus:border-red-500 rounded p-3 text-xs outline-none font-medium text-gray-800"
               />
             </div>
 
-            <p className="text-[10px] text-red-600 bg-red-50 p-2 rounded-lg font-bold">
-              ⚠️ Note: Karigar ke ledger mein wage hold rahegi jab tak alteration mukammal ho kar dubara pass na ho jaye.
+            <p className="text-[10px] text-red-600 bg-red-50 p-2 rounded font-bold flex items-center gap-1">
+              <FiAlertCircle className="text-red-600 shrink-0" /> Note: Worker wage will remain on hold until alteration is completed and approved.
             </p>
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 type="button"
                 onClick={() => setReworkModalSuit(null)}
-                className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded-lg transition"
+                className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded transition"
               >
                 Cancel
               </button>
@@ -722,7 +722,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                 type="button"
                 onClick={handleSubmitRework}
                 disabled={isRejecting}
-                className="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-5 py-2 rounded-xl transition shadow"
+                className="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-5 py-2 rounded transition shadow"
               >
                 Submit Rework Request
               </button>
@@ -766,7 +766,7 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-5 border border-gray-200 animate-scale-up">
+      <div className="bg-white rounded shadow-2xl w-full max-w-md p-6 space-y-5 border border-gray-200 animate-scale-up">
         
         {/* Modal Header */}
         <div className="flex justify-between items-center border-b border-gray-100 pb-3">
@@ -777,11 +777,11 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
               <p className="text-[11px] text-gray-500 font-medium">Order #BT-{order.orderNumber} | Customer: {order.customer?.name || 'Customer'}</p>
             </div>
           </div>
-          <button onClick={closeModal} className="text-gray-400 hover:text-black font-black text-lg">✕</button>
+          <button onClick={closeModal} className="text-gray-400 hover:text-black p-1 transition"><FiX className="text-lg" /></button>
         </div>
 
         {/* Financial Snapshot */}
-        <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl space-y-2">
+        <div className="bg-gray-50 border border-gray-200 p-4 rounded space-y-2">
           <div className="flex justify-between text-xs font-bold text-gray-600">
             <span>Total Bill:</span>
             <span className="text-black font-black font-sans">Rs {order.totalAmount}</span>
@@ -800,7 +800,7 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-[11px] font-black text-gray-700 uppercase mb-1">
-              Amount Receiving Now at Handover (وصول ہونے والی رقم):
+              Amount Receiving at Handover:
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-xs">Rs</span>
@@ -811,7 +811,7 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
                 value={receivedAmount}
                 onChange={(e) => setReceivedAmount(e.target.value)}
                 placeholder="0"
-                className="w-full pl-9 pr-3 py-2.5 border-2 border-gray-200 focus:border-purple-600 rounded-xl text-sm font-black outline-none font-sans"
+                className="w-full pl-9 pr-3 py-2.5 border-2 border-gray-200 focus:border-purple-600 rounded text-sm font-black outline-none font-sans"
               />
             </div>
           </div>
@@ -823,9 +823,9 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
             <select
               value={paymentMethod}
               onChange={(e) => setPaymentMethod(e.target.value)}
-              className="w-full border-2 border-gray-200 focus:border-purple-600 rounded-xl p-2.5 text-xs font-bold outline-none"
+              className="w-full border-2 border-gray-200 focus:border-purple-600 rounded p-2.5 text-xs font-bold outline-none"
             >
-              <option value="Cash">Cash (کیش)</option>
+              <option value="Cash">Cash</option>
               <option value="JazzCash">JazzCash</option>
               <option value="EasyPaisa">EasyPaisa</option>
               <option value="Bank">Bank Transfer / Card</option>
@@ -833,7 +833,7 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
           </div>
 
           {/* Dynamic Khata Feedback Alert */}
-          <div className={`p-3.5 rounded-xl border text-xs font-bold ${
+          <div className={`p-3.5 rounded border text-xs font-bold ${
             diff > 0 
               ? 'bg-red-50 border-red-200 text-red-800' 
               : diff < 0 
@@ -843,19 +843,19 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
             {diff > 0 && (
               <p className="flex items-center gap-1.5">
                 <FiAlertTriangle className="text-red-600 shrink-0" />
-                <span>⚠️ Rs {diff.toLocaleString()} Baqiya Udhar customer ke Khate me add ho jayega.</span>
+                <span>Rs {diff.toLocaleString()} remaining balance will be added to customer ledger account.</span>
               </p>
             )}
             {diff < 0 && (
               <p className="flex items-center gap-1.5">
                 <FiCheck className="text-green-600 shrink-0" />
-                <span>🟢 Rs {Math.abs(diff).toLocaleString()} Extra customer ke Advance Credit me save ho jayenge.</span>
+                <span>Rs {Math.abs(diff).toLocaleString()} extra payment will be credited to customer advance balance.</span>
               </p>
             )}
             {diff === 0 && (
               <p className="flex items-center gap-1.5 text-green-700">
                 <FiCheck />
-                <span>✅ Poori raqam wasool ho chuki hai. Khata clear rahega.</span>
+                <span>Full payment received. Ledger balance is fully settled.</span>
               </p>
             )}
           </div>
@@ -865,14 +865,14 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
             <button
               type="button"
               onClick={closeModal}
-              className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded-lg transition"
+              className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-black px-6 py-2.5 rounded-xl transition shadow flex items-center gap-1.5"
+              className="bg-purple-700 hover:bg-purple-800 text-white text-xs font-black px-6 py-2.5 rounded transition shadow flex items-center gap-1.5"
             >
               <FiCheckCircle /> {isPending ? 'Processing...' : 'Confirm Delivery & Update Khata'}
             </button>

@@ -219,7 +219,7 @@ const Catalogue = () => {
             {selectedItem && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedItem(null)}>
                     <div 
-                        className="bg-white rounded-2xl overflow-hidden max-w-4xl w-full flex flex-col md:flex-row relative animate-fade-in-up"
+                        className="bg-white rounded overflow-hidden max-w-4xl w-full flex flex-col md:flex-row relative animate-fade-in-up"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button 

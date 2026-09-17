@@ -73,6 +73,10 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
             <FiDollarSign className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Financial Reports</span>}
           </NavLink>
+          <NavLink to="/admin/payments" className={getLinkStyle} onClick={onCloseMobile}>
+            <FiCreditCard className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
+            {!collapsed && <span>Payments</span>}
+          </NavLink>
           <NavLink to="/admin/orders/create" className={getLinkStyle} onClick={onCloseMobile}>
             <FiShoppingBag className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Orders</span>}

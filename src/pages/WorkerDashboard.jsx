@@ -103,7 +103,7 @@ const WorkerDashboard = () => {
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
           
           {/* Earnings Card */}
-          <div className="bg-black text-white p-4 rounded-2xl shadow-sm border border-gray-900 flex flex-col justify-between">
+          <div className="bg-black text-white p-4 rounded shadow-sm border border-gray-900 flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Approved Earnings</span>
               <span className="text-[#D4AF37] text-xs font-black select-none">PKR</span>
@@ -115,7 +115,7 @@ const WorkerDashboard = () => {
           </div>
 
           {/* Stitched Count Card */}
-          <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-between">
+          <div className="bg-white p-4 rounded shadow-sm border border-gray-200 flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Approved Suits</span>
               <FiCheckCircle className="text-green-500 text-lg" />
@@ -127,7 +127,7 @@ const WorkerDashboard = () => {
           </div>
 
           {/* Advance Taken Card */}
-          <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-between">
+          <div className="bg-white p-4 rounded shadow-sm border border-gray-200 flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Advance Taken</span>
               <span className="text-red-500 font-black text-lg">Rs</span>
@@ -139,7 +139,7 @@ const WorkerDashboard = () => {
           </div>
 
           {/* Balance Due Card */}
-          <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col justify-between">
+          <div className="bg-white p-4 rounded shadow-sm border border-gray-200 flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Remaining Due</span>
               <span className="text-blue-500 font-black text-lg">Rs</span>
@@ -155,7 +155,7 @@ const WorkerDashboard = () => {
         </section>
 
         {/* PROFILE WAGE INFO (MOBILE TIGHT CARD) */}
-        <section className="bg-white p-4 rounded-2xl border border-gray-150 shadow-sm flex flex-wrap gap-4 items-center justify-between text-xs">
+        <section className="bg-white p-4 rounded border border-gray-150 shadow-sm flex flex-wrap gap-4 items-center justify-between text-xs">
           <div className="flex items-center gap-2">
             <FiScissors className="text-[#D4AF37]" />
             <span className="text-gray-500 font-semibold">Stitching Wage:</span>
@@ -231,14 +231,14 @@ const WorkerDashboard = () => {
             {/* 1. ASSIGNED TAB */}
             {activeTab === 'assigned' && (
               assignedSuits.length === 0 ? (
-                <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl shadow-sm">
+                <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiBox className="text-4xl text-gray-300 mx-auto mb-2" />
                   <p className="text-gray-400 font-bold text-sm">Abhi koi pending suit assign nahi hai.</p>
                   <p className="text-xs text-gray-400 mt-0.5">Admin se assignments ke liye rabta karein.</p>
                 </div>
               ) : (
                 assignedSuits.map((item, idx) => (
-                  <div key={idx} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4 flex flex-col md:flex-row md:items-start gap-5">
+                  <div key={idx} className="bg-white border border-gray-200 rounded p-5 shadow-sm space-y-4 flex flex-col md:flex-row md:items-start gap-5">
                     
                     {/* Fabric Image Container */}
                     <div className="w-full md:w-40 h-40 bg-gray-50 rounded-xl border border-gray-150 overflow-hidden flex items-center justify-center shrink-0 relative">
@@ -327,13 +327,13 @@ const WorkerDashboard = () => {
             {/* 2. UNDER INSPECTION TAB */}
             {activeTab === 'inspection' && (
               underInspectionSuits.length === 0 ? (
-                <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl shadow-sm">
+                <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiClock className="text-4xl text-amber-400 mx-auto mb-2" />
                   <p className="text-gray-500 font-bold text-sm">Abhi koi suit Admin Inspection mein nahi hai.</p>
                 </div>
               ) : (
                 underInspectionSuits.map((item, idx) => (
-                  <div key={idx} className="bg-white border border-amber-200 rounded-2xl p-5 shadow-sm space-y-3 border-l-4 border-l-amber-500">
+                  <div key={idx} className="bg-white border border-amber-200 rounded p-5 shadow-sm space-y-3 border-l-4 border-l-amber-500">
                     <div className="flex justify-between items-start">
                       <div>
                         <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
@@ -358,13 +358,13 @@ const WorkerDashboard = () => {
             {/* 3. REWORK REQUIRED TAB */}
             {activeTab === 'rework' && (
               reworkSuits.length === 0 ? (
-                <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl shadow-sm">
+                <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiCheckCircle className="text-4xl text-green-500 mx-auto mb-2" />
                   <p className="text-gray-500 font-bold text-sm">Koi alteration ya rework pending nahi hai!</p>
                 </div>
               ) : (
                 reworkSuits.map((item, idx) => (
-                  <div key={idx} className="bg-white border border-red-200 rounded-2xl p-5 shadow-sm space-y-4 border-l-4 border-l-red-600">
+                  <div key={idx} className="bg-white border border-red-200 rounded p-5 shadow-sm space-y-4 border-l-4 border-l-red-600">
                     <div className="flex justify-between items-start">
                       <div>
                         <span className="text-[10px] bg-red-100 text-red-900 border border-red-200 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
@@ -398,13 +398,13 @@ const WorkerDashboard = () => {
             {/* 4. COMPLETED & APPROVED TAB */}
             {activeTab === 'completed' && (
               stitchedSuits.length === 0 ? (
-                <div className="text-center py-16 bg-white border border-gray-200 rounded-2xl shadow-sm">
+                <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiCheckCircle className="text-4xl text-gray-300 mx-auto mb-2" />
                   <p className="text-gray-400 font-bold text-sm">Abhi tak koi suit approved nahi hua.</p>
                 </div>
               ) : (
                 stitchedSuits.map((item, idx) => (
-                  <div key={idx} className="bg-white border border-gray-150 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4 border-l-4 border-l-green-500">
+                  <div key={idx} className="bg-white border border-gray-150 rounded p-4 shadow-sm flex items-center justify-between gap-4 border-l-4 border-l-green-500">
                     <div className="space-y-1">
                       <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Order #BT-{item.orderNumber}</span>
                       <h4 className="font-bold text-gray-900 text-sm">{item.fabricDetails}</h4>
@@ -423,7 +423,7 @@ const WorkerDashboard = () => {
             {activeTab === 'ledger' && (
               <div className="space-y-6 animate-fade-in">
                 {/* Active Ledger table */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="bg-white border border-gray-200 rounded p-5 shadow-sm space-y-4">
                   <h3 className="font-black text-black text-sm uppercase tracking-wider border-b border-gray-100 pb-2">Active Ledger (Pending Settle)</h3>
                   {loadingLedger ? (
                     <div className="text-center py-4 text-xs text-gray-500">Loading ledger entries...</div>
@@ -466,7 +466,7 @@ const WorkerDashboard = () => {
                 </div>
 
                 {/* Settle/Payment logs */}
-                <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="bg-white border border-gray-200 rounded p-5 shadow-sm space-y-4">
                   <h3 className="font-black text-black text-sm uppercase tracking-wider border-b border-gray-100 pb-2">Paid Salary History</h3>
                   {loadingPayments ? (
                     <div className="text-center py-4 text-xs text-gray-500">Loading payment history...</div>
@@ -539,7 +539,7 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-gray-150 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded shadow-2xl w-full max-w-lg border border-gray-150 overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50/50">
           <h3 className="text-xs font-black text-black uppercase tracking-wider">Salary Payment Receipt</h3>
           <button onClick={closeModal} className="p-1.5 text-gray-400 hover:text-black transition rounded-full hover:bg-gray-200">

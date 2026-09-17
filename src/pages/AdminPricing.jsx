@@ -135,7 +135,7 @@ const PricingModal = ({ item, closeModal }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md relative">
-        <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-black">✖</button>
+        <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-black p-1 transition"><FiX className="text-lg" /></button>
         <h2 className="text-xl font-bold mb-4">{isEditMode ? 'Edit Pricing' : 'Add New Pricing'}</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">

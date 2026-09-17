@@ -1,18 +1,22 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useReactToPrint } from 'react-to-print';
 import { useGetOrders } from '../hooks/useOrder';
-import { FiPrinter, FiArrowLeft } from 'react-icons/fi';
+import { FiPrinter, FiArrowLeft, FiSliders } from 'react-icons/fi';
+import logo from '../assets/BT_Logo.png';
 
 const InvoicePrint = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: orders = [], isLoading } = useGetOrders();
   
-  // Specific order find karna
+  // Paper size state: '56mm' | '80mm' | 'a4'
+  const [paperSize, setPaperSize] = useState('80mm');
+  
+  // Find specific order
   const order = orders.find(o => o._id === id);
   
-  // Print ke liye reference
+  // Print reference
   const printRef = useRef();
   
   const handlePrint = useReactToPrint({
@@ -23,365 +27,367 @@ const InvoicePrint = () => {
   if (isLoading) return <div className="p-10 text-center font-bold text-gray-500">Loading slip data...</div>;
   if (!order) return <div className="p-10 text-center text-red-500 font-bold">Order not found!</div>;
 
-  // Order ID format: Agar custom sequence hai toh wo use karo, warna purani slice wali logic
   const displayId = order.orderNumber ? `BT-${order.orderNumber}` : order._id.slice(-6).toUpperCase();
 
+  // Dynamic width classes based on selected paper size
+  const containerWidthClass = 
+    paperSize === '56mm' ? 'w-[56mm] max-w-[56mm] text-[10px] p-2' :
+    paperSize === '80mm' ? 'w-[80mm] max-w-[80mm] text-xs p-3.5' :
+    'w-full max-w-3xl text-sm px-8 py-10';
+
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-100 p-3 sm:p-6 md:p-8 flex flex-col items-center font-sans">
       
-      {/* Top Action Buttons (Yeh print nahi honge, sirf screen par dikhenge) */}
-      <div className="w-full max-w-3xl flex justify-between mb-6">
+      {/* Dynamic Print CSS */}
+      <style>{`
+        @media print {
+          @page {
+            size: ${paperSize === '56mm' ? '56mm auto' : paperSize === '80mm' ? '80mm auto' : 'A4 portrait'};
+            margin: ${paperSize === '56mm' ? '1.5mm' : paperSize === '80mm' ? '2.5mm' : '10mm'};
+          }
+          body {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            background: white !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      {/* Top Action & Size Switcher Bar (Screen only) */}
+      <div className="w-full max-w-3xl flex flex-col sm:flex-row justify-between items-center gap-3 mb-6 no-print">
+        
         <button 
           onClick={() => navigate(-1)} 
-          className="bg-white text-black px-5 py-2.5 rounded-xl shadow-sm font-bold border border-gray-200 flex items-center gap-2 hover:bg-gray-50 transition"
+          className="bg-white text-black px-4 py-2 rounded-xl shadow-sm font-bold border border-gray-200 flex items-center gap-2 hover:bg-gray-50 transition text-xs sm:text-sm"
         >
           <FiArrowLeft /> Back
         </button>
+
+        {/* 3 Size Selector Pills */}
+        <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-gray-200 text-xs font-bold">
+          <span className="text-gray-400 px-2 hidden sm:inline-flex items-center gap-1">
+            <FiSliders /> Size:
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setPaperSize('56mm')}
+            className={`px-3 py-1.5 rounded-lg transition ${
+              paperSize === '56mm' 
+                ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            56mm Thermal
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPaperSize('80mm')}
+            className={`px-3 py-1.5 rounded-lg transition ${
+              paperSize === '80mm' 
+                ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            80mm POS
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPaperSize('a4')}
+            className={`px-3 py-1.5 rounded-lg transition ${
+              paperSize === 'a4' 
+                ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            A4 Sheet
+          </button>
+        </div>
+
+        {/* Print Button */}
         <button 
           onClick={handlePrint} 
-          className="bg-black hover:bg-gray-900 text-[#D4AF37] px-8 py-2.5 rounded-xl shadow-lg font-black tracking-wider flex items-center gap-2 transition"
+          className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-6 py-2.5 rounded-xl shadow-md font-black tracking-wide flex items-center gap-2 transition text-xs sm:text-sm"
         >
-          <FiPrinter /> PRINT SLIPS
+          <FiPrinter className="text-base" /> Print Slip
         </button>
       </div>
 
-      {/* --- A4 PAPER SHEET (Jo asal mein print hogi) --- */}
+      {/* --- PRINTABLE SLIP CONTAINER --- */}
       <div 
         ref={printRef} 
-        className="w-full max-w-3xl bg-white shadow-xl px-10 py-12"
-        style={{ minHeight: '11in' }} 
+        className={`bg-white shadow-xl border border-gray-200 text-black mx-auto overflow-hidden transition-all ${containerWidthClass}`}
+        style={{
+          minHeight: paperSize === 'a4' ? '10in' : 'auto'
+        }}
       >
         
-        {/* ========================================= */}
-        {/* 1. CUSTOMER INVOICE (Dukan Dar Ki Parchi) */}
-        {/* ========================================= */}
-        <div className="border-b-2 border-dashed border-gray-300 pb-8 mb-8">
-          <div className="text-center mb-6">
-            <h1 className="text-4xl font-black text-black uppercase tracking-widest">Balouch Tailors</h1>
-            <p className="text-sm text-gray-600 mt-1 font-medium">Main Bazar, Multan | Contact: 0300-XXXXXXX</p>
-          </div>
+        {/* ========================================================= */}
+        {/* HEADER: LOGO, DISTINCT VISIBLE SECTIONS & CONTACT DETAILS */}
+        {/* ========================================================= */}
+        <div className="text-center pb-3 border-b-2 border-dashed border-gray-300 mb-3 space-y-1">
           
-          <div className="flex justify-between items-center mb-6 text-sm">
-            <div className="bg-gray-50 p-3 rounded-lg border border-gray-100 min-w-[200px]">
-              <p className="text-xs text-gray-500 font-bold uppercase mb-1">Billed To:</p>
-              <p className="font-black text-lg">{order.customer?.name}</p>
-              <p className="font-bold text-gray-700">{order.customer?.phone}</p>
-            </div>
-            
-            {/* Dynamic Customer Order Status Tracking QR */}
-            <div className="flex flex-col items-center border border-gray-200 p-2 rounded-xl bg-gray-50/50 print:border-gray-300">
-              <img 
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${window.location.origin}/track/${order.orderNumber}`)}`} 
-                alt="Track Order QR" 
-                className="w-16 h-16"
-              />
-              <span className="text-[8px] text-gray-400 font-bold mt-1 uppercase tracking-wider">Track Status</span>
-            </div>
-
-            <div className="text-right">
-              <p className="text-lg"><strong>Order #:</strong> <span className="font-black">#{displayId}</span></p>
-              <p className="text-gray-600"><strong>Booking:</strong> {new Date(order.bookingDate).toLocaleDateString()}</p>
-              <p className="text-red-600 text-lg mt-1"><strong>Due Date:</strong> <span className="font-black">{new Date(order.deliveryDate).toLocaleDateString()}</span></p>
-            </div>
+          {/* Logo */}
+          <div className="flex justify-center mb-1">
+            <img 
+              src={logo} 
+              alt="Balouch Tailors" 
+              className={paperSize === '56mm' ? 'h-10 w-auto object-contain' : paperSize === '80mm' ? 'h-12 w-auto object-contain' : 'h-16 w-auto object-contain'} 
+            />
           </div>
 
-          <table className="w-full text-left text-sm mb-6 border-collapse">
-            <thead>
-              <tr className="border-b-2 border-black">
-                <th className="py-2 text-gray-600 uppercase text-xs">Item / Service Details</th>
-                <th className="py-2 text-center text-gray-600 uppercase text-xs w-16">Qty</th>
-                <th className="py-2 text-right text-gray-600 uppercase text-xs w-28">Amount (Rs)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* 1. Suits and their individual customizations as separate rows */}
-              {order.suits && order.suits.map((suit, suitIdx) => {
-                const suitCustoms = suit.customizations || [];
-                const customsSum = suitCustoms.reduce((acc, c) => acc + (Number(c.price) || 0), 0);
-                const baseRate = Number(suit.basePrice) > 0 
-                  ? Number(suit.basePrice) 
-                  : Math.max(0, (Number(suit.price) || 0) - customsSum);
+          {/* Shop Name */}
+          <h1 className={`font-black uppercase tracking-wider text-black ${
+            paperSize === '56mm' ? 'text-sm' : paperSize === '80mm' ? 'text-lg' : 'text-3xl'
+          }`}>
+            Balouch Tailors
+          </h1>
 
-                return (
-                  <React.Fragment key={`suit-${suitIdx}`}>
-                    {/* Suit Base Row */}
-                    <tr className="border-b border-gray-100">
-                      <td className="py-2.5">
-                        <div className="flex items-center gap-2">
-                          <span className="font-black text-base text-gray-900">
-                            {suit.serviceType ? `${suit.serviceType}` : 'Tailored Suit'} #{suitIdx + 1} (Base Stitching)
-                          </span>
-                          {suit.fabricDetails && (
-                            <span className="text-gray-600 font-medium text-xs">
-                              - {suit.fabricDetails}
-                            </span>
-                          )}
-                          {suit.volumeNo && (
-                            <span className="text-gray-500 text-[10px] font-bold bg-gray-100 px-1.5 py-0.5 rounded">
-                              Vol: {suit.volumeNo}
-                            </span>
-                          )}
-                        </div>
-                        {suit.staticTags && suit.staticTags.length > 0 && (
-                          <span className="text-[11px] font-semibold text-gray-400 block mt-0.5">
-                            Tags: {suit.staticTags.join(', ')}
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-2.5 text-center font-bold text-gray-600">1</td>
-                      <td className="py-2.5 text-right font-black text-base font-sans">
-                        Rs {baseRate.toLocaleString()}
-                      </td>
-                    </tr>
+          {/* Speciality Tag (Separate Line) */}
+          <div>
+            <span className={`inline-block bg-gray-100 text-gray-800 rounded font-black tracking-wider uppercase ${
+              paperSize === '56mm' ? 'text-[7px] px-1.5 py-0.5' : paperSize === '80mm' ? 'text-[9px] px-2 py-0.5' : 'text-xs px-3 py-1'
+            }`}>
+              Custom Bespoke Tailoring & Stitching for Gents
+            </span>
+          </div>
 
-                    {/* Customization Rows */}
-                    {suitCustoms.map((cust, cIdx) => (
-                      <tr key={`suit-${suitIdx}-cust-${cIdx}`} className="border-b border-gray-100 bg-gray-50/40">
-                        <td className="py-2 pl-6">
-                          <span className="text-gray-800 font-bold text-xs">
-                            ↳ Suit #{suitIdx + 1} Add-on: {cust.name} {cust.urduName ? `(${cust.urduName})` : ''}
-                          </span>
-                        </td>
-                        <td className="py-2 text-center font-bold text-gray-600 text-xs">1</td>
-                        <td className="py-2 text-right font-black text-xs font-sans">
-                          Rs {Number(cust.price || 0).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </React.Fragment>
-                );
-              })}
+          {/* Proprietor / Owner & Contact Details (Separate Line) */}
+          <p className={`font-bold text-gray-900 ${
+            paperSize === '56mm' ? 'text-[8px]' : paperSize === '80mm' ? 'text-[10px]' : 'text-sm'
+          }`}>
+            Proprietor: <span className="font-black">Muhammad Zubair</span> | Ph: <span className="font-black">0306-7379919</span>
+          </p>
 
-              {/* 2. Standalone Service Items (if any) */}
-              {order.orderItems && order.orderItems.map((item, idx) => (
-                <tr key={`item-${idx}`} className="border-b border-gray-100">
-                  <td className="py-2.5">
-                    <span className="font-black text-sm">{item.name}</span>
-                    {item.category && <span className="text-xs text-gray-500 font-bold ml-2">({item.category})</span>}
-                  </td>
-                  <td className="py-2.5 text-center font-bold text-gray-700">{item.quantity || 1}</td>
-                  <td className="py-2.5 text-right font-black text-base font-sans">
-                    Rs {item.total || (Number(item.rate || 0) * Number(item.quantity || 1))}
-                  </td>
-                </tr>
-              ))}
+          {/* Shop Address (Separate Line) */}
+          <p className={`text-gray-500 font-medium ${
+            paperSize === '56mm' ? 'text-[7px] leading-tight' : paperSize === '80mm' ? 'text-[9px] leading-tight' : 'text-xs'
+          }`}>
+            Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+          </p>
 
-              {/* 3. Alterations */}
-              {order.alterations && order.alterations.map((alt, idx) => (
-                <tr key={`alt-${idx}`} className="border-b border-gray-100">
-                  <td className="py-2.5">
-                    <span className="font-bold text-sm text-gray-800">Alteration: {alt.description}</span>
-                  </td>
-                  <td className="py-2.5 text-center font-bold text-gray-700">1</td>
-                  <td className="py-2.5 text-right font-black text-base font-sans">Rs {alt.price}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="flex justify-end text-sm">
-            <div className="w-80 space-y-2 bg-gray-50 p-4 rounded-lg border border-gray-100">
-              {order.subtotal > 0 && (
-                <div className="flex justify-between font-bold text-gray-600 text-xs">
-                  <span>Gross Subtotal:</span>
-                  <span>Rs {order.subtotal}</span>
-                </div>
-              )}
-
-              {order.discountAmount > 0 && (
-                <div className="flex justify-between font-bold text-green-700 text-xs">
-                  <span>- Discount ({order.discountPercent || 0}%):</span>
-                  <span>- Rs {order.discountAmount}</span>
-                </div>
-              )}
-
-              {order.previousKhataAdjusted?.type === 'added_due' && (
-                <div className="flex justify-between font-bold text-red-600 text-xs">
-                  <span>+ Previous Udhar Added:</span>
-                  <span>+ Rs {order.previousKhataAdjusted.amount}</span>
-                </div>
-              )}
-              {order.previousKhataAdjusted?.type === 'deducted_advance' && (
-                <div className="flex justify-between font-bold text-green-700 text-xs">
-                  <span>- Stored Advance Adjusted:</span>
-                  <span>- Rs {order.previousKhataAdjusted.amount}</span>
-                </div>
-              )}
-              <div className="flex justify-between font-bold text-gray-800 pt-1 border-t border-gray-200">
-                <span>Total Bill:</span> 
-                <span className="font-black text-base">Rs {order.totalAmount}</span>
-              </div>
-              <div className="flex justify-between font-bold text-gray-600">
-                <span>Advance Paid:</span> 
-                <span>Rs {order.advancePaid}</span>
-              </div>
-              <div className="flex justify-between text-xl font-black border-t-2 border-black pt-2 mt-2 text-black">
-                <span>Balance Due:</span> 
-                <span>Rs {order.balanceAmount}</span>
-              </div>
+          {/* Prominent Invoice Number Badge */}
+          <div className="pt-1">
+            <div className="inline-block bg-[#0F172A] text-white px-3 py-1 rounded-md print:border print:border-black">
+              <span className={`font-black uppercase tracking-widest ${paperSize === '56mm' ? 'text-[9px]' : 'text-xs'}`}>
+                INVOICE #{displayId}
+              </span>
             </div>
           </div>
         </div>
 
-
-       {/* ========================================= */}
-        {/* 2. KARIGAR SLIP (Smart Grouped Parchi)      */}
         {/* ========================================= */}
-        <div className="pt-6">
-          <div className="bg-black text-[#D4AF37] print:text-black print:bg-white print:border-b-2 print:border-black px-4 py-2 mb-6 font-black uppercase text-xl rounded text-center print:hidden">
-            ✂️ Master Slips (Karigar Copy)
+        {/* CUSTOMER & DATES INFO                     */}
+        {/* ========================================= */}
+        <div className={`mb-3 pb-2.5 border-b border-gray-200 ${
+          paperSize === 'a4' ? 'flex justify-between items-center' : 'space-y-1 text-left'
+        }`}>
+          <div>
+            <span className="text-gray-400 font-bold uppercase text-[8px] sm:text-[9px] block">Customer:</span>
+            <p className="font-black text-gray-900 text-xs sm:text-sm">{order.customer?.name || 'Customer'}</p>
+            <p className="font-semibold text-gray-700 text-[10px] sm:text-xs">{order.customer?.phone || '-'}</p>
           </div>
 
-          <div className="space-y-8">
-            {/* 🌟 LOGIC: Suits ko Wearer ke hisaab se group kar rahe hain 🌟 */}
-            {Object.values(
-              order.suits.reduce((acc, suit, idx) => {
-                const wearerId = suit.wearer?._id || order.customer._id;
-                if (!acc[wearerId]) {
-                  acc[wearerId] = {
-                    wearerData: suit.wearer || order.customer,
-                    suitsList: [] // Is bande ke saare suits is array mein jayenge
-                  };
-                }
-                // Suit ka number yaad rakhne ke liye idx + 1 bheja
-                acc[wearerId].suitsList.push({ ...suit, displayNum: idx + 1 });
-                return acc;
-              }, {})
-            ).map((group, groupIdx) => {
-              
-              const { wearerData, suitsList } = group;
-              const hasMeasurements = wearerData?.measurements && wearerData.measurements.length > 0;
-              const measData = hasMeasurements ? wearerData.measurements[0].data : {};
+          <div className={paperSize === 'a4' ? 'text-right' : 'pt-1 border-t border-dashed border-gray-100'}>
+            <div className="flex justify-between sm:justify-end gap-2 text-[10px] sm:text-xs">
+              <span className="text-gray-500 font-bold">Booking Date:</span>
+              <span className="font-bold text-gray-800">{new Date(order.bookingDate).toLocaleDateString()}</span>
+            </div>
+            <div className="flex justify-between sm:justify-end gap-2 text-[10px] sm:text-xs text-red-600 font-bold mt-0.5">
+              <span>Delivery Due:</span>
+              <span className="font-black">{new Date(order.deliveryDate).toLocaleDateString()}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================= */}
+        {/* SERVICE ITEMS & SUITS BREAKDOWN           */}
+        {/* ========================================= */}
+        <table className="w-full text-left border-collapse mb-3">
+          <thead>
+            <tr className="border-b-2 border-black text-[9px] sm:text-xs font-black uppercase text-gray-700">
+              <th className="py-1">Description & Specs</th>
+              <th className="py-1 text-center w-8 sm:w-10">Qty</th>
+              <th className="py-1 text-right w-16 sm:w-20">Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 text-[10px] sm:text-xs">
+            
+            {/* 1. Suits, Add-ons & Compact Preferences / Specs */}
+            {order.suits && order.suits.map((suit, suitIdx) => {
+              const suitCustoms = suit.customizations || [];
+              const customsSum = suitCustoms.reduce((acc, c) => acc + (Number(c.price) || 0), 0);
+              const baseRate = Number(suit.basePrice) > 0 
+                ? Number(suit.basePrice) 
+                : Math.max(0, (Number(suit.price) || 0) - customsSum);
+
+              const selectedTags = suit.staticTags || [];
+              const customNote = suit.customDesign || '';
 
               return (
-                <div 
-                  key={groupIdx} 
-                  dir="rtl" 
-                  className="border-[3px] border-black p-4 bg-white break-inside-avoid font-sans"
-                  style={{ fontFamily: '"Jameel Noori Nastaleeq", "Noto Nastaliq Urdu", Arial, sans-serif' }}
-                >
-                  
-                  {/* Decorative Top Border */}
-                  <div className="w-full border-y-[3px] border-double border-black py-1 mb-6 flex justify-between items-center px-4 bg-gray-50 print:bg-white">
-                    <span className="font-black text-xl tracking-widest" dir="ltr">BALOUCH TAILORS</span>
-                    <span className="font-bold">کل سوٹ: {suitsList.length}</span>
-                  </div>
-
-                  {/* Header: Name, Date, Phone, Booking No */}
-                  <div className="grid grid-cols-2 gap-x-12 gap-y-4 mb-6 text-xl font-bold text-black px-2">
-                    <div className="flex items-end border-b border-black pb-1">
-                      <span className="min-w-[40px] text-2xl">نام:</span>
-                      <span className="flex-grow px-2 font-black text-xl" dir="ltr">{wearerData?.name}</span>
-                    </div>
-                    <div className="flex items-end border-b border-black pb-1">
-                      <span className="min-w-[50px] text-2xl">تاریخ:</span>
-                      <span className="flex-grow px-2 font-black text-lg font-sans" dir="ltr">{new Date(order.bookingDate).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex items-end border-b border-black pb-1">
-                      <span className="min-w-[80px] text-2xl">بکنگ نمبر:</span>
-                      <span className="flex-grow px-2 font-black text-xl font-sans" dir="ltr">#{displayId}</span>
-                    </div>
-                    <div className="flex items-end border-b border-black pb-1">
-                      <span className="min-w-[80px] text-2xl">فون نمبر:</span>
-                      <span className="flex-grow px-2 font-black text-xl font-sans" dir="ltr">{wearerData?.phone}</span>
-                    </div>
-                  </div>
-
-                  {/* Main Body */}
-                  <div className="flex border-2 border-black">
-                    
-                    {/* RIGHT COLUMN: Measurements Table (Ek Baar Aayega) */}
-                    <div className="w-[35%] border-l-2 border-black bg-gray-50 print:bg-white">
-                      {!hasMeasurements ? (
-                        <div className="p-4 text-center font-bold text-red-500 text-xl">کوئی ناپ نہیں</div>
-                      ) : (
-                        <table className="w-full text-center border-collapse">
-                          <tbody>
-                            {Object.keys(measData).map((field, fIdx) => (
-                              <tr key={fIdx} className="border-b border-black last:border-b-0">
-                                <td className="w-1/2 border-l border-black p-2 font-black text-lg uppercase bg-gray-100 print:bg-white" dir="ltr">{field}</td>
-                                <td className="w-1/2 p-2 font-black text-2xl font-sans" dir="ltr">{measData[field]}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      )}
-                    </div>
-
-                    {/* LEFT COLUMN: Izafi Tafseel (Saare Suits List Honge) */}
-                    <div className="w-[65%] flex flex-col">
-                      <h3 className="text-3xl font-black text-center py-3 border-b-2 border-black bg-gray-100 print:bg-white m-0">
-                        سوٹوں کی تفصیل ({suitsList.length})
-                      </h3>
-                      
-                      <div className="flex flex-col grow">
-                        {suitsList.map((suitItem, sIdx) => (
-                          <div key={sIdx} className="p-4 border-b last:border-b-0 border-gray-300 border-dashed flex justify-between items-start gap-4">
-                            
-                            {/* Details (Right to left layout for Urdu compatibility) */}
-                            <div className="flex-grow">
-                              {/* Suit Title, Category & Volume */}
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="font-sans font-black text-xl uppercase" dir="ltr">
-                                  {suitItem.displayNum}. {suitItem.serviceType ? `${suitItem.serviceType} - ` : ''}{suitItem.fabricDetails}
-                                </span>
-                                <span className="bg-black text-white px-2 py-0.5 rounded text-xs font-sans font-bold tracking-wider" dir="ltr">
-                                  VOL: {suitItem.volumeNo}
-                                </span>
-                              </div>
-
-                              {/* Customizations / Add-ons Chips */}
-                              {suitItem.customizations && suitItem.customizations.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5 mb-2" dir="ltr">
-                                  {suitItem.customizations.map((c, cIdx) => (
-                                    <span key={cIdx} className="bg-black text-[#D4AF37] px-2 py-0.5 rounded text-xs font-bold font-sans">
-                                      ★ {c.name} {c.urduName ? `(${c.urduName})` : ''}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* Tags */}
-                              {suitItem.staticTags && suitItem.staticTags.length > 0 && (
-                                <div className="flex flex-wrap gap-1.5" dir="ltr">
-                                  {suitItem.staticTags.map(tag => (
-                                    <span key={tag} className="border border-black px-2 py-0.5 rounded text-xs font-bold font-sans">
-                                      {tag}
-                                    </span>
-                                  ))}
-                                </div>
-                              )}
-
-                              {/* Custom Design Voice Note */}
-                              {suitItem.customDesign && (
-                                <div className="mt-2 text-xl font-bold leading-relaxed text-right text-gray-800">
-                                  {suitItem.customDesign}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Worker QR Code for specific suit measurements */}
-                            <div className="flex flex-col items-center bg-white p-1.5 border-2 border-black shrink-0" dir="ltr">
-                              <img 
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=85x85&data=${encodeURIComponent(`${window.location.origin}/track/suit/${suitItem._id}`)}`} 
-                                alt="Suit QR" 
-                                className="w-16 h-16"
-                              />
-                              <span className="text-[7px] text-black font-black mt-1 font-sans tracking-wide uppercase">Suit #{suitItem.displayNum} SPEC</span>
-                            </div>
-                            
-                          </div>
-                        ))}
+                <React.Fragment key={`suit-${suitIdx}`}>
+                  {/* Suit Base Row */}
+                  <tr>
+                    <td className="py-1.5">
+                      <div className="font-black text-gray-900">
+                        {suit.serviceType ? `${suit.serviceType}` : 'Suit'} #{suitIdx + 1}
                       </div>
-                    </div>
+                      
+                      {suit.fabricDetails && (
+                        <div className="text-[9px] sm:text-[10px] text-gray-600">
+                          {suit.fabricDetails} {suit.volumeNo ? `(Vol: ${suit.volumeNo})` : ''}
+                        </div>
+                      )}
 
-                  </div>
-                </div>
+                      {/* Only customer selected preferences / tags */}
+                      {selectedTags.length > 0 && (
+                        <div className="text-[8px] sm:text-[9px] text-gray-700 font-semibold mt-0.5">
+                          {selectedTags.join(' • ')}
+                        </div>
+                      )}
+
+                      {customNote && (
+                        <div className="text-[8px] text-gray-500 italic mt-0.5">
+                          Note: {customNote}
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-1.5 text-center font-bold text-gray-600">1</td>
+                    <td className="py-1.5 text-right font-black font-sans">
+                      Rs {baseRate.toLocaleString()}
+                    </td>
+                  </tr>
+
+                  {/* Customization Rows */}
+                  {suitCustoms.map((cust, cIdx) => (
+                    <tr key={`suit-${suitIdx}-cust-${cIdx}`} className="bg-gray-50/60 text-[9px] sm:text-[11px]">
+                      <td className="py-1 pl-2.5 text-gray-700 font-medium">
+                        + {cust.name} {cust.urduName ? `(${cust.urduName})` : ''}
+                      </td>
+                      <td className="py-1 text-center text-gray-500">1</td>
+                      <td className="py-1 text-right font-bold font-sans">
+                        Rs {Number(cust.price || 0).toLocaleString()}
+                      </td>
+                    </tr>
+                  ))}
+                </React.Fragment>
               );
             })}
+
+            {/* 2. Standalone Service Items */}
+            {order.orderItems && order.orderItems.map((item, idx) => (
+              <tr key={`item-${idx}`}>
+                <td className="py-1.5 font-bold text-gray-800">
+                  {item.name} {item.category ? `(${item.category})` : ''}
+                </td>
+                <td className="py-1.5 text-center font-bold text-gray-600">{item.quantity || 1}</td>
+                <td className="py-1.5 text-right font-black font-sans">
+                  Rs {(item.total || (Number(item.rate || 0) * Number(item.quantity || 1))).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+
+            {/* 3. Alterations */}
+            {order.alterations && order.alterations.map((alt, idx) => (
+              <tr key={`alt-${idx}`}>
+                <td className="py-1.5 font-bold text-gray-800">
+                  Alteration: {alt.description}
+                </td>
+                <td className="py-1.5 text-center font-bold text-gray-600">1</td>
+                <td className="py-1.5 text-right font-black font-sans">
+                  Rs {Number(alt.price || 0).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* ========================================= */}
+        {/* FINANCIAL BILL BREAKDOWN                  */}
+        {/* ========================================= */}
+        <div className="border-t-2 border-black pt-1.5 mb-3 space-y-1 text-[10px] sm:text-xs">
+          {order.subtotal > 0 && (
+            <div className="flex justify-between text-gray-600 font-medium">
+              <span>Gross Subtotal:</span>
+              <span>Rs {Number(order.subtotal).toLocaleString()}</span>
+            </div>
+          )}
+
+          {order.discountAmount > 0 && (
+            <div className="flex justify-between text-green-700 font-bold">
+              <span>Discount ({order.discountPercent || 0}%):</span>
+              <span>- Rs {Number(order.discountAmount).toLocaleString()}</span>
+            </div>
+          )}
+
+          {order.previousKhataAdjusted?.type === 'added_due' && (
+            <div className="flex justify-between text-red-600 font-bold">
+              <span>+ Previous Udhar Added:</span>
+              <span>+ Rs {Number(order.previousKhataAdjusted.amount).toLocaleString()}</span>
+            </div>
+          )}
+          {order.previousKhataAdjusted?.type === 'deducted_advance' && (
+            <div className="flex justify-between text-green-700 font-bold">
+              <span>- Stored Advance Adjusted:</span>
+              <span>- Rs {Number(order.previousKhataAdjusted.amount).toLocaleString()}</span>
+            </div>
+          )}
+
+          <div className="flex justify-between font-black text-gray-900 pt-1 border-t border-gray-200">
+            <span>Total Bill:</span> 
+            <span className="font-sans">Rs {Number(order.totalAmount || 0).toLocaleString()}</span>
+          </div>
+
+          <div className="flex justify-between font-bold text-gray-600">
+            <span>Advance Paid:</span> 
+            <span className="font-sans">Rs {Number(order.advancePaid || 0).toLocaleString()}</span>
+          </div>
+
+          <div className="flex justify-between text-xs sm:text-base font-black border-t-2 border-black pt-1 text-black">
+            <span>Balance Due:</span> 
+            <span className="font-sans">Rs {Number(order.balanceAmount || 0).toLocaleString()}</span>
           </div>
         </div>
+
+        {/* QR Code Tracking Status */}
+        <div className="flex flex-col items-center justify-center my-2.5 py-1.5 border-y border-dashed border-gray-300">
+          <img 
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(`${window.location.origin}/track/${order.orderNumber}`)}`} 
+            alt="Track Order QR" 
+            className="w-12 h-12"
+          />
+          <span className="text-[7px] sm:text-[8px] text-gray-500 font-bold mt-0.5 uppercase tracking-wider">
+            Scan to Live Track Order #{displayId}
+          </span>
+        </div>
+
+        {/* ========================================= */}
+        {/* FOOTER: THANK YOU & TERMS / POLICY        */}
+        {/* ========================================= */}
+        <div className="text-center pt-1.5 space-y-1.5">
+          <p className="font-black text-[10px] sm:text-xs text-gray-900 tracking-wide">
+            Thank you for choosing Balouch Tailors!
+          </p>
+          <p className="text-[9px] sm:text-[10px] text-gray-600 font-urdu" dir="rtl">
+            آپ کے اعتماد کا شکریہ۔
+          </p>
+
+          <div className="border-t border-gray-200 pt-1.5 text-[7px] sm:text-[8px] text-gray-500 text-left space-y-0.5">
+            <p className="font-bold text-gray-700 uppercase">Terms & Conditions:</p>
+            <p>1. Please bring this receipt when collecting your stitched clothes.</p>
+            <p>2. Delivery will be handed over only after clearance of remaining balance.</p>
+            <p>3. Any fitting complaints/alterations must be reported within 7 days of delivery.</p>
+            <p>4. Advance payment is non-refundable.</p>
+          </div>
+        </div>
+
       </div>
+
     </div>
   );
 };

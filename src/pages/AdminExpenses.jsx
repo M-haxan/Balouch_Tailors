@@ -668,25 +668,25 @@ const PurchaseMaterialModal = ({ supplier, closeModal }) => {
               <button
                 type="button"
                 onClick={() => setForm({ ...form, paymentStatus: 'Unpaid' })}
-                className={`py-2 rounded font-black text-xs transition border ${
+                className={`py-2 rounded font-black text-xs transition border flex items-center justify-center gap-1.5 ${
                   form.paymentStatus === 'Unpaid'
                     ? 'bg-amber-500 text-black border-amber-600 shadow-sm'
                     : 'bg-white text-gray-600 border-gray-200'
                 }`}
               >
-                ⚠️ Udhar (Khate Mein Add Karein)
+                <FiAlertTriangle /> Outstanding Due (Add to Ledger)
               </button>
 
               <button
                 type="button"
                 onClick={() => setForm({ ...form, paymentStatus: 'Paid' })}
-                className={`py-2 rounded font-black text-xs transition border ${
+                className={`py-2 rounded font-black text-xs transition border flex items-center justify-center gap-1.5 ${
                   form.paymentStatus === 'Paid'
                     ? 'bg-green-600 text-white border-green-700 shadow-sm'
                     : 'bg-white text-gray-600 border-gray-200'
                 }`}
               >
-                ✓ Cash Paid Foren De Diye
+                <FiCheck /> Paid Cash Directly
               </button>
             </div>
           </div>
@@ -884,7 +884,7 @@ const SupplierLedgerModal = ({ supplier, closeModal }) => {
                       <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
                         entry.type === 'purchase' ? 'bg-amber-100 text-amber-900' : 'bg-green-100 text-green-900'
                       }`}>
-                        {entry.type === 'purchase' ? '📦 Maal Liya' : '💵 Paisa Diya'}
+                        {entry.type === 'purchase' ? 'Material Purchase' : 'Cash Payment'}
                       </span>
                     </td>
                     <td className="p-2.5 font-bold text-gray-900">

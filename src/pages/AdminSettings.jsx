@@ -91,7 +91,7 @@ const AdminSettings = () => {
   });
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm min-h-[85vh] flex flex-col md:flex-row border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded shadow-sm min-h-[85vh] flex flex-col md:flex-row border border-gray-100 overflow-hidden">
       
       {/* LEFT SIDEBAR: Settings Tabs */}
       <div className="w-full md:w-72 border-r border-gray-100 bg-gray-50/70 p-4 sm:p-6 shrink-0">
@@ -240,7 +240,7 @@ const AdminSettings = () => {
                 {loadingTailoring ? (
                   <div className="py-20 text-center text-sm font-bold text-gray-400">Loading Categories...</div>
                 ) : garmentServices.length === 0 ? (
-                  <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded-2xl p-6">
+                  <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded p-6">
                     <FiLayers className="text-4xl text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-600 font-bold mb-2">No garment categories found.</p>
                     <button 
@@ -251,7 +251,7 @@ const AdminSettings = () => {
                     </button>
                   </div>
                 ) : (
-                  <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-xs bg-white">
+                  <div className="border border-gray-200 rounded overflow-hidden shadow-xs bg-white">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs sm:text-sm">
                         <thead className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] sm:text-xs border-b border-gray-200">
@@ -318,7 +318,7 @@ const AdminSettings = () => {
                 {loadingTailoring ? (
                   <div className="py-20 text-center text-sm font-bold text-gray-400">Loading Customizations...</div>
                 ) : customizations.length === 0 ? (
-                  <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded-2xl p-6">
+                  <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded p-6">
                     <FiTag className="text-4xl text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-600 font-bold mb-2">No customizations defined yet.</p>
                     <button 
@@ -329,7 +329,7 @@ const AdminSettings = () => {
                     </button>
                   </div>
                 ) : (
-                  <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-xs bg-white">
+                  <div className="border border-gray-200 rounded overflow-hidden shadow-xs bg-white">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs sm:text-sm">
                         <thead className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] sm:text-xs border-b border-gray-200">
@@ -521,7 +521,7 @@ const PricingModal = ({ item, initialType = 'service', closeModal }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative flex flex-col overflow-hidden border border-gray-100">
+      <div className="bg-white rounded shadow-2xl w-full max-w-md relative flex flex-col overflow-hidden border border-gray-100">
         
         {/* Header */}
         <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50/70">
@@ -649,7 +649,7 @@ const TemplateModal = ({ item, closeModal }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
+      <div className="bg-white rounded shadow-2xl w-full max-w-lg relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
         
         {/* Modal Header */}
         <div className="flex justify-between items-center p-5 sm:p-6 border-b border-gray-100 bg-gray-50/70">

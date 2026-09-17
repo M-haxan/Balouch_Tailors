@@ -304,7 +304,7 @@ const WorkerFormModal = ({ worker, closeModal }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-150">
+      <div className="bg-white rounded shadow-2xl w-full max-w-xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-150">
         
         <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
           <h2 className="text-xl font-black text-black">
@@ -514,7 +514,7 @@ const WorkerAdvanceModal = ({ worker, closeModal }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden">
+      <div className="bg-white rounded shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden">
         
         <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
           <div>
@@ -676,7 +676,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-150">
+      <div className="bg-white rounded shadow-2xl w-full max-w-4xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-150">
         
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
@@ -888,7 +888,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
               </form>
 
               {calcResult && (
-                <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm space-y-6">
+                <div className="border border-gray-200 rounded p-6 bg-white shadow-sm space-y-6">
                   <div className="grid grid-cols-3 gap-4 text-center animate-fade-in">
                     <div className="bg-green-50 p-4 border border-green-100 rounded-xl">
                       <span className="text-[10px] text-gray-400 font-bold uppercase block">Total Stitching Credit</span>
@@ -1068,7 +1068,7 @@ const EditLedgerModal = ({ entry, closeModal, refetchLedger, refetchDetails }) =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden">
+      <div className="bg-white rounded shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden">
         <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-50/50">
           <h3 className="text-sm font-black text-black uppercase tracking-wider">Edit Ledger Entry</h3>
           <button onClick={closeModal} className="p-1.5 text-gray-400 hover:text-black transition rounded-full hover:bg-gray-200">
@@ -1150,7 +1150,7 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-gray-150 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded shadow-2xl w-full max-w-lg border border-gray-150 overflow-hidden flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50/50">
           <h3 className="text-xs font-black text-black uppercase tracking-wider">Salary Payment Receipt</h3>
           <button onClick={closeModal} className="p-1.5 text-gray-400 hover:text-black transition rounded-full hover:bg-gray-200">
