@@ -1,6 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useReactToPrint } from 'react-to-print';
 import { useGetOrders } from '../hooks/useOrder';
 import { FiPrinter, FiArrowLeft, FiSliders } from 'react-icons/fi';
 import logo from '../assets/BT_Logo.png';
@@ -16,13 +15,19 @@ const InvoicePrint = () => {
   // Find specific order
   const order = orders.find(o => o._id === id);
   
-  // Print reference
-  const printRef = useRef();
-  
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: `Order_BT-${order?.orderNumber || 'Slip'}`,
-  });
+  const handlePrint = () => {
+    try {
+      const originalTitle = document.title;
+      document.title = `Order_BT-${order?.orderNumber || (order?._id ? order._id.slice(-6).toUpperCase() : 'Slip')}`;
+      window.print();
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1500);
+    } catch (err) {
+      console.error('Print error:', err);
+      window.print();
+    }
+  };
 
   if (isLoading) return <div className="p-10 text-center font-bold text-gray-500">Loading slip data...</div>;
   if (!order) return <div className="p-10 text-center text-red-500 font-bold">Order not found!</div>;
@@ -36,22 +41,45 @@ const InvoicePrint = () => {
     'w-full max-w-3xl text-sm px-8 py-10';
 
   return (
-    <div className="min-h-screen bg-gray-100 p-3 sm:p-6 md:p-8 flex flex-col items-center font-sans">
+    <div className="min-h-screen bg-gray-100 p-3 sm:p-6 md:p-8 flex flex-col items-center font-sans printable-slip-wrapper">
       
       {/* Dynamic Print CSS */}
       <style>{`
         @media print {
           @page {
             size: ${paperSize === '56mm' ? '56mm auto' : paperSize === '80mm' ? '80mm auto' : 'A4 portrait'};
-            margin: ${paperSize === '56mm' ? '1.5mm' : paperSize === '80mm' ? '2.5mm' : '10mm'};
+            margin: ${paperSize === '56mm' ? '1.5mm' : paperSize === '80mm' ? '2.5mm' : '8mm'};
           }
-          body {
+          *, *:before, *:after {
+            box-shadow: none !important;
+            text-shadow: none !important;
+          }
+          html, body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
-            background: white !important;
           }
           .no-print {
             display: none !important;
+          }
+          .printable-slip-wrapper {
+            padding: 0 !important;
+            margin: 0 !important;
+            background: transparent !important;
+            min-height: auto !important;
+            display: block !important;
+          }
+          .printable-slip-box {
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 auto !important;
+            max-width: 100% !important;
+            width: ${paperSize === '56mm' ? '56mm' : paperSize === '80mm' ? '80mm' : '100%'} !important;
+            padding: ${paperSize === '56mm' ? '2mm' : paperSize === '80mm' ? '3mm' : '8mm'} !important;
           }
         }
       `}</style>
@@ -61,13 +89,14 @@ const InvoicePrint = () => {
         
         <button 
           onClick={() => navigate(-1)} 
-          className="bg-white text-black px-4 py-2 rounded-xl shadow-sm font-bold border border-gray-200 flex items-center gap-2 hover:bg-gray-50 transition text-xs sm:text-sm"
+          type="button"
+          className="bg-white text-black px-4 py-2 rounded shadow-sm font-bold border border-gray-200 flex items-center gap-2 hover:bg-gray-50 active:scale-95 transition text-xs sm:text-sm cursor-pointer"
         >
           <FiArrowLeft /> Back
         </button>
 
         {/* 3 Size Selector Pills */}
-        <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl shadow-sm border border-gray-200 text-xs font-bold">
+        <div className="flex items-center gap-1.5 bg-white p-1 rounded shadow-sm border border-gray-200 text-xs font-bold">
           <span className="text-gray-400 px-2 hidden sm:inline-flex items-center gap-1">
             <FiSliders /> Size:
           </span>
@@ -75,7 +104,7 @@ const InvoicePrint = () => {
           <button
             type="button"
             onClick={() => setPaperSize('56mm')}
-            className={`px-3 py-1.5 rounded-lg transition ${
+            className={`px-3 py-1.5 rounded transition cursor-pointer ${
               paperSize === '56mm' 
                 ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                 : 'text-gray-600 hover:bg-gray-100'
@@ -87,7 +116,7 @@ const InvoicePrint = () => {
           <button
             type="button"
             onClick={() => setPaperSize('80mm')}
-            className={`px-3 py-1.5 rounded-lg transition ${
+            className={`px-3 py-1.5 rounded transition cursor-pointer ${
               paperSize === '80mm' 
                 ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                 : 'text-gray-600 hover:bg-gray-100'
@@ -99,7 +128,7 @@ const InvoicePrint = () => {
           <button
             type="button"
             onClick={() => setPaperSize('a4')}
-            className={`px-3 py-1.5 rounded-lg transition ${
+            className={`px-3 py-1.5 rounded transition cursor-pointer ${
               paperSize === 'a4' 
                 ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                 : 'text-gray-600 hover:bg-gray-100'
@@ -112,7 +141,8 @@ const InvoicePrint = () => {
         {/* Print Button */}
         <button 
           onClick={handlePrint} 
-          className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-6 py-2.5 rounded-xl shadow-md font-black tracking-wide flex items-center gap-2 transition text-xs sm:text-sm"
+          type="button"
+          className="bg-[#0F172A] hover:bg-[#DFAC43] active:scale-95 text-[#DFAC43] hover:text-[#0F172A] px-6 py-2.5 rounded shadow-md font-black tracking-wide flex items-center gap-2 transition text-xs sm:text-sm cursor-pointer"
         >
           <FiPrinter className="text-base" /> Print Slip
         </button>
@@ -120,8 +150,7 @@ const InvoicePrint = () => {
 
       {/* --- PRINTABLE SLIP CONTAINER --- */}
       <div 
-        ref={printRef} 
-        className={`bg-white shadow-xl border border-gray-200 text-black mx-auto overflow-hidden transition-all ${containerWidthClass}`}
+        className={`bg-white shadow-xl border border-gray-200 text-black mx-auto overflow-hidden transition-all printable-slip-box ${containerWidthClass}`}
         style={{
           minHeight: paperSize === 'a4' ? '10in' : 'auto'
         }}
