@@ -121,9 +121,9 @@ const Pricing = () => {
                                     </div>
                                 </div>
                                 <div className="text-right">
-                                    {/* DB se minPrice aur maxPrice ka range */}
+                                    {/* DB se Single Price */}
                                     <span className="text-xl font-bold text-black border-b-2 border-transparent group-hover:border-black transition-all duration-300 block">
-                                        {item.minPrice} - {item.maxPrice}
+                                        Rs. {Number(item.price !== undefined && item.price !== null ? item.price : (item.minPrice || 0)).toLocaleString()}
                                     </span>
                                     <span className="text-xs text-gray-400 font-medium">{item.deliveryTime}</span>
                                 </div>
