@@ -1,10 +1,9 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FiShoppingBag, FiCreditCard, FiLogOut, FiUsers, FiTrendingUp } from 'react-icons/fi';
+import { FiShoppingBag, FiCreditCard, FiLogOut, FiUsers, FiTrendingUp, FiLayers, FiBox } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import { CgProfile } from "react-icons/cg";
 import { IoMdSettings } from "react-icons/io";
-import { FiBox } from 'react-icons/fi';
 import useAuthStore from '../Store/authStore';
 
 const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) => {
@@ -53,6 +52,10 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
           <NavLink to="/admin/catalogue" className={getLinkStyle} onClick={onCloseMobile}>
             <FiShoppingBag className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Catalogue</span>}
+          </NavLink>
+          <NavLink to="/admin/services" className={getLinkStyle} onClick={onCloseMobile}>
+            <FiLayers className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
+            {!collapsed && <span>Services & Offers</span>}
           </NavLink>
           <NavLink to="/admin/pricing" className={getLinkStyle} onClick={onCloseMobile}>
             <FiCreditCard className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />

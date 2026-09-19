@@ -17,6 +17,7 @@ import AdminLayout from './Layouts/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminCatalogue from './pages/AdminCatalogue';
 import AdminPricing from './pages/AdminPricing';
+import AdminServices from './pages/AdminServices';
 import AdminSettings from './pages/AdminSettings';
 import AdminCustomers from './pages/AdminCustomers';
 import CustomerProfile from './pages/CustomerProfile';
@@ -85,6 +86,8 @@ function App() {
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/catalogue" element={<AdminCatalogue />} />
+            <Route path="/admin/services" element={<AdminServices />} />
+            <Route path="/admin/offers" element={<AdminServices />} />
             <Route path="/admin/pricing" element={<AdminPricing />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/customers" element={<AdminCustomers />} />

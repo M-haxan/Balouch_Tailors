@@ -105,7 +105,7 @@ const AdminSettings = () => {
         <nav className="space-y-2">
           <button 
             onClick={() => setActiveTab('rates')}
-            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-black transition-all text-left ${
+            className={`w-full flex items-center justify-between px-4 py-3.5 rounded text-sm font-black transition-all text-left ${
               activeTab === 'rates' 
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'text-gray-600 hover:bg-gray-200'
@@ -115,7 +115,7 @@ const AdminSettings = () => {
               <FaMoneyBillWave className="text-lg" />
               <span>Tailoring Rates & Add-ons</span>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+            <span className={`text-xs px-2 py-0.5 rounded font-bold ${
               activeTab === 'rates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-600'
             }`}>
               {tailoringList.length}
@@ -124,7 +124,7 @@ const AdminSettings = () => {
           
           <button 
             onClick={() => setActiveTab('templates')}
-            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-black transition-all text-left ${
+            className={`w-full flex items-center justify-between px-4 py-3.5 rounded text-sm font-black transition-all text-left ${
               activeTab === 'templates' 
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'text-gray-600 hover:bg-gray-200'
@@ -134,7 +134,7 @@ const AdminSettings = () => {
               <FiSliders className="text-lg" />
               <span>Measurement Templates</span>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+            <span className={`text-xs px-2 py-0.5 rounded font-bold ${
               activeTab === 'templates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-600'
             }`}>
               {templates.length}
@@ -143,7 +143,7 @@ const AdminSettings = () => {
           
           <button 
             onClick={() => setActiveTab('general')}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-black transition-all text-left ${
+            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded text-sm font-black transition-all text-left ${
               activeTab === 'general' 
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'text-gray-600 hover:bg-gray-200'
@@ -178,7 +178,7 @@ const AdminSettings = () => {
               <div className="flex items-center gap-2">
                 <button 
                   onClick={() => openPricingModal(null, rateSection === 'customizations' ? 'customization' : 'service')}
-                  className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-sm"
+                  className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-sm"
                 >
                   <FiPlus className="text-base" />
                   {rateSection === 'services' ? 'Add Category' : 'Add Customization'}
@@ -191,7 +191,7 @@ const AdminSettings = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => setRateSection('services')}
-                  className={`px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
+                  className={`px-4 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
                     rateSection === 'services'
                       ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                       : 'text-gray-600 hover:bg-gray-200'
@@ -203,14 +203,14 @@ const AdminSettings = () => {
 
                 <button
                   onClick={() => setRateSection('customizations')}
-                  className={`px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
+                  className={`px-4 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
                     rateSection === 'customizations'
                       ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                       : 'text-gray-600 hover:bg-gray-200'
                   }`}
                 >
                   <FiTag />
-                  <span>Customizations / Add-ons ({customizations.length})</span>
+                  <span>Customizations ({customizations.length})</span>
                 </button>
               </div>
 
@@ -222,7 +222,7 @@ const AdminSettings = () => {
                   placeholder="Search..."
                   value={pricingSearch}
                   onChange={(e) => setPricingSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-medium outline-none focus:border-[#DFAC43]"
+                  className="w-full pl-8 pr-3 py-1.5 rounded bg-white border border-gray-200 text-xs font-medium outline-none focus:border-[#DFAC43]"
                 />
               </div>
             </div>
@@ -230,7 +230,7 @@ const AdminSettings = () => {
             {/* SECTION 1: GARMENT CATEGORIES TABLE */}
             {rateSection === 'services' && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 bg-amber-50/70 border border-amber-200/80 p-3 rounded-xl text-xs text-amber-900 font-medium">
+                <div className="flex items-center gap-2 bg-amber-50/70 border border-amber-200/80 p-3 rounded text-xs text-amber-900 font-medium">
                   <FiInfo className="text-base text-amber-700 shrink-0" />
                   <span>
                     <strong>Garment Categories:</strong> Order create karte waqt category choose karne par yeh <strong>Base Price</strong> bill me add hogi.
