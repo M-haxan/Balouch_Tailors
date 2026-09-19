@@ -23,7 +23,8 @@ import {
   FiAlertCircle,
   FiCheckCircle,
   FiEdit,
-  FiShoppingBag
+  FiShoppingBag,
+  FiCornerDownRight
 } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
 
