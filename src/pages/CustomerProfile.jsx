@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import logo from '../assets/BT_Logo.png';
 import {
   useGetCustomerProfile,
   useUpdateCustomer,
@@ -25,7 +26,6 @@ import {
   FiAlertTriangle,
   FiAlertCircle,
   FiBook,
-  FiDollarSign,
   FiPrinter,
   FiLayers,
   FiCalendar,
@@ -35,8 +35,10 @@ import {
   FiExternalLink,
   FiRefreshCw,
   FiSearch,
-  FiSliders
+  FiSliders,
+  FiAward
 } from 'react-icons/fi';
+import { FaMoneyBillWave } from 'react-icons/fa';
 import { FaWhatsapp } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
@@ -950,6 +952,7 @@ const OrdersTab = ({ orders = [], customer, newOrderUrl }) => {
 // SUB-COMPONENT: KHATA LEDGER TAB
 // ====================================================================
 const KhataLedgerTab = ({ customer, ledger = [], khataBalance = 0, openSettleModal }) => {
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   const handleShareWhatsAppStatement = () => {
     const rawNum = customer.whatsapp || customer.phone;
@@ -979,108 +982,468 @@ const KhataLedgerTab = ({ customer, ledger = [], khataBalance = 0, openSettleMod
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
+    <>
+      <div className="bg-white border border-gray-200 rounded p-4 sm:p-6 shadow-sm space-y-4 sm:space-y-6">
 
-      {/* Running Balance Banner */}
-      <div className={`p-4 sm:p-6 rounded border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${khataBalance > 0
-          ? 'bg-red-50/70 border-red-200 text-red-900'
-          : khataBalance < 0
-            ? 'bg-green-50/70 border-green-200 text-green-900'
-            : 'bg-gray-50 border-gray-200 text-gray-800'
-        }`}>
-        <div>
-          <span className="text-[11px] font-black uppercase tracking-wider block opacity-75">
-            Current Account Balance
-          </span>
-          <p className="text-2xl sm:text-3xl font-black font-sans mt-1">
-            {khataBalance > 0 ? (
-              <span className="text-red-700 inline-flex items-center gap-1.5">
-                <FiAlertCircle className="text-red-600 text-xl" /> Customer Owes: Rs {khataBalance.toLocaleString()} (Udhar)
-              </span>
-            ) : khataBalance < 0 ? (
-              <span className="text-green-700 inline-flex items-center gap-1.5">
-                <FiCheckCircle className="text-green-600 text-xl" /> Customer Credit: Rs {Math.abs(khataBalance).toLocaleString()} (Advance Jama)
-              </span>
-            ) : (
-              <span className="text-gray-700 inline-flex items-center gap-1.5">
-                <FiCheck className="text-gray-500 text-xl" /> Clear Balance (Rs 0)
-              </span>
+        {/* Running Balance Banner */}
+        <div className={`p-4 sm:p-6 rounded border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${khataBalance > 0
+            ? 'bg-red-50/70 border-red-200 text-red-900'
+            : khataBalance < 0
+              ? 'bg-green-50/70 border-green-200 text-green-900'
+              : 'bg-gray-50 border-gray-200 text-gray-800'
+          }`}>
+          <div>
+            <span className="text-[11px] font-black uppercase tracking-wider block opacity-75">
+              Current Account Balance
+            </span>
+            <p className="text-2xl sm:text-3xl font-black font-sans mt-1">
+              {khataBalance > 0 ? (
+                <span className="text-red-700 inline-flex items-center gap-1.5">
+                  <FiAlertCircle className="text-red-600 text-xl" /> Customer Owes: Rs {khataBalance.toLocaleString()} (Udhar)
+                </span>
+              ) : khataBalance < 0 ? (
+                <span className="text-green-700 inline-flex items-center gap-1.5">
+                  <FiCheckCircle className="text-green-600 text-xl" /> Customer Credit: Rs {Math.abs(khataBalance).toLocaleString()} (Advance Jama)
+                </span>
+              ) : (
+                <span className="text-gray-700 inline-flex items-center gap-1.5">
+                  <FiCheck className="text-gray-500 text-xl" /> Clear Balance (Rs 0)
+                </span>
+              )}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <button
+              onClick={() => setIsPrintModalOpen(true)}
+              className="flex-1 sm:flex-none justify-center bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] text-xs font-black px-4 py-2.5 rounded transition flex items-center gap-1.5 shadow whitespace-nowrap cursor-pointer"
+              title="Print Ledger Statement or Save as PDF"
+            >
+              <FiPrinter className="text-base" /> Print Statement
+            </button>
+            <button
+              onClick={handleShareWhatsAppStatement}
+              className="flex-1 sm:flex-none justify-center bg-green-600 hover:bg-green-700 text-white text-xs font-black px-4 py-2.5 rounded transition flex items-center gap-1.5 shadow whitespace-nowrap cursor-pointer"
+            >
+              <FaWhatsapp className="text-base" /> Send WhatsApp
+            </button>
+            <button
+              onClick={openSettleModal}
+              className="flex-1 sm:flex-none justify-center bg-amber-50 hover:bg-[#DFAC43] text-[#0F172A] hover:text-black border border-amber-300 text-xs font-black px-4 py-2.5 rounded transition flex items-center gap-1.5 shadow whitespace-nowrap cursor-pointer"
+            >
+              Settle / Post Entry
+            </button>
+          </div>
+        </div>
+
+        {/* Transaction Statement Table */}
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <h3 className="text-sm font-black uppercase tracking-wider text-gray-800">
+              Account Transaction History ({ledger.length} entries)
+            </h3>
+            {ledger.length > 0 && (
+              <button
+                onClick={() => setIsPrintModalOpen(true)}
+                className="text-xs text-gray-600 hover:text-black font-bold flex items-center gap-1 cursor-pointer"
+              >
+                <FiPrinter /> Print PDF
+              </button>
             )}
-          </p>
+          </div>
+
+          {ledger.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 border border-dashed border-gray-200 rounded text-xs text-gray-400">
+              No khata transactions or settlements recorded yet for this customer.
+            </div>
+          ) : (
+            <div className="border border-gray-200 rounded overflow-x-auto shadow-sm">
+              <table className="w-full text-left border-collapse text-xs min-w-[600px]">
+                <thead>
+                  <tr className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] border-b border-gray-200">
+                    <th className="p-3.5">Date & Time</th>
+                    <th className="p-3.5">Description & Reference</th>
+                    <th className="p-3.5 text-right">Debit (+)</th>
+                    <th className="p-3.5 text-right">Credit (-)</th>
+                    <th className="p-3.5 text-right">Running Balance</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {ledger.map((entry) => (
+                    <tr key={entry._id} className="hover:bg-gray-50/80 transition font-medium">
+                      <td className="p-3.5 text-gray-500 whitespace-nowrap">
+                        {new Date(entry.date || entry.createdAt).toLocaleDateString()} {new Date(entry.date || entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="p-3.5 font-semibold text-gray-800">
+                        {entry.description}
+                        {entry.orderNumber && (
+                          <span className="ml-2 bg-[#0F172A] text-[#DFAC43] px-2 py-0.5 rounded text-[10px] font-black whitespace-nowrap">
+                            #BT-{entry.orderNumber}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-3.5 text-right font-black text-red-600 font-sans whitespace-nowrap">
+                        {entry.type === 'debit' ? `+ Rs ${entry.amount.toLocaleString()}` : '-'}
+                      </td>
+                      <td className="p-3.5 text-right font-black text-green-600 font-sans whitespace-nowrap">
+                        {entry.type === 'credit' || entry.type === 'payment' ? `- Rs ${entry.amount.toLocaleString()}` : '-'}
+                      </td>
+                      <td className="p-3.5 text-right font-black font-sans whitespace-nowrap">
+                        <span className={`px-2.5 py-1 rounded text-xs ${entry.runningBalance > 0 ? 'text-red-700 bg-red-50' :
+                            entry.runningBalance < 0 ? 'text-green-700 bg-green-50' :
+                              'text-gray-700 bg-gray-100'
+                          }`}>
+                          Rs {entry.runningBalance.toLocaleString()}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <button
-            onClick={handleShareWhatsAppStatement}
-            className="flex-1 sm:flex-none justify-center bg-green-600 hover:bg-green-700 text-white text-xs font-black px-4 py-2.5 rounded transition flex items-center gap-1.5 shadow whitespace-nowrap"
-          >
-            <FaWhatsapp className="text-base" /> Send WhatsApp Statement
-          </button>
-          <button
-            onClick={openSettleModal}
-            className="flex-1 sm:flex-none justify-center bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] text-xs font-black px-4 py-2.5 rounded transition flex items-center gap-1.5 shadow whitespace-nowrap"
-          >
-            Settle / Post Entry
-          </button>
-        </div>
       </div>
 
-      {/* Transaction Statement Table */}
-      <div className="space-y-3">
-        <h3 className="text-sm font-black uppercase tracking-wider text-gray-800">
-          Account Transaction History ({ledger.length} entries)
-        </h3>
+      {/* PRINT KHATA STATEMENT MODAL */}
+      {isPrintModalOpen && (
+        <CustomerKhataPrintModal
+          customer={customer}
+          ledger={ledger}
+          khataBalance={khataBalance}
+          closeModal={() => setIsPrintModalOpen(false)}
+        />
+      )}
+    </>
+  );
+};
 
-        {ledger.length === 0 ? (
-          <div className="text-center py-12 bg-gray-50 border border-dashed border-gray-200 rounded text-xs text-gray-400">
-            No khata transactions or settlements recorded yet for this customer.
+// ====================================================================
+// COMPONENT: CUSTOMER KHATA PRINT MODAL (56mm, 80mm, A4 STATEMENT)
+// ====================================================================
+const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, closeModal }) => {
+  const [paperSize, setPaperSize] = useState('a4'); // '56mm' | '80mm' | 'a4'
+
+  const formattedCustomerId = customer.customerNumber ? `#C-${customer.customerNumber}` : `#C-${customer._id.slice(-4).toUpperCase()}`;
+
+  // Totals calculations
+  let totalDebit = 0;
+  let totalCredit = 0;
+  ledger.forEach(entry => {
+    if (entry.type === 'debit') totalDebit += Number(entry.amount) || 0;
+    if (entry.type === 'credit' || entry.type === 'payment') totalCredit += Number(entry.amount) || 0;
+  });
+
+  const handlePrint = () => {
+    try {
+      const originalTitle = document.title;
+      document.title = `Khata_Statement_${customer.name.replace(/\s+/g, '_')}_${formattedCustomerId}`;
+      window.print();
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1500);
+    } catch (err) {
+      console.error('Print error:', err);
+      window.print();
+    }
+  };
+
+  const containerWidthClass = 
+    paperSize === '56mm' ? 'w-[56mm] max-w-[56mm] text-[10px] p-2.5' :
+    paperSize === '80mm' ? 'w-[80mm] max-w-[80mm] text-xs p-4' :
+    'w-full max-w-3xl text-xs p-8';
+
+  return (
+    <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 font-sans overflow-y-auto">
+      
+      {/* Dynamic Print CSS */}
+      <style>{`
+        @media print {
+          @page {
+            size: ${paperSize === '56mm' ? '56mm auto' : paperSize === '80mm' ? '80mm auto' : 'A4 portrait'};
+            margin: ${paperSize === '56mm' ? '0mm' : paperSize === '80mm' ? '0mm' : '8mm'};
+          }
+          *, *:before, *:after {
+            box-shadow: none !important;
+            text-shadow: none !important;
+          }
+          html, body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          header, nav, aside, footer, .no-print, .Toastify {
+            display: none !important;
+          }
+          body * {
+            visibility: hidden !important;
+          }
+          #khata-printable-slip, #khata-printable-slip * {
+            visibility: visible !important;
+          }
+          #khata-printable-slip {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            right: 0 !important;
+            margin: 0 auto !important;
+            box-shadow: none !important;
+            border: none !important;
+            width: ${paperSize === '56mm' ? '54mm' : paperSize === '80mm' ? '76mm' : '100%'} !important;
+            max-width: ${paperSize === '56mm' ? '54mm' : paperSize === '80mm' ? '76mm' : '100%'} !important;
+            padding: ${paperSize === '56mm' ? '1.5mm' : paperSize === '80mm' ? '2.5mm' : '0mm'} !important;
+            background: #ffffff !important;
+          }
+        }
+      `}</style>
+
+      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full border border-gray-200 overflow-hidden flex flex-col max-h-[92vh] animate-scale-up">
+        
+        {/* TOP CONTROLS BAR (SCREEN ONLY) */}
+        <div className="bg-[#0F172A] text-white p-4 flex flex-wrap justify-between items-center gap-3 no-print">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-5 bg-[#DFAC43] rounded-sm"></span>
+            <h3 className="text-sm sm:text-base font-black text-white flex items-center gap-1.5">
+              <FiPrinter className="text-[#DFAC43]" /> Customer Khata Statement
+            </h3>
           </div>
-        ) : (
-          <div className="border border-gray-200 rounded overflow-x-auto shadow-sm">
-            <table className="w-full text-left border-collapse text-xs min-w-[600px]">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] border-b border-gray-200">
-                  <th className="p-3.5">Date & Time</th>
-                  <th className="p-3.5">Description & Reference</th>
-                  <th className="p-3.5 text-right">Debit (+)</th>
-                  <th className="p-3.5 text-right">Credit (-)</th>
-                  <th className="p-3.5 text-right">Running Balance</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {ledger.map((entry) => (
-                  <tr key={entry._id} className="hover:bg-gray-50/80 transition font-medium">
-                    <td className="p-3.5 text-gray-500 whitespace-nowrap">
-                      {new Date(entry.date || entry.createdAt).toLocaleDateString()} {new Date(entry.date || entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                    <td className="p-3.5 font-semibold text-gray-800">
-                      {entry.description}
-                      {entry.orderNumber && (
-                        <span className="ml-2 bg-[#0F172A] text-[#DFAC43] px-2 py-0.5 rounded text-[10px] font-black whitespace-nowrap">
-                          #BT-{entry.orderNumber}
-                        </span>
-                      )}
-                    </td>
-                    <td className="p-3.5 text-right font-black text-red-600 font-sans whitespace-nowrap">
-                      {entry.type === 'debit' ? `+ Rs ${entry.amount.toLocaleString()}` : '-'}
-                    </td>
-                    <td className="p-3.5 text-right font-black text-green-600 font-sans whitespace-nowrap">
-                      {entry.type === 'credit' || entry.type === 'payment' ? `- Rs ${entry.amount.toLocaleString()}` : '-'}
-                    </td>
-                    <td className="p-3.5 text-right font-black font-sans whitespace-nowrap">
-                      <span className={`px-2.5 py-1 rounded text-xs ${entry.runningBalance > 0 ? 'text-red-700 bg-red-50' :
-                          entry.runningBalance < 0 ? 'text-green-700 bg-green-50' :
-                            'text-gray-700 bg-gray-100'
-                        }`}>
-                        Rs {entry.runningBalance.toLocaleString()}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          <div className="flex items-center gap-2">
+            {/* Paper Size Switcher */}
+            <div className="flex items-center bg-gray-800 p-1 rounded border border-gray-700 text-xs font-bold">
+              {['56mm', '80mm', 'a4'].map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setPaperSize(size)}
+                  className={`px-3 py-1 rounded transition uppercase cursor-pointer ${
+                    paperSize === size ? 'bg-[#DFAC43] text-[#0F172A] font-black' : 'text-gray-300 hover:text-white'
+                  }`}
+                >
+                  {size === 'a4' ? 'A4 / PDF' : size}
+                </button>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="bg-[#DFAC43] hover:bg-yellow-400 text-[#0F172A] font-black text-xs px-4 py-1.5 rounded transition shadow flex items-center gap-1 cursor-pointer"
+            >
+              <FiPrinter /> Print / PDF
+            </button>
+
+            <button
+              type="button"
+              onClick={closeModal}
+              className="text-gray-400 hover:text-white p-1 text-lg transition cursor-pointer"
+            >
+              <FiX />
+            </button>
           </div>
-        )}
+        </div>
+
+        {/* PREVIEW CONTAINER */}
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-gray-100 flex justify-center items-start">
+          
+          <div 
+            id="khata-printable-slip"
+            className={`bg-white shadow-md border border-gray-300 text-black leading-tight ${containerWidthClass}`}
+          >
+            {/* SHOP HEADER */}
+            <div className="text-center pb-3 border-b-2 border-black space-y-1">
+              {/* Logo */}
+              <div className="flex justify-center mb-1">
+                <img 
+                  src={logo} 
+                  alt="Balouch Tailors" 
+                  className={paperSize === '56mm' ? 'h-9 w-auto object-contain' : paperSize === '80mm' ? 'h-11 w-auto object-contain' : 'h-14 w-auto object-contain'} 
+                />
+              </div>
+
+              <h1 className="text-base sm:text-2xl font-black tracking-wider uppercase font-serif">
+                BALOUCH TAILORS
+              </h1>
+              
+              <div>
+                <span className="inline-block bg-gray-100 text-gray-800 text-[9px] sm:text-xs font-black px-2.5 py-0.5 rounded uppercase tracking-wider">
+                  Gents Shalwar Qameez Specialist
+                </span>
+              </div>
+{/* 
+              <p className="text-[10px] sm:text-xs font-bold text-gray-900">
+                Proprietor: <span className="font-black">Zubair Balouch</span> | Ph: <span className="font-black">0313-4389192, 0306-7379919</span>
+              </p> */}
+
+              <p className="text-[9px] sm:text-[10px] font-medium text-gray-600">
+                Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+              </p>
+              
+              <div className="pt-2 pb-1">
+                <span className="inline-block bg-[#0F172A] text-white text-[10px] sm:text-xs font-black px-4 py-1 uppercase tracking-widest rounded-xs">
+                  CUSTOMER KHATA STATEMENT / کھاتہ لیجر سٹیٹمنٹ
+                </span>
+              </div>
+            </div>
+
+            {/* CUSTOMER & STATEMENT METADATA */}
+            <div className="py-3 border-b border-dashed border-gray-400 space-y-1.5 text-[11px] sm:text-xs">
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-gray-600 block text-[10px] uppercase font-bold">Customer Name:</span>
+                  <span className="font-black text-sm text-gray-900">{customer.name}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-gray-600 block text-[10px] uppercase font-bold">Customer ID:</span>
+                  <span className="font-black font-sans text-sm">{formattedCustomerId}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-gray-100">
+                <div>
+                  <span className="text-gray-600 text-[10px]">Phone: </span>
+                  <span className="font-bold">{customer.phone || '-'}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-gray-600 text-[10px]">Date: </span>
+                  <span className="font-bold">{new Date().toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* FINANCIAL SUMMARY BOX */}
+            <div className="my-3 p-3 bg-gray-50 border border-gray-200 rounded text-xs space-y-1.5">
+              <div className="flex justify-between">
+                <span className="text-gray-600 font-semibold">Total Debit (Orders Bill):</span>
+                <span className="font-black font-sans text-red-600">Rs {totalDebit.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600 font-semibold">Total Credit (Payments Received):</span>
+                <span className="font-black font-sans text-green-700">Rs {totalCredit.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between pt-1.5 border-t border-gray-300 font-black text-sm">
+                <span>Current Account Net Balance:</span>
+                <span>
+                  {khataBalance > 0 ? (
+                    <span className="text-red-700 font-black">Rs {khataBalance.toLocaleString()} (Udhar / Payable)</span>
+                  ) : khataBalance < 0 ? (
+                    <span className="text-green-700 font-black">Rs {Math.abs(khataBalance).toLocaleString()} (Advance Jama)</span>
+                  ) : (
+                    <span className="text-gray-700 font-black">Rs 0 (Khata Clear)</span>
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {/* TRANSACTION HISTORY TABLE */}
+            <div className="py-2 space-y-2">
+              <h3 className="text-[10px] sm:text-xs font-black uppercase tracking-wider border-b border-black pb-1">
+                Transaction Ledger Entries ({ledger.length})
+              </h3>
+
+              {ledger.length === 0 ? (
+                <p className="text-center py-4 text-xs text-gray-400 italic">No transactions recorded.</p>
+              ) : (
+                <table className="w-full text-left border-collapse text-[10px] sm:text-xs">
+                  <thead>
+                    <tr className="border-b-2 border-gray-300 font-black uppercase text-[9px] sm:text-[10px]">
+                      <th className="py-1.5">Date</th>
+                      <th className="py-1.5">Description</th>
+                      <th className="py-1.5 text-right">Debit (+)</th>
+                      <th className="py-1.5 text-right">Credit (-)</th>
+                      <th className="py-1.5 text-right">Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {ledger.map((entry, idx) => (
+                      <tr key={idx} className="py-1">
+                        <td className="py-1.5 whitespace-nowrap text-gray-600 font-mono">
+                          {new Date(entry.date || entry.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-1.5 font-bold">
+                          {entry.description}
+                          {entry.orderNumber && (
+                            <span className="ml-1 font-mono text-[9px] bg-gray-100 px-1 py-0.2 rounded">
+                              #BT-{entry.orderNumber}
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-1.5 text-right font-mono font-bold text-red-600 whitespace-nowrap">
+                          {entry.type === 'debit' ? `+Rs ${entry.amount}` : '-'}
+                        </td>
+                        <td className="py-1.5 text-right font-mono font-bold text-green-700 whitespace-nowrap">
+                          {entry.type === 'credit' || entry.type === 'payment' ? `-Rs ${entry.amount}` : '-'}
+                        </td>
+                        <td className="py-1.5 text-right font-mono font-black whitespace-nowrap">
+                          Rs {entry.runningBalance?.toLocaleString() || 0}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* FOOTER & SIGNATURE */}
+            <div className="pt-6 border-t border-gray-300 space-y-3 text-[9px] sm:text-[10px] text-gray-600 text-center">
+              <p className="font-bold">
+                Computerized Khata Statement generated by Balouch Tailors POS Management System.
+              </p>
+
+              <div className="flex justify-between items-end pt-6 px-4 font-bold text-gray-800">
+                <div className="text-center">
+                  <div className="w-24 border-t border-black mb-1"></div>
+                  <span>Customer Signature</span>
+                </div>
+                <div className="text-center">
+                  <div className="w-24 border-t border-black mb-1"></div>
+                  <span>Balouch Tailors</span>
+                </div>
+              </div>
+
+              {/* Shop & Proprietor Footer Stamp */}
+              <div className="pt-2 border-t-2 border-black text-center space-y-0.5 text-black">
+                <p className="font-black text-[9px] sm:text-[11px] uppercase tracking-wider">
+                  Proprietor: Zubair Balouch
+                </p>
+                <p className="font-black text-[9px] sm:text-[10px] font-sans">
+                  📞 0313-4389192 | 0306-7379919
+                </p>
+                <p className="text-[7px] sm:text-[8px] text-gray-600">
+                  Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* MODAL FOOTER */}
+        <div className="p-3 border-t border-gray-200 bg-gray-50 flex justify-end gap-2 no-print">
+          <button
+            type="button"
+            onClick={closeModal}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded font-bold text-xs transition cursor-pointer"
+          >
+            Close
+          </button>
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="px-5 py-2 bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] rounded font-black text-xs transition shadow flex items-center gap-1.5 cursor-pointer"
+          >
+            <FiPrinter /> Print Khata Statement
+          </button>
+        </div>
+
       </div>
 
     </div>
@@ -1476,7 +1839,7 @@ const SettleKhataModal = ({ customer, closeModal }) => {
       <div className="bg-white rounded shadow-2xl w-full max-w-md overflow-hidden border border-gray-200 animate-fade-in">
         <div className="flex justify-between items-center p-5 border-b border-gray-100 bg-gray-900 text-white">
           <div className="flex items-center gap-2">
-            <FiDollarSign className="text-[#DFAC43] text-lg" />
+            <FaMoneyBillWave className="text-[#DFAC43] text-lg" />
             <h2 className="text-base font-black">Khata Settlement ({customer.name})</h2>
           </div>
           <button onClick={closeModal} className="text-gray-400 hover:text-white"><FiX className="text-lg" /></button>

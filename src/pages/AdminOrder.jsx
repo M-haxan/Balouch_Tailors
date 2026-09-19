@@ -16,15 +16,16 @@ import {
   FiX, 
   FiTag, 
   FiPercent, 
-  FiDollarSign, 
   FiLayers,
   FiUpload,
   FiCamera,
   FiImage,
   FiAlertCircle,
   FiCheckCircle,
-  FiCornerDownRight
+  FiEdit,
+  FiShoppingBag
 } from 'react-icons/fi';
+import { FaMoneyBillWave } from 'react-icons/fa';
 
 // Standard stitching tags
 const COMMON_TAGS = [
@@ -476,9 +477,32 @@ const CreateOrder = () => {
             <FiCheckCircle className="text-2xl sm:text-3xl" />
           </div>
           <h2 className="text-lg sm:text-2xl font-black text-gray-900 mb-1.5 sm:mb-2">Order Created Successfully</h2>
-          <p className="text-gray-500 mb-5 sm:mb-6 text-xs sm:text-sm font-medium">
+          <p className="text-gray-500 mb-4 text-xs sm:text-sm font-medium">
             Order has been saved and ledger balance updated.
           </p>
+
+          {/* Assigned Suit IDs List for Writing on Cloth */}
+          <div className="bg-gray-50 border border-gray-200 rounded p-3 mb-5 text-left">
+            <div className="flex justify-between items-center pb-2 border-b border-gray-200 mb-2">
+              <span className="text-xs font-bold text-gray-500 uppercase">Order Number:</span>
+              <span className="font-black text-sm text-[#0F172A]">#BT-{savedOrder.orderNumber}</span>
+            </div>
+            <p className="text-[10px] font-black text-gray-600 uppercase mb-2">
+              Assigned Suit IDs (Suit par likhne ke liye IDs):
+            </p>
+            <div className="space-y-1.5">
+              {savedOrder.suits && savedOrder.suits.map((s, idx) => (
+                <div key={idx} className="flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs">
+                  <span className="font-bold text-gray-800 truncate pr-2">
+                    Suit #{idx + 1} ({s.serviceType || 'Shalwar Qameez'}{s.fabricDetails ? ` - ${s.fabricDetails}` : ''})
+                  </span>
+                  <span className="bg-[#0F172A] text-[#DFAC43] font-mono font-black px-2 py-0.5 rounded text-xs shrink-0 shadow-xs">
+                    {s.suitNumber || `BT-${savedOrder.orderNumber}-${idx + 1}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
           
           <div className="space-y-2.5 sm:space-y-3">
             <button 
@@ -1007,7 +1031,7 @@ const CreateOrder = () => {
             <div className="flex items-center justify-between mb-2.5 sm:mb-3">
               <h3 className="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
                 <span className="w-5 h-5 rounded bg-amber-100 text-[#DFAC43] flex items-center justify-center text-xs">
-                  <FiDollarSign />
+                  <FaMoneyBillWave />
                 </span>
                 3. Order Summary
               </h3>

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useGetWorkerDashboard, useSubmitSuitForInspection, useGetWorkerLedger, useGetWorkerPayments } from '../hooks/useWorkers';
 import useAuthStore from '../Store/authStore';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/BT_Logo.png';
 import { 
   FiScissors, 
   FiCheckCircle, 
-  FiDollarSign, 
   FiLogOut, 
   FiCalendar, 
   FiUser, 
@@ -14,7 +14,13 @@ import {
   FiInfo, 
   FiPhone, 
   FiAlertTriangle,
-  FiClock
+  FiClock,
+  FiSearch,
+  FiEye,
+  FiFileText,
+  FiX,
+  FiTag,
+  FiLayers
 } from 'react-icons/fi';
 import Preloader from '../components/Preloader';
 
@@ -32,6 +38,8 @@ const WorkerDashboard = () => {
   
   const [activeTab, setActiveTab] = useState('assigned'); // 'assigned', 'inspection', 'rework', 'completed', or 'ledger'
   const [viewingPayment, setViewingPayment] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSuitForSpecs, setSelectedSuitForSpecs] = useState(null);
 
   const handleLogout = () => {
     logout();
@@ -43,6 +51,9 @@ const WorkerDashboard = () => {
       submitForQC({ orderId, suitId }, {
         onSuccess: () => {
           refetch();
+          if (selectedSuitForSpecs && selectedSuitForSpecs.suitId === suitId) {
+            setSelectedSuitForSpecs(null);
+          }
         }
       });
     }
@@ -64,6 +75,44 @@ const WorkerDashboard = () => {
     reworkSuits = [], 
     stitchedSuits = [] 
   } = dashboardData || {};
+
+  // Search filter helper
+  const filterSuitList = (list) => {
+    if (!searchTerm.trim()) return list;
+    const query = searchTerm.toLowerCase().trim();
+    return list.filter(item => {
+      const suitIdStr = (item.suitNumber || '').toLowerCase();
+      const orderNumStr = (item.orderNumber || '').toString().toLowerCase();
+      const formattedId = `bt-${orderNumStr}-${item.suitIndex || ''}`.toLowerCase();
+      const customerName = (item.customerName || '').toLowerCase();
+      const wearerName = (item.wearerName || '').toLowerCase();
+      const phone = (item.customerPhone || '').toString();
+      const fabric = (item.fabricDetails || '').toLowerCase();
+      const vol = (item.volumeNo || '').toLowerCase();
+      const notes = (item.customDesign || '').toLowerCase();
+      const tags = (item.staticTags || []).join(' ').toLowerCase();
+
+      return (
+        suitIdStr.includes(query) ||
+        orderNumStr.includes(query) ||
+        formattedId.includes(query) ||
+        customerName.includes(query) ||
+        wearerName.includes(query) ||
+        phone.includes(query) ||
+        fabric.includes(query) ||
+        vol.includes(query) ||
+        notes.includes(query) ||
+        tags.includes(query)
+      );
+    });
+  };
+
+  const filteredAssigned = filterSuitList(assignedSuits);
+  const filteredInspection = filterSuitList(underInspectionSuits);
+  const filteredRework = filterSuitList(reworkSuits);
+  const filteredStitched = filterSuitList(stitchedSuits);
+
+  const totalFilteredMatches = filteredAssigned.length + filteredInspection.length + filteredRework.length + filteredStitched.length;
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12 font-sans">
@@ -179,45 +228,82 @@ const WorkerDashboard = () => {
         {/* SUIT WORK LIST SECTION */}
         <section className="space-y-4">
           
+          {/* SEARCH BAR FOR QUICK LOOKUP BY SUIT ID, WEARER, FABRIC */}
+          <div className="bg-white p-3 sm:p-4 rounded border border-gray-200 shadow-sm space-y-2">
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-base" />
+              <input
+                type="text"
+                placeholder="Search Suit ID (e.g. BT-1001-1 or 1001), Wearer, Fabric, Vol..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-300 focus:border-black focus:bg-white rounded outline-none text-xs sm:text-sm font-bold text-gray-900 transition"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-1 text-sm cursor-pointer"
+                  title="Clear Search"
+                >
+                  <FiX />
+                </button>
+              )}
+            </div>
+
+            {searchTerm && (
+              <div className="flex justify-between items-center text-[11px] font-bold text-gray-500 px-1 pt-0.5">
+                <span>
+                  Found <span className="text-black font-black">{totalFilteredMatches}</span> matching suits across all lists
+                </span>
+                <button 
+                  onClick={() => setSearchTerm('')} 
+                  className="text-[#DFAC43] hover:underline font-black cursor-pointer"
+                >
+                  Clear Search
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* TAB SELECTORS */}
           <div className="flex overflow-x-auto bg-gray-200/80 p-1 rounded-xl gap-1">
             <button
               onClick={() => setActiveTab('assigned')}
-              className={`flex-1 min-w-[100px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 min-w-[100px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'assigned' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'
               }`}
             >
-              Assigned ({assignedSuits.length})
+              Assigned ({filteredAssigned.length})
             </button>
             <button
               onClick={() => setActiveTab('inspection')}
-              className={`flex-1 min-w-[110px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 min-w-[110px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'inspection' ? 'bg-amber-400 text-black shadow-sm font-black' : 'text-gray-600 hover:text-black'
               }`}
             >
-              <FiClock /> In QC ({underInspectionSuits.length})
+              <FiClock /> In QC ({filteredInspection.length})
             </button>
-            {reworkSuits.length > 0 && (
+            {filteredRework.length > 0 && (
               <button
                 onClick={() => setActiveTab('rework')}
-                className={`flex-1 min-w-[110px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                className={`flex-1 min-w-[110px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   activeTab === 'rework' ? 'bg-red-600 text-white shadow-sm font-black animate-pulse' : 'text-red-600 hover:bg-red-100'
                 }`}
               >
-                <FiAlertTriangle /> Rework ({reworkSuits.length})
+                <FiAlertTriangle /> Rework ({filteredRework.length})
               </button>
             )}
             <button
               onClick={() => setActiveTab('completed')}
-              className={`flex-1 min-w-[100px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 min-w-[100px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'completed' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'
               }`}
             >
-              Approved ({stitchedSuits.length})
+              Approved ({filteredStitched.length})
             </button>
             <button
               onClick={() => setActiveTab('ledger')}
-              className={`flex-1 min-w-[90px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 min-w-[90px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'ledger' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'
               }`}
             >
@@ -230,17 +316,19 @@ const WorkerDashboard = () => {
             
             {/* 1. ASSIGNED TAB */}
             {activeTab === 'assigned' && (
-              assignedSuits.length === 0 ? (
+              filteredAssigned.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiBox className="text-4xl text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-400 font-bold text-sm">Abhi koi pending suit assign nahi hai.</p>
+                  <p className="text-gray-400 font-bold text-sm">
+                    {searchTerm ? 'Is search ke mutabiq koi assigned suit nahi mila.' : 'Abhi koi pending suit assign nahi hai.'}
+                  </p>
                   <p className="text-xs text-gray-400 mt-0.5">Admin se assignments ke liye rabta karein.</p>
                 </div>
               ) : (
-                assignedSuits.map((item, idx) => (
-                  <div key={idx} className="bg-white border border-gray-200 rounded p-5 shadow-sm space-y-4 flex flex-col md:flex-row md:items-start gap-5">
+                filteredAssigned.map((item, idx) => (
+                  <div key={idx} className="bg-white border border-gray-200 rounded p-4 sm:p-5 shadow-sm space-y-4 flex flex-col md:flex-row md:items-start gap-4 sm:gap-5">
                     
-                    {/* Fabric Image Container */}
+                    {/* Fabric Image Container with Suit ID Badge */}
                     <div className="w-full md:w-40 h-40 bg-gray-50 rounded-xl border border-gray-150 overflow-hidden flex items-center justify-center shrink-0 relative">
                       {item.fabricImage?.url ? (
                         <img 
@@ -254,8 +342,8 @@ const WorkerDashboard = () => {
                           <span className="text-[10px] font-bold uppercase">No Image</span>
                         </div>
                       )}
-                      <span className="absolute top-2 left-2 bg-black text-[#D4AF37] text-[10px] font-black px-2 py-0.5 rounded shadow-sm">
-                        #BT-{item.orderNumber}
+                      <span className="absolute top-2 left-2 bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded shadow-sm">
+                        ID: {item.suitNumber || `BT-${item.orderNumber}-${item.suitIndex || 1}`}
                       </span>
                     </div>
 
@@ -265,7 +353,12 @@ const WorkerDashboard = () => {
                       <div className="space-y-2">
                         {/* Title & Vol */}
                         <div className="flex justify-between items-start gap-4">
-                          <h4 className="font-black text-black text-base uppercase leading-tight">{item.fabricDetails}</h4>
+                          <div>
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block">
+                              {item.serviceType || 'Garment'}
+                            </span>
+                            <h4 className="font-black text-black text-base uppercase leading-tight">{item.fabricDetails}</h4>
+                          </div>
                           <span className="bg-gray-100 text-black px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider shrink-0 border border-gray-200">
                             VOL: {item.volumeNo}
                           </span>
@@ -286,8 +379,8 @@ const WorkerDashboard = () => {
                         {/* Styling Tags */}
                         {item.staticTags && item.staticTags.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 pt-1">
-                            {item.staticTags.map(tag => (
-                              <span key={tag} className="bg-gray-100 border border-gray-200 text-black px-2 py-0.5 rounded-full text-[10px] font-bold">
+                            {item.staticTags.map((tag, tIdx) => (
+                              <span key={tIdx} className="bg-gray-100 border border-gray-200 text-black px-2 py-0.5 rounded-full text-[10px] font-bold">
                                 {tag}
                               </span>
                             ))}
@@ -303,15 +396,27 @@ const WorkerDashboard = () => {
                         )}
                       </div>
 
-                      {/* Action Submit for QC */}
-                      <div className="pt-3 border-t border-gray-100 flex justify-between items-center gap-3">
-                        <span className="text-xs font-bold text-gray-400">
-                          Expected Wage: <span className="text-black font-black">Rs {worker.perSuitWage}</span>
-                        </span>
+                      {/* Action Buttons: View Measurements/Specs + Submit for QC */}
+                      <div className="pt-3 border-t border-gray-100 flex flex-wrap justify-between items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-gray-400">
+                            Wage: <span className="text-black font-black">Rs {worker.perSuitWage}</span>
+                          </span>
+                          
+                          {/* Specs & Naap Details Modal Trigger */}
+                          <button
+                            type="button"
+                            onClick={() => setSelectedSuitForSpecs(item)}
+                            className="bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] text-xs font-black px-3 py-1.5 rounded transition flex items-center gap-1 border border-gray-200 cursor-pointer"
+                          >
+                            <FiFileText className="text-sm" /> View Naap & Specs
+                          </button>
+                        </div>
+
                         <button
                           onClick={() => handleSubmitForQC(item.orderId, item.suitId)}
                           disabled={isSubmitting}
-                          className="bg-black hover:bg-[#D4AF37] hover:text-black text-white text-xs font-black px-5 py-2.5 rounded-xl transition shadow-md flex items-center gap-1.5"
+                          className="bg-black hover:bg-[#D4AF37] hover:text-black text-white text-xs font-black px-4 py-2 rounded-xl transition shadow-md flex items-center gap-1.5 cursor-pointer"
                         >
                           <FiCheckCircle /> Submit for QC Inspection
                         </button>
@@ -326,20 +431,27 @@ const WorkerDashboard = () => {
 
             {/* 2. UNDER INSPECTION TAB */}
             {activeTab === 'inspection' && (
-              underInspectionSuits.length === 0 ? (
+              filteredInspection.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiClock className="text-4xl text-amber-400 mx-auto mb-2" />
-                  <p className="text-gray-500 font-bold text-sm">Abhi koi suit Admin Inspection mein nahi hai.</p>
+                  <p className="text-gray-500 font-bold text-sm">
+                    {searchTerm ? 'Is search ke mutabiq koi suit QC me nahi hai.' : 'Abhi koi suit Admin Inspection mein nahi hai.'}
+                  </p>
                 </div>
               ) : (
-                underInspectionSuits.map((item, idx) => (
+                filteredInspection.map((item, idx) => (
                   <div key={idx} className="bg-white border border-amber-200 rounded p-5 shadow-sm space-y-3 border-l-4 border-l-amber-500">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
-                          <FiClock /> Waiting for Admin Quality Approval
-                        </span>
-                        <h4 className="font-black text-base text-gray-900 mt-2 uppercase">{item.fabricDetails}</h4>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
+                            <FiClock /> Waiting for Admin Quality Approval
+                          </span>
+                          <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
+                            ID: {item.suitNumber || `BT-${item.orderNumber}-${item.suitIndex || 1}`}
+                          </span>
+                        </div>
+                        <h4 className="font-black text-base text-gray-900 mt-1 uppercase">{item.fabricDetails}</h4>
                         <p className="text-xs text-gray-500 mt-0.5">Order #BT-{item.orderNumber} | Wearer: <span className="font-bold">{item.wearerName}</span></p>
                       </div>
                       <div className="text-right">
@@ -347,9 +459,19 @@ const WorkerDashboard = () => {
                         <span className="text-[9px] text-gray-400 font-bold uppercase">Wage On Hold</span>
                       </div>
                     </div>
-                    <p className="text-xs text-amber-800 bg-amber-50/70 p-2.5 rounded-xl border border-amber-100 font-medium">
-                      ℹ️ Yeh suit aapne complete kar diya hai. Jaise hi Admin physically check karke approve karega, aapke ledger me Rs {worker.perSuitWage} add ho jayenge.
-                    </p>
+                    
+                    <div className="flex justify-between items-center pt-2">
+                      <p className="text-xs text-amber-800 bg-amber-50/70 p-2 rounded border border-amber-100 font-medium">
+                        ℹ️ Physical QC approval hone par aapke ledger me Rs {worker.perSuitWage} credit ho jayenge.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSuitForSpecs(item)}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1 shrink-0 ml-2"
+                      >
+                        <FiFileText /> Naap & Specs
+                      </button>
+                    </div>
                   </div>
                 ))
               )
@@ -357,20 +479,25 @@ const WorkerDashboard = () => {
 
             {/* 3. REWORK REQUIRED TAB */}
             {activeTab === 'rework' && (
-              reworkSuits.length === 0 ? (
+              filteredRework.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiCheckCircle className="text-4xl text-green-500 mx-auto mb-2" />
                   <p className="text-gray-500 font-bold text-sm">Koi alteration ya rework pending nahi hai!</p>
                 </div>
               ) : (
-                reworkSuits.map((item, idx) => (
+                filteredRework.map((item, idx) => (
                   <div key={idx} className="bg-white border border-red-200 rounded p-5 shadow-sm space-y-4 border-l-4 border-l-red-600">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="text-[10px] bg-red-100 text-red-900 border border-red-200 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
-                          <FiAlertTriangle /> Alteration / Rework Needed
-                        </span>
-                        <h4 className="font-black text-base text-gray-900 mt-2 uppercase">{item.fabricDetails}</h4>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] bg-red-100 text-red-900 border border-red-200 px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider inline-flex items-center gap-1">
+                            <FiAlertTriangle /> Alteration / Rework Needed
+                          </span>
+                          <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
+                            ID: {item.suitNumber || `BT-${item.orderNumber}-${item.suitIndex || 1}`}
+                          </span>
+                        </div>
+                        <h4 className="font-black text-base text-gray-900 mt-1 uppercase">{item.fabricDetails}</h4>
                         <p className="text-xs text-gray-500">Order #BT-{item.orderNumber} | Wearer: <span className="font-bold">{item.wearerName}</span></p>
                       </div>
                     </div>
@@ -381,11 +508,19 @@ const WorkerDashboard = () => {
                       <p className="text-xs font-bold text-red-900">{item.reworkNotes || 'Silayi theek karein aur dobara submit karein.'}</p>
                     </div>
 
-                    <div className="pt-2 flex justify-end">
+                    <div className="pt-2 flex justify-between items-center">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSuitForSpecs(item)}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1.5 rounded flex items-center gap-1"
+                      >
+                        <FiFileText /> Naap & Specs
+                      </button>
+
                       <button
                         onClick={() => handleSubmitForQC(item.orderId, item.suitId)}
                         disabled={isSubmitting}
-                        className="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-5 py-2 rounded-xl transition shadow flex items-center gap-1.5"
+                        className="bg-red-600 hover:bg-red-700 text-white text-xs font-black px-5 py-2 rounded-xl transition shadow flex items-center gap-1.5 cursor-pointer"
                       >
                         <FiCheckCircle /> Alteration Done - Re-Submit for QC
                       </button>
@@ -397,22 +532,36 @@ const WorkerDashboard = () => {
 
             {/* 4. COMPLETED & APPROVED TAB */}
             {activeTab === 'completed' && (
-              stitchedSuits.length === 0 ? (
+              filteredStitched.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiCheckCircle className="text-4xl text-gray-300 mx-auto mb-2" />
                   <p className="text-gray-400 font-bold text-sm">Abhi tak koi suit approved nahi hua.</p>
                 </div>
               ) : (
-                stitchedSuits.map((item, idx) => (
+                filteredStitched.map((item, idx) => (
                   <div key={idx} className="bg-white border border-gray-150 rounded p-4 shadow-sm flex items-center justify-between gap-4 border-l-4 border-l-green-500">
                     <div className="space-y-1">
-                      <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">Order #BT-{item.orderNumber}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Order #BT-{item.orderNumber}</span>
+                        <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[9px] font-black px-1.5 py-0.2 rounded">
+                          ID: {item.suitNumber || `BT-${item.orderNumber}-${item.suitIndex || 1}`}
+                        </span>
+                      </div>
                       <h4 className="font-bold text-gray-900 text-sm">{item.fabricDetails}</h4>
                       <p className="text-xs text-gray-500">Stitched for: <span className="font-bold">{item.wearerName}</span></p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-black text-green-600">+ Rs {worker.perSuitWage}</p>
-                      <p className="text-[10px] text-green-700 font-bold uppercase">QC Passed & Credited</p>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedSuitForSpecs(item)}
+                        className="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-2.5 py-1.5 rounded flex items-center gap-1"
+                      >
+                        <FiFileText /> Naap
+                      </button>
+                      <div className="text-right">
+                        <p className="text-sm font-black text-green-600">+ Rs {worker.perSuitWage}</p>
+                        <p className="text-[10px] text-green-700 font-bold uppercase">QC Passed</p>
+                      </div>
                     </div>
                   </div>
                 ))
@@ -510,6 +659,17 @@ const WorkerDashboard = () => {
 
       </main>
 
+      {/* Suit Naap & Specifications Modal */}
+      {selectedSuitForSpecs && (
+        <SuitSpecsModal
+          suit={selectedSuitForSpecs}
+          worker={worker}
+          closeModal={() => setSelectedSuitForSpecs(null)}
+          onSubmitForQC={handleSubmitForQC}
+          isSubmitting={isSubmitting}
+        />
+      )}
+
       {/* Receipt Slip Modal */}
       {viewingPayment && (
         <PaymentReceiptModal
@@ -519,6 +679,260 @@ const WorkerDashboard = () => {
         />
       )}
 
+    </div>
+  );
+};
+
+// -------------------------------------------------------------
+// COMPONENT: SUIT SPECIFICATIONS & FULL MEASUREMENTS MODAL
+// -------------------------------------------------------------
+const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting }) => {
+  if (!suit) return null;
+
+  const suitIdBadge = suit.suitNumber || (suit.orderNumber ? `BT-${suit.orderNumber}-${suit.suitIndex || 1}` : 'BT-SUIT');
+  const wearer = suit.wearer || {};
+  const measurements = (suit.measurements && suit.measurements.length > 0) 
+    ? suit.measurements 
+    : (wearer.measurements || []);
+  const prefs = suit.stitchingPreferences || wearer.stitchingPreferences || {};
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-4 font-sans">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[92vh] animate-fade-in">
+        
+        {/* HEADER */}
+        <div className="bg-[#0F172A] text-white p-4 sm:p-5 flex justify-between items-center shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-5 bg-[#DFAC43] rounded-sm"></span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-black text-white">Suit Specifications</h3>
+                <span className="bg-[#DFAC43] text-[#0F172A] font-mono text-xs font-black px-2 py-0.5 rounded shadow-xs">
+                  ID: {suitIdBadge}
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-400 font-medium">Order #BT-{suit.orderNumber} | Customer: {suit.customerName}</p>
+            </div>
+          </div>
+          <button 
+            onClick={closeModal} 
+            className="text-gray-400 hover:text-white p-1 text-2xl leading-none transition cursor-pointer"
+          >
+            <FiX />
+          </button>
+        </div>
+
+        {/* MODAL BODY (SCROLLABLE) */}
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 text-xs">
+          
+          {/* Quick Info Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-gray-50 p-3 rounded-lg border border-gray-200">
+            <div>
+              <span className="text-[9px] font-bold text-gray-400 uppercase block">Wearer Name:</span>
+              <span className="font-black text-gray-900 text-xs sm:text-sm">{suit.wearerName}</span>
+            </div>
+            <div>
+              <span className="text-[9px] font-bold text-gray-400 uppercase block">Customer Phone:</span>
+              <span className="font-bold text-gray-700">{suit.customerPhone || '-'}</span>
+            </div>
+            <div>
+              <span className="text-[9px] font-bold text-gray-400 uppercase block">Delivery Due:</span>
+              <span className="font-black text-red-600 text-xs">{new Date(suit.deliveryDate).toLocaleDateString()}</span>
+            </div>
+            <div>
+              <span className="text-[9px] font-bold text-gray-400 uppercase block">Stitching Wage:</span>
+              <span className="font-black text-green-700 text-xs">Rs {worker?.perSuitWage || suit.price}</span>
+            </div>
+          </div>
+
+          {/* Garment, Fabric & Add-ons */}
+          <div className="bg-white p-3.5 rounded-lg border border-gray-200 space-y-2.5">
+            <div className="flex flex-wrap justify-between items-start gap-2">
+              <div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase block">Garment & Fabric:</span>
+                <p className="font-black text-gray-900 text-sm">
+                  {suit.serviceType || 'Shalwar Qameez'} - <span className="text-[#0F172A]">{suit.fabricDetails}</span>
+                </p>
+                {suit.volumeNo && (
+                  <span className="inline-block bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-0.5 rounded mt-1 border">
+                    VOL: {suit.volumeNo}
+                  </span>
+                )}
+              </div>
+              
+              {suit.fabricImage?.url && (
+                <div className="shrink-0">
+                  <a href={suit.fabricImage.url} target="_blank" rel="noreferrer" className="block text-center">
+                    <img src={suit.fabricImage.url} alt="Fabric sample" className="w-14 h-14 object-cover rounded border border-gray-300 shadow-xs hover:opacity-90" />
+                    <span className="text-[9px] text-blue-600 font-bold block mt-0.5">Zoom Photo</span>
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Customizations / Add-ons */}
+            {suit.customizations && suit.customizations.length > 0 && (
+              <div className="pt-2 border-t border-gray-100">
+                <span className="text-[10px] font-bold text-gray-400 uppercase block mb-1">Add-on Customizations:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {suit.customizations.map((c, i) => (
+                    <span key={i} className="bg-[#0F172A] text-[#DFAC43] font-bold text-[10px] px-2 py-0.5 rounded">
+                      + {c.name} {c.urduName ? `(${c.urduName})` : ''}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Style Preferences (Collar, Sleeves, Daman, Pockets, Patti) */}
+          <div className="bg-amber-50/50 p-3.5 rounded-lg border border-amber-200 space-y-2">
+            <h4 className="font-black text-amber-950 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+              <FiTag className="text-[#DFAC43]" /> Style & Stitching Preferences (ڈیزائننگ / ترجیحات)
+            </h4>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-semibold">
+              {prefs.collar && (
+                <div className="bg-white p-2 rounded border border-amber-150">
+                  <span className="text-[9px] text-gray-400 uppercase block">Collar / Bain (گلا/بین):</span>
+                  <span className="font-black text-gray-900">{prefs.collar}</span>
+                </div>
+              )}
+              {prefs.sleeves && (
+                <div className="bg-white p-2 rounded border border-amber-150">
+                  <span className="text-[9px] text-gray-400 uppercase block">Sleeves / Astin (آستین):</span>
+                  <span className="font-black text-gray-900">{prefs.sleeves}</span>
+                </div>
+              )}
+              {prefs.daman && (
+                <div className="bg-white p-2 rounded border border-amber-150">
+                  <span className="text-[9px] text-gray-400 uppercase block">Daman (دامن):</span>
+                  <span className="font-black text-gray-900">{prefs.daman}</span>
+                </div>
+              )}
+              {prefs.frontPocket && (
+                <div className="bg-white p-2 rounded border border-amber-150">
+                  <span className="text-[9px] text-gray-400 uppercase block">Front Pocket (سامنے جیب):</span>
+                  <span className="font-black text-gray-900">{prefs.frontPocket}</span>
+                </div>
+              )}
+              {prefs.sidePockets && (
+                <div className="bg-white p-2 rounded border border-amber-150">
+                  <span className="text-[9px] text-gray-400 uppercase block">Side Pockets (سائیڈ جیب):</span>
+                  <span className="font-black text-gray-900">{prefs.sidePockets}</span>
+                </div>
+              )}
+              {prefs.shalwarPocket && (
+                <div className="bg-white p-2 rounded border border-amber-150">
+                  <span className="text-[9px] text-gray-400 uppercase block">Shalwar Pocket (شلوار جیب):</span>
+                  <span className="font-black text-gray-900">{prefs.shalwarPocket}</span>
+                </div>
+              )}
+              {prefs.patti && (
+                <div className="bg-white p-2 rounded border border-amber-150">
+                  <span className="text-[9px] text-gray-400 uppercase block">Patti (سامنے پٹی):</span>
+                  <span className="font-black text-gray-900">{prefs.patti}</span>
+                </div>
+              )}
+              {prefs.stitchingStyle && (
+                <div className="bg-white p-2 rounded border border-amber-150">
+                  <span className="text-[9px] text-gray-400 uppercase block">Stitching Style:</span>
+                  <span className="font-black text-gray-900">{prefs.stitchingStyle}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Tags */}
+            {suit.staticTags && suit.staticTags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {suit.staticTags.map((tag, tIdx) => (
+                  <span key={tIdx} className="bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded text-[10px] font-bold">
+                    ✓ {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Special Urdu Notes */}
+            {suit.customDesign && (
+              <div className="bg-white p-3 rounded border border-amber-200 text-right" dir="rtl">
+                <span className="block text-[9px] font-bold text-amber-800 uppercase tracking-wider mb-1 text-left" dir="ltr">
+                  Special Tailor Instructions (خصوصی ہدایات):
+                </span>
+                <p className="text-xs sm:text-sm font-black text-gray-900 leading-relaxed font-sans">{suit.customDesign}</p>
+              </div>
+            )}
+          </div>
+
+          {/* FULL BODY MEASUREMENTS (مکمل جسمانی ناپ) */}
+          <div className="bg-white p-4 rounded-lg border border-gray-200 space-y-3">
+            <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+              <h4 className="font-black text-gray-900 uppercase tracking-wider text-xs flex items-center gap-1.5">
+                <FiScissors className="text-[#DFAC43]" /> Full Body Measurements (ناپ کا چارٹ)
+              </h4>
+              <span className="text-[10px] text-gray-400 font-bold">Inches (انچ)</span>
+            </div>
+
+            {(!measurements || measurements.length === 0) ? (
+              <p className="text-xs text-gray-400 italic py-3 text-center">Is wearer ka koi size/measurement save nahi hai.</p>
+            ) : (
+              <div className="space-y-4">
+                {measurements.map((meas, mIdx) => {
+                  const dataObj = meas.data instanceof Map ? Object.fromEntries(meas.data) : (meas.data || {});
+                  const keys = Object.keys(dataObj);
+                  return (
+                    <div key={mIdx} className="space-y-2">
+                      {meas.category && (
+                        <span className="inline-block bg-black text-[#DFAC43] text-[10px] font-black px-2.5 py-0.5 rounded uppercase">
+                          {meas.category}
+                        </span>
+                      )}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                        {keys.map((key) => (
+                          <div key={key} className="bg-gray-50 border border-gray-200 p-2 rounded text-center">
+                            <span className="text-[10px] font-bold text-gray-500 uppercase block truncate">{key}</span>
+                            <span className="text-sm sm:text-base font-black text-gray-900 font-sans">{dataObj[key] || '-'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+        </div>
+
+        {/* FOOTER ACTIONS */}
+        <div className="bg-gray-50 border-t border-gray-200 p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-center gap-2 shrink-0">
+          <span className="text-xs font-bold text-gray-500">
+            Suit Status: <span className="font-black text-black">{suit.stitchingStatus}</span>
+          </span>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="flex-1 sm:flex-none px-4 py-2 border border-gray-300 rounded text-xs font-bold text-gray-700 hover:bg-gray-100 transition cursor-pointer"
+            >
+              Close
+            </button>
+
+            {suit.stitchingStatus !== 'Stitched' && suit.stitchingStatus !== 'Submitted for Inspection' && (
+              <button
+                type="button"
+                onClick={() => onSubmitForQC(suit.orderId, suit.suitId)}
+                disabled={isSubmitting}
+                className="flex-1 sm:flex-none bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black px-4 py-2 rounded text-xs transition shadow flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <FiCheckCircle /> Submit for QC Inspection
+              </button>
+            )}
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 };
@@ -548,14 +962,30 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
         </div>
 
         <div className="p-6 overflow-y-auto flex-1 font-sans bg-gray-55" id="receipt-print-area">
-          <div className="border-4 border-double border-black p-5 space-y-5 bg-white text-black rounded-lg shadow-sm">
-            <div className="text-center space-y-0.5">
-              <h1 className="text-xl font-black tracking-widest uppercase font-serif text-black">Balouch Tailors</h1>
-              <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">Premium Stitching & Bridal Wear</p>
-              <div className="w-16 h-0.5 bg-black mx-auto my-1.5"></div>
-              <p className="text-[11px] font-black tracking-wider uppercase bg-black text-white px-2 py-0.5 inline-block rounded">
-                Karigar Salary Slip (Raseed)
+          <div className="border-4 border-double border-black p-5 space-y-4 bg-white text-black rounded-lg shadow-sm">
+            
+            {/* Header */}
+            <div className="text-center space-y-1">
+              <div className="flex justify-center mb-1">
+                <img src={logo} alt="Balouch Tailors" className="h-12 w-auto object-contain" />
+              </div>
+              <h1 className="text-xl font-black tracking-wider uppercase font-serif text-black">Balouch Tailors</h1>
+              <div>
+                <span className="inline-block bg-gray-100 text-gray-800 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                  Gents Shalwar Qameez Specialist
+                </span>
+              </div>
+              <p className="text-[10px] font-bold text-gray-900">
+                Proprietor: <span className="font-black">Zubair Balouch</span> | Ph: <span className="font-black">0313-4389192, 0306-7379919</span>
               </p>
+              <p className="text-[8px] text-gray-600">
+                Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+              </p>
+              <div className="pt-1">
+                <span className="text-[10px] font-black tracking-wider uppercase bg-black text-white px-3 py-0.5 inline-block rounded">
+                  Karigar Salary Slip (تنخواہ رسید)
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-[10px] border-b border-dashed border-gray-400 pb-3 font-semibold text-gray-700">
@@ -610,7 +1040,7 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4 pt-8 text-[9px] font-bold text-center">
+            <div className="grid grid-cols-2 gap-4 pt-6 text-[9px] font-bold text-center">
               <div className="space-y-1">
                 <div className="border-b border-black w-28 mx-auto"></div>
                 <p className="uppercase text-gray-500">Karigar Signature</p>
@@ -619,6 +1049,19 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
                 <div className="border-b border-black w-28 mx-auto"></div>
                 <p className="uppercase text-gray-500">Shop Stamp & Sig</p>
               </div>
+            </div>
+
+            {/* Shop & Proprietor Footer Stamp */}
+            <div className="pt-3 border-t-2 border-black text-center space-y-0.5 text-black">
+              <p className="font-black text-[10px] uppercase tracking-wider">
+                Proprietor: Zubair Balouch
+              </p>
+              <p className="font-black text-[10px] font-sans">
+                📞 0313-4389192 | 0306-7379919
+              </p>
+              <p className="text-[8px] text-gray-600">
+                Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+              </p>
             </div>
           </div>
         </div>

@@ -200,7 +200,7 @@ const InvoicePrint = () => {
             <span className={`inline-block bg-gray-100 text-gray-800 rounded font-black tracking-wider uppercase ${
               paperSize === '56mm' ? 'text-[7px] px-1.5 py-0.5' : paperSize === '80mm' ? 'text-[9px] px-2 py-0.5' : 'text-xs px-3 py-1'
             }`}>
-              Custom Bespoke Tailoring & Stitching for Gents
+              Gents Shalwar Qameez Specialist
             </span>
           </div>
 
@@ -208,11 +208,11 @@ const InvoicePrint = () => {
           <p className={`font-bold text-gray-900 ${
             paperSize === '56mm' ? 'text-[8px]' : paperSize === '80mm' ? 'text-[10px]' : 'text-sm'
           }`}>
-            Proprietor: <span className="font-black">Muhammad Zubair</span> | Ph: <span className="font-black">0306-7379919</span>
+            {/* Proprietor: <span className="font-black">Zubair Balouch</span> | Ph: <span className="font-black">0313-4389192, 0306-7379919</span> */}
           </p>
 
           {/* Shop Address (Separate Line) */}
-          <p className={`text-gray-500 font-medium ${
+          <p className={`text-gray-600 font-medium ${
             paperSize === '56mm' ? 'text-[7px] leading-tight' : paperSize === '80mm' ? 'text-[9px] leading-tight' : 'text-xs'
           }`}>
             Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
@@ -281,8 +281,11 @@ const InvoicePrint = () => {
                   {/* Suit Base Row */}
                   <tr>
                     <td className="py-1.5">
-                      <div className="font-black text-gray-900">
-                        {suit.serviceType ? `${suit.serviceType}` : 'Suit'} #{suitIdx + 1}
+                      <div className="font-black text-gray-900 flex items-center justify-between gap-1">
+                        <span>{suit.serviceType ? `${suit.serviceType}` : 'Suit'} #{suitIdx + 1}</span>
+                        <span className="font-mono text-[8px] sm:text-[9px] bg-[#0F172A] text-white px-1.5 py-0.2 rounded font-black print:border print:border-black">
+                          ID: {suit.suitNumber || `BT-${order.orderNumber || (order._id ? order._id.slice(-4) : '1')}-${suitIdx + 1}`}
+                        </span>
                       </div>
                       
                       {suit.fabricDetails && (
@@ -414,13 +417,13 @@ const InvoicePrint = () => {
         </div>
 
         {/* ========================================= */}
-        {/* FOOTER: THANK YOU & TERMS / POLICY        */}
+        {/* FOOTER: PROPRIETOR, CONTACT & TERMS       */}
         {/* ========================================= */}
         <div className="text-center pt-1.5 space-y-1.5">
           <p className="font-black text-[10px] sm:text-xs text-gray-900 tracking-wide">
             Thank you for choosing Balouch Tailors!
           </p>
-          <p className="text-[9px] sm:text-[10px] text-gray-600 font-urdu" dir="rtl">
+          <p className="text-[9px] sm:text-[10px] text-gray-700 font-bold" dir="rtl">
             آپ کے اعتماد کا شکریہ۔
           </p>
 
@@ -430,6 +433,19 @@ const InvoicePrint = () => {
             <p>2. Delivery will be handed over only after clearance of remaining balance.</p>
             <p>3. Any fitting complaints/alterations must be reported within 7 days of delivery.</p>
             <p>4. Advance payment is non-refundable.</p>
+          </div>
+
+          {/* Shop & Proprietor Footer Stamp */}
+          <div className="pt-2 border-t-2 border-black text-center space-y-0.5 text-black">
+            <p className="font-black text-[9px] sm:text-[11px] uppercase tracking-wider">
+              Proprietor: Zubair Balouch
+            </p>
+            <p className="font-black text-[9px] sm:text-[10px] font-sans">
+              📞 0313-4389192 | 0306-7379919
+            </p>
+            <p className="text-[7px] sm:text-[8px] text-gray-600">
+              Hazori Bagh Road, Street 1, Muhallah Muhammadi, Multan
+            </p>
           </div>
         </div>
 

@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useGetFinancialSummary } from '../hooks/useWorkers';
 import { useGetOrders } from '../hooks/useOrder';
 import { 
-  FiDollarSign, 
   FiTrendingUp, 
   FiScissors, 
   FiCreditCard, 
@@ -14,6 +13,7 @@ import {
   FiPieChart,
   FiFileText
 } from 'react-icons/fi';
+import { FaMoneyBillWave } from 'react-icons/fa';
 import Preloader from '../components/Preloader';
 
 const AdminFinancialReports = () => {
@@ -59,7 +59,7 @@ const AdminFinancialReports = () => {
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-2">
-              <FiDollarSign className="text-[#DFAC43]" /> Financial Reports & Accounting
+              <FaMoneyBillWave className="text-[#DFAC43]" /> Financial Reports & Accounting
             </h1>
             <p className="text-xs md:text-sm text-gray-400 mt-1 max-w-xl font-medium">
               Live automated financial matrix, net business profit, cash flow collections, receivables, and Karigar & material liabilities.

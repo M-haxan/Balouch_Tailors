@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { FiShoppingBag, FiCreditCard, FiLogOut, FiUsers, FiTrendingUp, FiDollarSign } from 'react-icons/fi';
+import { FiShoppingBag, FiCreditCard, FiLogOut, FiUsers, FiTrendingUp } from 'react-icons/fi';
+import { FaMoneyBillWave } from 'react-icons/fa';
 import { CgProfile } from "react-icons/cg";
 import { IoMdSettings } from "react-icons/io";
 import { FiBox } from 'react-icons/fi';
@@ -70,7 +71,7 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
             {!collapsed && <span>Expenses</span>}
           </NavLink>
           <NavLink to="/admin/financial-reports" className={getLinkStyle} onClick={onCloseMobile}>
-            <FiDollarSign className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
+            <FaMoneyBillWave className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
             {!collapsed && <span>Financial Reports</span>}
           </NavLink>
           <NavLink to="/admin/payments" className={getLinkStyle} onClick={onCloseMobile}>

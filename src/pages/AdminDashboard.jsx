@@ -5,7 +5,6 @@ import { useGetWorkers, useGetFinancialSummary } from '../hooks/useWorkers';
 import { useGetCustomers } from '../hooks/useCustomers';
 import { 
   FiBox, 
-  FiDollarSign, 
   FiScissors, 
   FiUsers, 
   FiTrendingUp, 
@@ -23,6 +22,7 @@ import {
   FiPhone,
   FiAlertCircle
 } from 'react-icons/fi';
+import { FaMoneyBillWave } from 'react-icons/fa';
 import Preloader from '../components/Preloader';
 
 const AdminDashboard = () => {
@@ -177,7 +177,7 @@ const AdminDashboard = () => {
               onClick={() => navigate('/admin/financial-reports')}
               className="h-11 bg-[#1E293B] hover:bg-gray-800 text-gray-200 hover:text-white font-bold px-3 rounded text-xs transition border border-gray-700 flex items-center justify-center gap-1.5 whitespace-nowrap"
             >
-              <FiDollarSign className="text-xs shrink-0" /> 
+              <FaMoneyBillWave className="text-xs shrink-0" /> 
               <span>Finance Reports</span>
             </button>
             <button

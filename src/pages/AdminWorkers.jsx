@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logo from '../assets/BT_Logo.png';
 import { 
   useGetWorkers, 
   useAddWorker, 
@@ -21,7 +22,6 @@ import {
   FiX, 
   FiUser, 
   FiPhone, 
-  FiDollarSign, 
   FiBriefcase, 
   FiUnlock, 
   FiMapPin,
@@ -1160,15 +1160,30 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
 
         {/* Printable Section */}
         <div className="p-6 overflow-y-auto flex-1 font-sans bg-gray-50" id="receipt-print-area">
-          <div className="border-4 border-double border-black p-5 space-y-5 bg-white text-black rounded-lg shadow-sm">
+          <div className="border-4 border-double border-black p-5 space-y-4 bg-white text-black rounded-lg shadow-sm">
+            
             {/* Invoice Header */}
-            <div className="text-center space-y-0.5">
-              <h1 className="text-xl font-black tracking-widest uppercase font-serif text-black">Balouch Tailors</h1>
-              <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">Premium Stitching & Bridal Wear</p>
-              <div className="w-16 h-0.5 bg-black mx-auto my-1.5"></div>
-              <p className="text-[11px] font-black tracking-wider uppercase bg-black text-white px-2 py-0.5 inline-block rounded">
-                Karigar Salary Slip (Raseed)
+            <div className="text-center space-y-1">
+              <div className="flex justify-center mb-1">
+                <img src={logo} alt="Balouch Tailors" className="h-12 w-auto object-contain" />
+              </div>
+              <h1 className="text-xl font-black tracking-wider uppercase font-serif text-black">Balouch Tailors</h1>
+              <div>
+                <span className="inline-block bg-gray-100 text-gray-800 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
+                  Gents Shalwar Qameez Specialist
+                </span>
+              </div>
+              <p className="text-[10px] font-bold text-gray-900">
+                Proprietor: <span className="font-black">Zubair Balouch</span> | Ph: <span className="font-black">0313-4389192, 0306-7379919</span>
               </p>
+              <p className="text-[8px] text-gray-600">
+                Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+              </p>
+              <div className="pt-1">
+                <span className="text-[10px] font-black tracking-wider uppercase bg-black text-white px-3 py-0.5 inline-block rounded">
+                  Karigar Salary Slip (تنخواہ رسید)
+                </span>
+              </div>
             </div>
 
             {/* Invoice Metadata */}
@@ -1228,7 +1243,7 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
             )}
 
             {/* Signature fields */}
-            <div className="grid grid-cols-2 gap-4 pt-8 text-[9px] font-bold text-center">
+            <div className="grid grid-cols-2 gap-4 pt-6 text-[9px] font-bold text-center">
               <div className="space-y-1">
                 <div className="border-b border-black w-28 mx-auto"></div>
                 <p className="uppercase text-gray-500">Karigar Signature</p>
@@ -1237,6 +1252,19 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
                 <div className="border-b border-black w-28 mx-auto"></div>
                 <p className="uppercase text-gray-500">Shop Stamp & Sig</p>
               </div>
+            </div>
+
+            {/* Shop & Proprietor Footer Stamp */}
+            <div className="pt-3 border-t-2 border-black text-center space-y-0.5 text-black">
+              <p className="font-black text-[10px] uppercase tracking-wider">
+                Proprietor: Zubair Balouch
+              </p>
+              <p className="font-black text-[10px] font-sans">
+                📞 0313-4389192 | 0306-7379919
+              </p>
+              <p className="text-[8px] text-gray-600">
+                Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+              </p>
             </div>
           </div>
         </div>

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetOrders, useDeliverOrder } from '../hooks/useOrder';
 import { 
-  FiDollarSign, 
   FiCreditCard, 
   FiCheckCircle, 
   FiAlertCircle, 
@@ -15,6 +14,7 @@ import {
   FiX,
   FiCheck
 } from 'react-icons/fi';
+import { FaMoneyBillWave } from 'react-icons/fa';
 import Preloader from '../components/Preloader';
 
 const AdminPayments = () => {
@@ -169,7 +169,7 @@ const AdminPayments = () => {
         <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Today's Cash</span>
-            <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs"><FiDollarSign /></span>
+            <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs"><FaMoneyBillWave /></span>
           </div>
           <p className="text-xl font-black text-[#0F172A] font-sans">Rs {todayCollection.toLocaleString()}</p>
           <span className="text-[10px] text-green-700 font-bold block">Cash Collected Today</span>
