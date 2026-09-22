@@ -12,6 +12,10 @@ import {
   useDeleteTailoringService 
 } from '../hooks/useTailoringServices';
 import { 
+  useGetShopSettings, 
+  useUpdateShopSettings 
+} from '../hooks/useShopSettings';
+import { 
   FiEdit, 
   FiTrash2, 
   FiPlus, 
@@ -23,7 +27,14 @@ import {
   FiCheck,
   FiLayers,
   FiTag,
-  FiInfo
+  FiInfo,
+  FiPhone,
+  FiMapPin,
+  FiAward,
+  FiImage,
+  FiSave,
+  FiPrinter,
+  FiUser
 } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import { toast } from 'react-toastify';
@@ -91,32 +102,35 @@ const AdminSettings = () => {
   });
 
   return (
-    <div className="bg-white rounded shadow-sm min-h-[85vh] flex flex-col md:flex-row border border-gray-100 overflow-hidden">
+    <div className="space-y-6">
       
-      {/* LEFT SIDEBAR: Settings Tabs */}
-      <div className="w-full md:w-72 border-r border-gray-100 bg-gray-50/70 p-4 sm:p-6 shrink-0">
-        <div className="mb-6">
-          <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <FiSettings className="text-[#DFAC43]" /> Settings
-          </h2>
-          <p className="text-xs text-gray-500 mt-1 font-medium">Manage garment categories, add-on rates & templates.</p>
+      {/* TOP HEADER & HORIZONTAL TABS ROW */}
+      <div className="bg-white rounded shadow-sm border border-gray-200/90 p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-100">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2.5">
+              <FiSettings className="text-[#DFAC43]" /> System Settings
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
+              Manage garment categories, rates, measurement templates & shop branding preferences.
+            </p>
+          </div>
         </div>
 
-        <nav className="space-y-2">
+        {/* Horizontal Navigation Tabs */}
+        <div className="flex items-center gap-2.5 pt-4 overflow-x-auto no-scrollbar">
           <button 
             onClick={() => setActiveTab('rates')}
-            className={`w-full flex items-center justify-between px-4 py-3.5 rounded text-sm font-black transition-all text-left ${
+            className={`flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'rates' 
-                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
-                : 'text-gray-600 hover:bg-gray-200'
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md scale-[1.01]' 
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-black border border-gray-200'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <FaMoneyBillWave className="text-lg" />
-              <span>Tailoring Rates & Add-ons</span>
-            </div>
-            <span className={`text-xs px-2 py-0.5 rounded font-bold ${
-              activeTab === 'rates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-600'
+            <FaMoneyBillWave className="text-base shrink-0" />
+            <span>Tailoring Rates & Add-ons</span>
+            <span className={`text-[11px] px-2 py-0.5 rounded font-bold ml-1 ${
+              activeTab === 'rates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-700'
             }`}>
               {tailoringList.length}
             </span>
@@ -124,18 +138,16 @@ const AdminSettings = () => {
           
           <button 
             onClick={() => setActiveTab('templates')}
-            className={`w-full flex items-center justify-between px-4 py-3.5 rounded text-sm font-black transition-all text-left ${
+            className={`flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'templates' 
-                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
-                : 'text-gray-600 hover:bg-gray-200'
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md scale-[1.01]' 
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-black border border-gray-200'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <FiSliders className="text-lg" />
-              <span>Measurement Templates</span>
-            </div>
-            <span className={`text-xs px-2 py-0.5 rounded font-bold ${
-              activeTab === 'templates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-600'
+            <FiSliders className="text-base shrink-0" />
+            <span>Measurement Templates</span>
+            <span className={`text-[11px] px-2 py-0.5 rounded font-bold ml-1 ${
+              activeTab === 'templates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-700'
             }`}>
               {templates.length}
             </span>
@@ -143,20 +155,20 @@ const AdminSettings = () => {
           
           <button 
             onClick={() => setActiveTab('general')}
-            className={`w-full flex items-center gap-3 px-4 py-3.5 rounded text-sm font-black transition-all text-left ${
+            className={`flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer ${
               activeTab === 'general' 
-                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
-                : 'text-gray-600 hover:bg-gray-200'
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md scale-[1.01]' 
+                : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-black border border-gray-200'
             }`}
           >
-            <FiSettings className="text-lg" />
-            <span>General Preferences</span>
+            <FiSettings className="text-base shrink-0" />
+            <span>Shop Branding & Info</span>
           </button>
-        </nav>
+        </div>
       </div>
 
-      {/* RIGHT SIDE: Content Area */}
-      <div className="flex-1 p-4 sm:p-6 md:p-8 bg-white min-w-0">
+      {/* FULL-WIDTH CONTENT CARD */}
+      <div className="bg-white rounded shadow-sm border border-gray-200/90 p-5 sm:p-7 md:p-8 min-w-0">
         
         {/* ============================================================== */}
         {/* TAB 1: TAILORING RATES & CUSTOMIZATIONS                       */}
@@ -175,54 +187,64 @@ const AdminSettings = () => {
                 </p>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button 
                   onClick={() => openPricingModal(null, rateSection === 'customizations' ? 'customization' : 'service')}
-                  className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-sm"
+                  className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-sm whitespace-nowrap"
                 >
-                  <FiPlus className="text-base" />
-                  {rateSection === 'services' ? 'Add Category' : 'Add Customization'}
+                  <FiPlus className="text-base shrink-0" />
+                  <span>{rateSection === 'services' ? 'Add Category' : 'Add Customization'}</span>
                 </button>
               </div>
             </div>
 
             {/* Sub-Tabs: 1. Garment Categories vs 2. Customizations */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100">
-              <div className="flex gap-2">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-gray-50 p-2.5 rounded border border-gray-200">
+              <div className="flex flex-wrap sm:flex-nowrap gap-2">
                 <button
                   onClick={() => setRateSection('services')}
-                  className={`px-4 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
+                  className={`px-3.5 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 whitespace-nowrap ${
                     rateSection === 'services'
                       ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                       : 'text-gray-600 hover:bg-gray-200'
                   }`}
                 >
-                  <FiLayers />
-                  <span>Garment Categories ({garmentServices.length})</span>
+                  <FiLayers className="text-sm shrink-0" />
+                  <span>Garment Categories</span>
+                  <span className={`text-[11px] px-1.5 py-0.2 rounded font-bold shrink-0 ${
+                    rateSection === 'services' ? 'bg-[#DFAC43] text-black' : 'bg-gray-200 text-gray-700'
+                  }`}>
+                    {garmentServices.length}
+                  </span>
                 </button>
 
                 <button
                   onClick={() => setRateSection('customizations')}
-                  className={`px-4 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 ${
+                  className={`px-3.5 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 whitespace-nowrap ${
                     rateSection === 'customizations'
                       ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                       : 'text-gray-600 hover:bg-gray-200'
                   }`}
                 >
-                  <FiTag />
-                  <span>Customizations ({customizations.length})</span>
+                  <FiTag className="text-sm shrink-0" />
+                  <span>Customizations</span>
+                  <span className={`text-[11px] px-1.5 py-0.2 rounded font-bold shrink-0 ${
+                    rateSection === 'customizations' ? 'bg-[#DFAC43] text-black' : 'bg-gray-200 text-gray-700'
+                  }`}>
+                    {customizations.length}
+                  </span>
                 </button>
               </div>
 
               {/* Search input */}
-              <div className="relative w-full sm:w-60">
+              <div className="relative w-full lg:w-60 shrink-0">
                 <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder="Search rates..."
                   value={pricingSearch}
                   onChange={(e) => setPricingSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 rounded bg-white border border-gray-200 text-xs font-medium outline-none focus:border-[#DFAC43]"
+                  className="w-full pl-8 pr-3 py-2 rounded bg-white border border-gray-200 text-xs font-medium outline-none focus:border-[#DFAC43]"
                 />
               </div>
             </div>
@@ -281,7 +303,7 @@ const AdminSettings = () => {
                                   <button 
                                     onClick={() => openPricingModal(item, 'service')} 
                                     title="Edit Category"
-                                    className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
+                                    className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded transition"
                                   >
                                     <FiEdit className="text-sm" />
                                   </button>
@@ -289,7 +311,7 @@ const AdminSettings = () => {
                                     onClick={() => handleDeletePricing(item._id)} 
                                     disabled={isDeletingTailoring}
                                     title="Delete Category"
-                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
                                   >
                                     <FiTrash2 className="text-sm" />
                                   </button>
@@ -308,7 +330,7 @@ const AdminSettings = () => {
             {/* SECTION 2: CUSTOMIZATIONS & ADD-ONS TABLE */}
             {rateSection === 'customizations' && (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 bg-amber-50/70 border border-amber-200/80 p-3 rounded-xl text-xs text-amber-900 font-medium">
+                <div className="flex items-center gap-2 bg-amber-50/70 border border-amber-200/80 p-3 rounded text-xs text-amber-900 font-medium">
                   <FiInfo className="text-base text-amber-700 shrink-0" />
                   <span>
                     <strong>Customizations & Add-ons:</strong> Yahan Jali Kanta, Double Silai, Fancy Button ke add-on rates define karein.
@@ -323,7 +345,7 @@ const AdminSettings = () => {
                     <p className="text-gray-600 font-bold mb-2">No customizations defined yet.</p>
                     <button 
                       onClick={() => openPricingModal(null, 'customization')}
-                      className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-5 py-2.5 rounded-xl font-black text-xs transition"
+                      className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-5 py-2.5 rounded font-black text-xs transition"
                     >
                       + Add New Customization
                     </button>
@@ -359,7 +381,7 @@ const AdminSettings = () => {
                                   <button 
                                     onClick={() => openPricingModal(item, 'customization')} 
                                     title="Edit Customization"
-                                    className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded-lg transition"
+                                    className="p-2 text-gray-600 hover:text-black hover:bg-gray-100 rounded transition"
                                   >
                                     <FiEdit className="text-sm" />
                                   </button>
@@ -367,7 +389,7 @@ const AdminSettings = () => {
                                     onClick={() => handleDeletePricing(item._id)} 
                                     disabled={isDeletingTailoring}
                                     title="Delete Customization"
-                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
                                   >
                                     <FiTrash2 className="text-sm" />
                                   </button>
@@ -399,7 +421,7 @@ const AdminSettings = () => {
               </div>
               <button 
                 onClick={() => openTemplateModal()}
-                className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-sm"
+                className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-sm"
               >
                 <FiPlus className="text-base" /> Add New Template
               </button>
@@ -426,7 +448,7 @@ const AdminSettings = () => {
                         <button onClick={() => openTemplateModal(template)} className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition">
                           <FiEdit />
                         </button>
-                        <button onClick={() => handleDeleteTemplate(template._id)} disabled={isDeletingTemplate} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                        <button onClick={() => handleDeleteTemplate(template._id)} disabled={isDeletingTemplate} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition">
                           <FiTrash2 />
                         </button>
                       </div>
@@ -447,14 +469,10 @@ const AdminSettings = () => {
         )}
 
         {/* ============================================================== */}
-        {/* TAB 3: GENERAL SETTINGS                                        */}
+        {/* TAB 3: GENERAL SETTINGS (SHOP BRANDING & CONTACT INFO)         */}
         {/* ============================================================== */}
         {activeTab === 'general' && (
-          <div className="text-center py-20">
-            <FiSettings className="text-4xl text-gray-300 mx-auto mb-4 animate-spin-slow" />
-            <h3 className="text-xl font-bold text-gray-800">General Settings</h3>
-            <p className="text-gray-500 mt-2 text-sm">Shop info, invoice footer notes, and SMS templates configurations will appear here.</p>
-          </div>
+          <ShopGeneralSettings />
         )}
       </div>
 
@@ -536,7 +554,7 @@ const PricingModal = ({ item, initialType = 'service', closeModal }) => {
           </div>
           <button 
             onClick={closeModal} 
-            className="text-gray-400 hover:text-black p-1.5 rounded-lg hover:bg-gray-200 transition"
+            className="text-gray-400 hover:text-black p-1.5 rounded hover:bg-gray-200 transition"
           >
             <FiX className="text-lg" />
           </button>
@@ -555,7 +573,7 @@ const PricingModal = ({ item, initialType = 'service', closeModal }) => {
               placeholder={isService ? 'e.g. Shalwar Qameez, Kurta, Waistcoat' : 'e.g. Jali Kanta, Double Silai, Fancy Button'} 
               value={serviceName} 
               onChange={(e) => setServiceName(e.target.value)} 
-              className="w-full border-2 border-gray-200 focus:border-[#DFAC43] rounded-xl p-3 outline-none text-sm font-bold text-gray-800 transition"
+              className="w-full border-2 border-gray-200 focus:border-[#DFAC43] rounded p-3 outline-none text-sm font-bold text-gray-800 transition"
             />
           </div>
 
@@ -572,7 +590,7 @@ const PricingModal = ({ item, initialType = 'service', closeModal }) => {
                 placeholder={isService ? '1500' : '400'} 
                 value={price} 
                 onChange={(e) => setPrice(e.target.value)} 
-                className="w-full border-2 border-gray-200 focus:border-[#DFAC43] rounded-xl pl-14 pr-3 py-3 outline-none text-base font-black text-black transition"
+                className="w-full border-2 border-gray-200 focus:border-[#DFAC43] rounded pl-14 pr-3 py-3 outline-none text-base font-black text-black transition"
               />
             </div>
           </div>
@@ -582,14 +600,14 @@ const PricingModal = ({ item, initialType = 'service', closeModal }) => {
             <button 
               type="button" 
               onClick={closeModal} 
-              className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-bold text-xs hover:bg-gray-100 transition"
+              className="px-5 py-2.5 rounded border border-gray-300 text-gray-700 font-bold text-xs hover:bg-gray-100 transition"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               disabled={isPending} 
-              className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-6 py-2.5 rounded-xl font-black text-xs transition shadow-md disabled:opacity-50 flex items-center gap-1.5"
+              className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-6 py-2.5 rounded font-black text-xs transition shadow-md disabled:opacity-50 flex items-center gap-1.5"
             >
               <FiCheck />
               {isPending ? 'Saving...' : isEditMode ? 'Update' : 'Save'}
@@ -649,14 +667,14 @@ const TemplateModal = ({ item, closeModal }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded shadow-2xl w-full max-w-lg relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
+      <div className="bg-white rounded shadow w-full max-w-lg relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-100">
         
         {/* Modal Header */}
         <div className="flex justify-between items-center p-5 sm:p-6 border-b border-gray-100 bg-gray-50/70">
           <h2 className="text-lg sm:text-xl font-black text-black">
             {isEditMode ? `Edit Template: ${item.categoryname}` : 'Create New Template'}
           </h2>
-          <button onClick={closeModal} className="text-gray-400 hover:text-black p-1.5 rounded-lg hover:bg-gray-200 transition">
+          <button onClick={closeModal} className="text-gray-400 hover:text-black p-1.5 rounded hover:bg-gray-200 transition">
             <FiX className="text-lg" />
           </button>
         </div>
@@ -673,7 +691,7 @@ const TemplateModal = ({ item, closeModal }) => {
               placeholder="e.g. Shalwar Kameez, Waistcoat, Safari Suit" 
               value={categoryname} 
               onChange={(e) => setCategoryname(e.target.value)} 
-              className="w-full border border-gray-300 focus:border-[#DFAC43] rounded-xl p-3 outline-none text-sm font-semibold"
+              className="w-full border border-gray-300 focus:border-[#DFAC43] rounded p-3 outline-none text-sm font-semibold"
             />
           </div>
 
@@ -699,7 +717,7 @@ const TemplateModal = ({ item, closeModal }) => {
                     placeholder={`Field #${idx + 1} (e.g. Length, Collar)`} 
                     value={field} 
                     onChange={(e) => handleFieldChange(idx, e.target.value)} 
-                    className="flex-1 border border-gray-300 focus:border-[#DFAC43] rounded-xl p-2.5 outline-none text-sm font-medium"
+                    className="flex-1 border border-gray-300 focus:border-[#DFAC43] rounded p-2.5 outline-none text-sm font-medium"
                   />
                   {fields.length > 1 && (
                     <button 
@@ -720,14 +738,14 @@ const TemplateModal = ({ item, closeModal }) => {
             <button 
               type="button" 
               onClick={closeModal} 
-              className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-bold text-xs hover:bg-gray-100 transition"
+              className="px-5 py-2.5 rounded border border-gray-300 text-gray-700 font-bold text-xs hover:bg-gray-100 transition"
             >
               Cancel
             </button>
             <button 
               type="submit" 
               disabled={isPending} 
-              className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-6 py-2.5 rounded-xl font-black text-xs transition shadow-md disabled:opacity-50"
+              className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-6 py-2.5 rounded font-black text-xs transition shadow-md disabled:opacity-50"
             >
               {isPending ? 'Saving...' : isEditMode ? 'Update Template' : 'Create Template'}
             </button>
@@ -738,4 +756,289 @@ const TemplateModal = ({ item, closeModal }) => {
   );
 };
 
+// -------------------------------------------------------------
+// SHOP GENERAL BRANDING & CONTACT SETTINGS COMPONENT
+// -------------------------------------------------------------
+const ShopGeneralSettings = () => {
+  const { data: shopSettings, isLoading } = useGetShopSettings();
+  const { mutate: updateSettings, isPending } = useUpdateShopSettings();
+
+  const [form, setForm] = useState({
+    shopName: '',
+    tagline: '',
+    proprietor: '',
+    primaryPhone: '',
+    secondaryPhone: '',
+    address: ''
+  });
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState('');
+
+  // Hydrate form when shopSettings loads
+  React.useEffect(() => {
+    if (shopSettings) {
+      setForm({
+        shopName: shopSettings.shopName || 'Balouch Tailors',
+        tagline: shopSettings.tagline || 'Gents Shalwar Qameez Specialist',
+        proprietor: shopSettings.proprietor || 'Zubair Balouch',
+        primaryPhone: shopSettings.primaryPhone || '0313-4389192',
+        secondaryPhone: shopSettings.secondaryPhone || '0306-7379919',
+        address: shopSettings.address || 'Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan'
+      });
+      setLogoPreview(shopSettings.logoUrl || '');
+    }
+  }, [shopSettings]);
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!form.shopName.trim()) return toast.error('Shop Name is required');
+
+    const formData = new FormData();
+    formData.append('shopName', form.shopName.trim());
+    formData.append('tagline', form.tagline.trim());
+    formData.append('proprietor', form.proprietor.trim());
+    formData.append('primaryPhone', form.primaryPhone.trim());
+    formData.append('secondaryPhone', form.secondaryPhone.trim());
+    formData.append('address', form.address.trim());
+
+    if (logoFile) {
+      formData.append('logo', logoFile);
+    }
+
+    updateSettings(formData);
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-16 text-gray-500 font-bold">Loading shop branding settings...</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* HEADER */}
+      <div className="border-b border-gray-100 pb-4">
+        <h3 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2">
+          <FiSettings className="text-[#DFAC43]" /> Shop Branding & Contact Info
+        </h3>
+        <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
+          These details dynamically appear across your Website Header, Navbar, Preloader, and all printable Invoices, Delivery Slips, and Ledger Statements.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* MAIN FORM */}
+        <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-5 bg-white p-5 sm:p-6 rounded border border-gray-200/90 shadow-sm">
+          
+          {/* 1. SHOP NAME & SPECIALITY */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                Shop Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Balouch Tailors"
+                value={form.shopName}
+                onChange={(e) => setForm({ ...form, shopName: e.target.value })}
+                className="w-full border border-gray-300 rounded px-3.5 py-2.5 text-xs sm:text-sm font-bold text-gray-900 focus:border-[#DFAC43] outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                Tagline / Speciality
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Gents Shalwar Qameez Specialist"
+                value={form.tagline}
+                onChange={(e) => setForm({ ...form, tagline: e.target.value })}
+                className="w-full border border-gray-300 rounded px-3.5 py-2.5 text-xs sm:text-sm font-bold text-[#D4AF37] focus:border-[#DFAC43] outline-none"
+              />
+            </div>
+          </div>
+
+          {/* 2. PROPRIETOR & PHONES */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                Proprietor Name *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Zubair Balouch"
+                value={form.proprietor}
+                onChange={(e) => setForm({ ...form, proprietor: e.target.value })}
+                className="w-full border border-gray-300 rounded px-3.5 py-2.5 text-xs sm:text-sm font-bold text-gray-900 focus:border-[#DFAC43] outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                Primary Phone *
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. 0313-4389192"
+                value={form.primaryPhone}
+                onChange={(e) => setForm({ ...form, primaryPhone: e.target.value })}
+                className="w-full border border-gray-300 rounded px-3.5 py-2.5 text-xs sm:text-sm font-medium focus:border-[#DFAC43] outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                Secondary Phone
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 0306-7379919"
+                value={form.secondaryPhone}
+                onChange={(e) => setForm({ ...form, secondaryPhone: e.target.value })}
+                className="w-full border border-gray-300 rounded px-3.5 py-2.5 text-xs sm:text-sm font-medium focus:border-[#DFAC43] outline-none"
+              />
+            </div>
+          </div>
+
+          {/* 3. ADDRESS */}
+          <div>
+            <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+              Shop Address (Appears on Bills & Slips) *
+            </label>
+            <textarea
+              required
+              rows="2"
+              placeholder="e.g. Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan"
+              value={form.address}
+              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              className="w-full border border-gray-300 rounded px-3.5 py-2 text-xs sm:text-sm font-medium focus:border-[#DFAC43] outline-none resize-y"
+            ></textarea>
+          </div>
+
+          {/* 4. LOGO UPLOAD */}
+          <div>
+            <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+              Shop Logo (Web, Navbar, Preloader & Invoices)
+            </label>
+            <div className="flex flex-col sm:flex-row items-start gap-4 p-3 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <div className="flex-1 w-full">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                  className="w-full border border-gray-300 rounded p-2 text-xs bg-white file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#0F172A] file:text-white hover:file:bg-[#DFAC43] hover:file:text-black cursor-pointer"
+                />
+                <p className="text-[11px] text-gray-500 mt-1">
+                  PNG with transparent background or high-res JPG/WEBP logo recommended.
+                </p>
+              </div>
+
+              {logoPreview && (
+                <div className="w-24 h-20 rounded bg-white border border-gray-200 flex items-center justify-center p-2 shrink-0 shadow-sm">
+                  <img src={logoPreview} alt="Logo Preview" className="max-w-full max-h-full object-contain" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* SUBMIT BUTTON */}
+          <div className="flex justify-end pt-3 border-t border-gray-100">
+            <button
+              type="submit"
+              disabled={isPending}
+              className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] px-6 py-2.5 rounded text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-md disabled:opacity-50"
+            >
+              <FiSave className="text-base" />
+              {isPending ? 'Saving Shop Settings...' : 'Save Branding Settings'}
+            </button>
+          </div>
+        </form>
+
+        {/* REAL-TIME LIVE BILL HEADER PREVIEW */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="bg-white rounded p-5 border border-gray-200/90 shadow-sm text-center space-y-2">
+            <div className="flex items-center justify-between border-b pb-2 text-xs text-gray-500 font-bold">
+              <span className="flex items-center gap-1">
+                <FiPrinter className="text-sm text-[#DFAC43]" /> Live Bill / Slip Preview
+              </span>
+              <span className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded font-black">
+                Real-time
+              </span>
+            </div>
+
+            {/* Simulated Bill Header */}
+            <div className="pt-2 pb-3 border-b-2 border-dashed border-gray-300 space-y-1">
+              <div className="flex justify-center mb-1">
+                <img 
+                  src={logoPreview || '/assets/BT_Logo.png'} 
+                  alt="Shop Logo" 
+                  className="h-11 w-auto object-contain"
+                />
+              </div>
+              <h4 className="font-black text-base sm:text-lg uppercase tracking-wider text-black leading-tight">
+                {form.shopName || 'Balouch Tailors'}
+              </h4>
+              <p className="text-[8px] font-bold tracking-widest text-gray-500 uppercase -mt-0.5">
+                {form.tagline || 'Gents Shalwar Qameez Specialist'}
+              </p>
+              <div className="pt-1.5">
+                <span className="inline-block bg-[#0F172A] text-white px-3 py-0.5 rounded text-[9px] font-black tracking-widest uppercase">
+                  INVOICE #BT-22
+                </span>
+              </div>
+            </div>
+
+            {/* Simulated Bill Body Snippet */}
+            <div className="py-2 border-b border-dashed border-gray-200 text-left text-[9px] space-y-1 text-gray-600">
+              <div className="flex justify-between font-bold text-gray-800">
+                <span>Customer: Walk-in Customer</span>
+                <span>Due: {new Date().toLocaleDateString()}</span>
+              </div>
+              <div className="flex justify-between border-t border-gray-100 pt-1 font-black text-black">
+                <span>Shalwar Qameez (1 Suit)</span>
+                <span>Rs 1,500</span>
+              </div>
+            </div>
+
+            {/* Simulated Footer Stamp with Proprietor, Phone & Address */}
+            <div className="pt-2 text-center space-y-1 border-t-2 border-black text-black">
+              <p className="font-black text-[10px] uppercase tracking-wider">
+                Proprietor: {form.proprietor || 'Zubair Balouch'}
+              </p>
+              <p className="font-black text-[9px] font-sans">
+                📞 {form.primaryPhone || '0313-4389192'}{form.secondaryPhone ? ` | ${form.secondaryPhone}` : ''}
+              </p>
+              <p className="text-[8px] text-gray-600 leading-tight px-2">
+                {form.address || 'Hazori Bagh Road, Street 1, Muhallah Muhammadi, Multan'}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 p-3.5 rounded text-xs text-blue-900 space-y-1">
+            <h5 className="font-bold flex items-center gap-1 text-blue-950">
+              <FiInfo className="text-sm" /> Instant Sync:
+            </h5>
+            <p className="text-[11px] leading-relaxed text-blue-800">
+              Saving these settings will instantly update all new invoice prints, preloader, website top header, and admin bar.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
 export default AdminSettings;
+

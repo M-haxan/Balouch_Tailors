@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import logo from '../assets/BT_Logo.png';
+import defaultLogo from '../assets/BT_Logo.png';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 import { 
   useGetWorkers, 
   useAddWorker, 
@@ -1137,6 +1138,16 @@ const EditLedgerModal = ({ entry, closeModal, refetchLedger, refetchDetails }) =
 // COMPONENT: PAYMENT INVOICE RECEIPT MODAL (PRINT FRIENDLY)
 // -------------------------------------------------------------
 const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
+  const { data: shopSettings } = useGetShopSettings();
+
+  const currentLogo = shopSettings?.logoUrl || defaultLogo;
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
+  const tagline = shopSettings?.tagline || 'Gents Shalwar Qameez Specialist';
+  const proprietor = shopSettings?.proprietor || 'Zubair Balouch';
+  const primaryPhone = shopSettings?.primaryPhone || '0313-4389192';
+  const secondaryPhone = shopSettings?.secondaryPhone || '0306-7379919';
+  const address = shopSettings?.address || 'Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan';
+
   const handlePrint = () => {
     const printContent = document.getElementById('receipt-print-area').innerHTML;
     const originalContent = document.body.innerHTML;
@@ -1165,19 +1176,11 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
             {/* Invoice Header */}
             <div className="text-center space-y-1">
               <div className="flex justify-center mb-1">
-                <img src={logo} alt="Balouch Tailors" className="h-12 w-auto object-contain" />
+                <img src={currentLogo} alt={shopName} className="h-11 w-auto object-contain" />
               </div>
-              <h1 className="text-xl font-black tracking-wider uppercase font-serif text-black">Balouch Tailors</h1>
-              <div>
-                <span className="inline-block bg-gray-100 text-gray-800 text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
-                  Gents Shalwar Qameez Specialist
-                </span>
-              </div>
-              <p className="text-[10px] font-bold text-gray-900">
-                Proprietor: <span className="font-black">Zubair Balouch</span> | Ph: <span className="font-black">0313-4389192, 0306-7379919</span>
-              </p>
-              <p className="text-[8px] text-gray-600">
-                Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+              <h1 className="text-xl font-black tracking-wider uppercase font-serif text-black leading-tight">{shopName}</h1>
+              <p className="text-[9px] font-bold tracking-widest text-gray-500 uppercase -mt-0.5">
+                {tagline}
               </p>
               <div className="pt-1">
                 <span className="text-[10px] font-black tracking-wider uppercase bg-black text-white px-3 py-0.5 inline-block rounded">
@@ -1257,13 +1260,13 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
             {/* Shop & Proprietor Footer Stamp */}
             <div className="pt-3 border-t-2 border-black text-center space-y-0.5 text-black">
               <p className="font-black text-[10px] uppercase tracking-wider">
-                Proprietor: Zubair Balouch
+                Proprietor: {proprietor}
               </p>
               <p className="font-black text-[10px] font-sans">
-                📞 0313-4389192 | 0306-7379919
+                📞 {primaryPhone}{secondaryPhone ? ` | ${secondaryPhone}` : ''}
               </p>
               <p className="text-[8px] text-gray-600">
-                Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+                {address}
               </p>
             </div>
           </div>

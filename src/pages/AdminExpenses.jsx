@@ -32,7 +32,8 @@ import {
   FiArrowLeft
 } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
-import logo from '../assets/BT_Logo.png';
+import defaultLogo from '../assets/BT_Logo.png';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 import Preloader from '../components/Preloader';
 
 const SUPPLIER_CATEGORIES = [
@@ -732,6 +733,15 @@ const PurchaseMaterialModal = ({ supplier, closeModal }) => {
 // COMPONENT: VENDOR KHATA STATEMENT PRINT MODAL (56mm, 80mm, A4)
 const VendorStatementPrintModal = ({ supplier, processedEntries, balance, periodLabel, periodPurchases, periodPaid, closeModal }) => {
   const [paperSize, setPaperSize] = useState('80mm');
+  const { data: shopSettings } = useGetShopSettings();
+
+  const currentLogo = shopSettings?.logoUrl || defaultLogo;
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
+  const tagline = shopSettings?.tagline || 'Gents Shalwar Qameez Specialist';
+  const proprietor = shopSettings?.proprietor || 'Zubair Balouch';
+  const primaryPhone = shopSettings?.primaryPhone || '0313-4389192';
+  const secondaryPhone = shopSettings?.secondaryPhone || '0306-7379919';
+  const address = shopSettings?.address || 'Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan';
 
   const handlePrint = () => {
     try {
@@ -887,30 +897,20 @@ const VendorStatementPrintModal = ({ supplier, processedEntries, balance, period
           <div className="text-center pb-3 border-b-2 border-dashed border-gray-300 mb-3 space-y-1">
             <div className="flex justify-center mb-1">
               <img 
-                src={logo} 
-                alt="Balouch Tailors" 
-                className={paperSize === '56mm' ? 'h-10 w-auto object-contain' : paperSize === '80mm' ? 'h-12 w-auto object-contain' : 'h-16 w-auto object-contain'} 
+                src={currentLogo} 
+                alt={shopName} 
+                className={paperSize === '56mm' ? 'h-9 w-auto object-contain' : paperSize === '80mm' ? 'h-11 w-auto object-contain' : 'h-14 w-auto object-contain'} 
               />
             </div>
-            <h1 className={`font-black uppercase tracking-wider text-black ${
-              paperSize === '56mm' ? 'text-sm' : paperSize === '80mm' ? 'text-lg' : 'text-2xl'
+            <h1 className={`font-black uppercase tracking-wider text-black leading-tight ${
+              paperSize === '56mm' ? 'text-xs' : paperSize === '80mm' ? 'text-base sm:text-lg' : 'text-2xl'
             }`}>
-              Balouch Tailors
+              {shopName}
             </h1>
-            <p className={`font-extrabold text-[#D4AF37] uppercase tracking-widest ${
-              paperSize === '56mm' ? 'text-[8px]' : paperSize === '80mm' ? 'text-[10px]' : 'text-xs'
+            <p className={`font-bold tracking-widest text-gray-500 uppercase -mt-0.5 ${
+              paperSize === '56mm' ? 'text-[7px]' : paperSize === '80mm' ? 'text-[8px]' : 'text-xs'
             }`}>
-              Gents Shalwar Qameez Specialist
-            </p>
-            <p className={`font-bold text-gray-900 ${
-              paperSize === '56mm' ? 'text-[8px]' : paperSize === '80mm' ? 'text-[10px]' : 'text-xs'
-            }`}>
-            
-            </p>
-            <p className={`text-gray-500 font-medium ${
-              paperSize === '56mm' ? 'text-[7px] leading-tight' : paperSize === '80mm' ? 'text-[9px] leading-tight' : 'text-xs'
-            }`}>
-              Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+              {tagline}
             </p>
             <div className="pt-1">
               <span className="inline-block bg-[#0F172A] text-white px-3 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
@@ -1004,11 +1004,11 @@ const VendorStatementPrintModal = ({ supplier, processedEntries, balance, period
               Thank you for your business & partnership!
             </p>
             <div className="bg-gray-100 rounded py-1 px-2 text-gray-700 font-bold inline-block border border-gray-200">
-              Proprietor: <span className="text-black font-black">Zubair Balouch</span> | 
-              📞 0313-4389192 | 0306-7379919
+              Proprietor: <span className="text-black font-black">{proprietor}</span> | 
+              📞 {primaryPhone}{secondaryPhone ? ` | ${secondaryPhone}` : ''}
             </div>
             <p className="text-[7px] text-gray-400">
-              Computer Generated Vendor Statement | Balouch Tailors Multan
+              Computer Generated Vendor Statement | {shopName}
             </p>
           </div>
 

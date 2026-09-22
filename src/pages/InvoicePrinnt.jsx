@@ -1,14 +1,24 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useGetOrders } from '../hooks/useOrder';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 import { FiPrinter, FiArrowLeft, FiSliders } from 'react-icons/fi';
-import logo from '../assets/BT_Logo.png';
+import defaultLogo from '../assets/BT_Logo.png';
 
 const InvoicePrint = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: orders = [], isLoading } = useGetOrders();
+  const { data: shopSettings } = useGetShopSettings();
   
+  const currentLogo = shopSettings?.logoUrl || defaultLogo;
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
+  const tagline = shopSettings?.tagline || 'Gents Shalwar Qameez Specialist';
+  const proprietor = shopSettings?.proprietor || 'Zubair Balouch';
+  const primaryPhone = shopSettings?.primaryPhone || '0313-4389192';
+  const secondaryPhone = shopSettings?.secondaryPhone || '0306-7379919';
+  const address = shopSettings?.address || 'Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan';
+
   // Paper size state: '56mm' | '80mm' | 'a4'
   const [paperSize, setPaperSize] = useState('80mm');
   
@@ -175,53 +185,37 @@ const InvoicePrint = () => {
       >
         
         {/* ========================================================= */}
-        {/* HEADER: LOGO, DISTINCT VISIBLE SECTIONS & CONTACT DETAILS */}
+        {/* HEADER: LOGO, SHOP NAME, TAGLINE & INVOICE NUMBER         */}
         {/* ========================================================= */}
         <div className="text-center pb-3 border-b-2 border-dashed border-gray-300 mb-3 space-y-1">
           
           {/* Logo */}
           <div className="flex justify-center mb-1">
             <img 
-              src={logo} 
-              alt="Balouch Tailors" 
-              className={paperSize === '56mm' ? 'h-10 w-auto object-contain' : paperSize === '80mm' ? 'h-12 w-auto object-contain' : 'h-16 w-auto object-contain'} 
+              src={currentLogo} 
+              alt={shopName} 
+              className={paperSize === '56mm' ? 'h-9 w-auto object-contain' : paperSize === '80mm' ? 'h-11 w-auto object-contain' : 'h-14 w-auto object-contain'} 
             />
           </div>
 
           {/* Shop Name */}
-          <h1 className={`font-black uppercase tracking-wider text-black ${
-            paperSize === '56mm' ? 'text-sm' : paperSize === '80mm' ? 'text-lg' : 'text-3xl'
+          <h1 className={`font-black uppercase tracking-wider text-black leading-tight ${
+            paperSize === '56mm' ? 'text-xs' : paperSize === '80mm' ? 'text-base sm:text-lg' : 'text-2xl sm:text-3xl'
           }`}>
-            Balouch Tailors
+            {shopName}
           </h1>
 
-          {/* Speciality Tag (Separate Line) */}
-          <div>
-            <span className={`inline-block bg-gray-100 text-gray-800 rounded font-black tracking-wider uppercase ${
-              paperSize === '56mm' ? 'text-[7px] px-1.5 py-0.5' : paperSize === '80mm' ? 'text-[9px] px-2 py-0.5' : 'text-xs px-3 py-1'
-            }`}>
-              Gents Shalwar Qameez Specialist
-            </span>
-          </div>
-
-          {/* Proprietor / Owner & Contact Details (Separate Line) */}
-          <p className={`font-bold text-gray-900 ${
-            paperSize === '56mm' ? 'text-[8px]' : paperSize === '80mm' ? 'text-[10px]' : 'text-sm'
+          {/* Speciality Subtitle (Small & compact directly under name) */}
+          <p className={`font-bold tracking-widest text-gray-500 uppercase -mt-0.5 ${
+            paperSize === '56mm' ? 'text-[7px]' : paperSize === '80mm' ? 'text-[8px]' : 'text-xs'
           }`}>
-            {/* Proprietor: <span className="font-black">Zubair Balouch</span> | Ph: <span className="font-black">0313-4389192, 0306-7379919</span> */}
-          </p>
-
-          {/* Shop Address (Separate Line) */}
-          <p className={`text-gray-600 font-medium ${
-            paperSize === '56mm' ? 'text-[7px] leading-tight' : paperSize === '80mm' ? 'text-[9px] leading-tight' : 'text-xs'
-          }`}>
-            Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+            {tagline}
           </p>
 
           {/* Prominent Invoice Number Badge */}
           <div className="pt-1">
-            <div className="inline-block bg-[#0F172A] text-white px-3 py-1 rounded-md print:border print:border-black">
-              <span className={`font-black uppercase tracking-widest ${paperSize === '56mm' ? 'text-[9px]' : 'text-xs'}`}>
+            <div className="inline-block bg-[#0F172A] text-white px-3 py-0.5 rounded-md print:border print:border-black">
+              <span className={`font-black uppercase tracking-widest ${paperSize === '56mm' ? 'text-[8px]' : 'text-[10px] sm:text-xs'}`}>
                 INVOICE #{displayId}
               </span>
             </div>
@@ -438,13 +432,13 @@ const InvoicePrint = () => {
           {/* Shop & Proprietor Footer Stamp */}
           <div className="pt-2 border-t-2 border-black text-center space-y-0.5 text-black">
             <p className="font-black text-[9px] sm:text-[11px] uppercase tracking-wider">
-              Proprietor: Zubair Balouch
+              Proprietor: {proprietor}
             </p>
             <p className="font-black text-[9px] sm:text-[10px] font-sans">
-              📞 0313-4389192 | 0306-7379919
+              📞 {primaryPhone}{secondaryPhone ? ` | ${secondaryPhone}` : ''}
             </p>
             <p className="text-[7px] sm:text-[8px] text-gray-600">
-              Hazori Bagh Road, Street 1, Muhallah Muhammadi, Multan
+              {address}
             </p>
           </div>
         </div>

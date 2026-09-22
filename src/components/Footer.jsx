@@ -1,8 +1,17 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 
 const Footer = () => {
     const location = useLocation();
+    const { data: shopSettings } = useGetShopSettings();
+
+    const shopName = shopSettings?.shopName || 'Balouch Tailors';
+    const address = shopSettings?.address || 'Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan';
+    const primaryPhone = shopSettings?.primaryPhone || '0313-4389192';
+    const secondaryPhone = shopSettings?.secondaryPhone || '0306-7379919';
+    const email = shopSettings?.email || 'balouchtailors110@gmail.com';
+    const tagline = shopSettings?.tagline || '"The joy of dressing is an art"';
 
     // Hide footer on admin dashboard
     if (location.pathname === '/admin/dashboard') {
@@ -15,10 +24,10 @@ const Footer = () => {
                 <div className="flex flex-col lg:flex-row justify-between gap-16 mb-16">
                     <div className="lg:w-1/3">
                         <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tighter mb-4">
-                            Balouch <span className="text-gray-400 font-light">Tailors</span>
+                            {shopName.split(' ')[0]} <span className="text-gray-400 font-light">{shopName.split(' ').slice(1).join(' ') || 'Tailors'}</span>
                         </h2>
                         <h3 className="text-2xl font-serif italic text-gray-600 leading-relaxed max-w-sm">
-                            "The joy of dressing is an art"
+                            {tagline}
                         </h3>
                     </div>
                     
@@ -26,9 +35,9 @@ const Footer = () => {
                         <div>
                             <h4 className="text-xl font-bold mb-6 text-gray-900">Contact</h4>
                             <div className="text-gray-600 leading-relaxed">
-                                <p>Hazori Bagh Road Street No 1<br />Muhallah Muhammadi Multan</p>
-                                <p className="mt-2">0306-7379919, 03134389192</p>
-                                <p className="mt-2">balouchtailors110@gmail.com</p>
+                                <p>{address}</p>
+                                <p className="mt-2">{primaryPhone}{secondaryPhone ? `, ${secondaryPhone}` : ''}</p>
+                                <p className="mt-2">{email}</p>
                             </div>
                         </div>
                         

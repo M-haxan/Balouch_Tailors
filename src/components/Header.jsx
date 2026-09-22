@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/BT_Logo.png';
+import defaultLogo from '../assets/BT_Logo.png';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { data: shopSettings } = useGetShopSettings();
+
+    const currentLogo = shopSettings?.logoUrl || defaultLogo;
+    const shopName = shopSettings?.shopName || "Balouch Tailors";
 
     // Google Maps Universal Link with exact Place ID
-    const shopName = "BALOUCH+TAILOR'S+Multan";
+    const destinationQuery = encodeURIComponent(shopName + " Multan");
     const placeId = "ChIJOxF6UagzOzkROAZCfNdJGds";
-    const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${shopName}&destination_place_id=${placeId}`;
+    const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destinationQuery}&destination_place_id=${placeId}`;
 
     const handleGetDirections = (e) => {
         e.preventDefault();
@@ -24,9 +29,9 @@ const Header = () => {
             <div className="container mx-auto px-4 py-4 flex flex-wrap items-center justify-between">
                 <div className="flex-shrink-0 z-50 relative">
                     <Link to="/" className="flex items-center group">
-                        <img src={logo} alt="Balouch Tailors Logo" className="h-16 md:h-20 w-auto object-contain transform scale-110 origin-left transition-transform group-hover:scale-105" />
+                        <img src={currentLogo} alt={`${shopName} Logo`} className="h-16 md:h-20 w-auto object-contain transform scale-110 origin-left transition-transform group-hover:scale-105" />
                         <span className="ml-3 text-2xl md:text-3xl font-black text-gray-900 tracking-tighter uppercase hidden sm:block">
-                            Balouch <span className="text-gray-400 font-light">Tailors</span>
+                            {shopName.split(' ')[0]} <span className="text-gray-400 font-light">{shopName.split(' ').slice(1).join(' ') || 'Tailors'}</span>
                         </span>
                     </Link>
                 </div>

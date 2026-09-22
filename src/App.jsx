@@ -19,6 +19,7 @@ import AdminCatalogue from './pages/AdminCatalogue';
 import AdminPricing from './pages/AdminPricing';
 import AdminServices from './pages/AdminServices';
 import AdminSettings from './pages/AdminSettings';
+import AdminProfile from './pages/AdminProfile';
 import AdminCustomers from './pages/AdminCustomers';
 import CustomerProfile from './pages/CustomerProfile';
 import AdminMeasurements from './pages/AdminMeasurements';
@@ -90,6 +91,7 @@ function App() {
             <Route path="/admin/offers" element={<AdminServices />} />
             <Route path="/admin/pricing" element={<AdminPricing />} />
             <Route path="/admin/settings" element={<AdminSettings />} />
+            <Route path="/admin/profile" element={<AdminProfile />} />
             <Route path="/admin/customers" element={<AdminCustomers />} />
             <Route path="/admin/customers/:id" element={<CustomerProfile />} />
             <Route path="/admin/measurements" element={<AdminMeasurements />} />

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useGetOrders, useUpdateOrder, useDeleteOrder, useDeliverOrder } from '../hooks/useOrder';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/BT_Logo.png';
+import defaultLogo from '../assets/BT_Logo.png';
 import { 
   FiSearch, 
   FiPrinter, 
@@ -1215,6 +1216,15 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
 // -------------------------------------------------------------
 const DeliveryReceiptModal = ({ order, settlementData, closeModal }) => {
   const [paperSize, setPaperSize] = useState('80mm'); // '56mm' | '80mm' | 'a4'
+  const { data: shopSettings } = useGetShopSettings();
+
+  const currentLogo = shopSettings?.logoUrl || defaultLogo;
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
+  const tagline = shopSettings?.tagline || 'Gents Shalwar Qameez Specialist';
+  const proprietor = shopSettings?.proprietor || 'Zubair Balouch';
+  const primaryPhone = shopSettings?.primaryPhone || '0313-4389192';
+  const secondaryPhone = shopSettings?.secondaryPhone || '0306-7379919';
+  const address = shopSettings?.address || 'Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan';
 
   const { receivedAmount = 0, paymentMethod = 'Cash', diff = 0 } = settlementData || {};
   const totalBill = Number(order.totalAmount) || 0;
@@ -1348,28 +1358,18 @@ const DeliveryReceiptModal = ({ order, settlementData, closeModal }) => {
               {/* Logo */}
               <div className="flex justify-center mb-0.5">
                 <img 
-                  src={logo} 
-                  alt="Balouch Tailors" 
+                  src={currentLogo} 
+                  alt={shopName} 
                   className={paperSize === '56mm' ? 'h-9 w-auto object-contain' : paperSize === '80mm' ? 'h-11 w-auto object-contain' : 'h-14 w-auto object-contain'} 
                 />
               </div>
 
-              <h1 className="text-base sm:text-lg font-black tracking-wider uppercase font-serif">
-                BALOUCH TAILORS
+              <h1 className="text-base sm:text-lg font-black tracking-wider uppercase font-serif leading-tight">
+                {shopName}
               </h1>
               
-              <div>
-                <span className="inline-block bg-gray-100 text-gray-800 text-[8px] sm:text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider">
-                  Gents Shalwar Qameez Specialist
-                </span>
-              </div>
-
-              <p className="text-[9px] sm:text-[10px] font-bold text-gray-900">
-                Proprietor: <span className="font-black">Zubair Balouch</span> | Ph: <span className="font-black">0313-4389192, 0306-7379919</span>
-              </p>
-
-              <p className="text-[8px] sm:text-[9px] font-medium text-gray-600">
-                Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan
+              <p className="text-[8px] sm:text-[9px] font-bold tracking-widest text-gray-500 uppercase -mt-0.5">
+                {tagline}
               </p>
               
               <div className="pt-1 pb-0.5">
@@ -1458,7 +1458,7 @@ const DeliveryReceiptModal = ({ order, settlementData, closeModal }) => {
                 گاہک نے سوٹ مکمل تسلی اور فٹنگ چیک کر کے وصول پایا۔
               </p>
               <p className="text-[9px] text-gray-500 italic">
-                Suit checked & received in good order. Thank you for choosing Balouch Tailors!
+                Suit checked & received in good order. Thank you for choosing {shopName}!
               </p>
 
               {/* Signatures */}
@@ -1469,20 +1469,20 @@ const DeliveryReceiptModal = ({ order, settlementData, closeModal }) => {
                 </div>
                 <div className="text-center">
                   <div className="w-20 border-t border-black mb-0.5"></div>
-                  <span>Balouch Tailors</span>
+                  <span>{shopName}</span>
                 </div>
               </div>
 
               {/* Shop & Proprietor Footer Stamp */}
               <div className="pt-2 border-t-2 border-black text-center space-y-0.5 text-black">
                 <p className="font-black text-[9px] sm:text-[10px] uppercase tracking-wider">
-                  Proprietor: Zubair Balouch
+                  Proprietor: {proprietor}
                 </p>
                 <p className="font-black text-[9px] sm:text-[10px] font-sans">
-                  📞 0313-4389192 | 0306-7379919
+                  📞 {primaryPhone}{secondaryPhone ? ` | ${secondaryPhone}` : ''}
                 </p>
                 <p className="text-[7px] sm:text-[8px] text-gray-600">
-                  Hazori Bagh Road, Street 1, Muhallah Muhammadi, Multan
+                  {address}
                 </p>
               </div>
             </div>

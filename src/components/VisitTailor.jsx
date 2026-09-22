@@ -1,12 +1,21 @@
 import React from 'react';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 
 const VisitTailor = () => {
+    const { data: shopSettings } = useGetShopSettings();
+
+    const shopName = shopSettings?.shopName || 'Balouch Tailors';
+    const address = shopSettings?.address || 'Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan';
+    const primaryPhone = shopSettings?.primaryPhone || '0313-4389192';
+    const secondaryPhone = shopSettings?.secondaryPhone || '0306-7379919';
+    const email = shopSettings?.email || 'balouchtailors110@gmail.com';
+
     // Google Maps Universal Link with exact Place ID
-    const shopName = "BALOUCH+TAILOR'S+Multan";
+    const destinationQuery = encodeURIComponent(shopName + " Multan");
     const placeId = "ChIJOxF6UagzOzkROAZCfNdJGds";
     
     // URL to trigger directions
-    const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${shopName}&destination_place_id=${placeId}`;
+    const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destinationQuery}&destination_place_id=${placeId}`;
 
     const handleGetDirections = (e) => {
         e.preventDefault();
@@ -27,7 +36,7 @@ const VisitTailor = () => {
                         </div>
                         <div className="ml-4">
                             <h4 className="text-lg font-bold text-gray-900 mb-1">Address</h4>
-                            <p className="text-gray-600 leading-relaxed">Hazori Bagh Road Street No 1<br />Muhallah Muhammadi Multan</p>
+                            <p className="text-gray-600 leading-relaxed">{address}</p>
                         </div>
                     </div>
 
@@ -37,7 +46,7 @@ const VisitTailor = () => {
                         </div>
                         <div className="ml-4">
                             <h4 className="text-lg font-bold text-gray-900 mb-1">Contact</h4>
-                            <p className="text-gray-600">0306-7379919<br />0313-4389192</p>
+                            <p className="text-gray-600">{primaryPhone}{secondaryPhone ? <><br />{secondaryPhone}</> : ''}</p>
                         </div>
                     </div>
 
@@ -47,7 +56,7 @@ const VisitTailor = () => {
                         </div>
                         <div className="ml-4">
                             <h4 className="text-lg font-bold text-gray-900 mb-1">Email</h4>
-                            <p className="text-gray-600">balouchtailors110@gmail.com</p>
+                            <p className="text-gray-600">{email}</p>
                         </div>
                     </div>
 
