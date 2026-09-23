@@ -39,94 +39,60 @@ import {
   useRejectSuit, 
   useAssignSuitStage 
 } from '../hooks/useWorkers';
+import Pagination from '../components/Pagination';
 
 const Allorders = () => {
   const navigate = useNavigate();
-  const { data: orders = [], isLoading } = useGetOrders();
-  const { mutate: updateOrder } = useUpdateOrder();
-  const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
 
-  // Filters State
+  // Filters & Server Pagination State
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [viewingOrder, setViewingOrder] = useState(null);
 
   // Delivery & Handover modal state
   const [deliveryModalOrder, setDeliveryModalOrder] = useState(null);
 
-  // Count suits waiting for inspection across all orders
-  let totalPendingQC = 0;
-  orders.forEach(ord => {
-    ord.suits?.forEach(s => {
-      if (s.stitchingStatus === 'Submitted for Inspection') totalPendingQC++;
-    });
+  // Server-side paginated orders fetch
+  const { data: ordersResponse, isLoading } = useGetOrders({
+    page: currentPage,
+    limit: PAGE_SIZE,
+    search: searchTerm,
+    status: statusFilter
   });
+
+  const { mutate: updateOrder } = useUpdateOrder();
+  const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
+
+  const orders = Array.isArray(ordersResponse) 
+    ? ordersResponse 
+    : (ordersResponse?.data || []);
+
+  const pagination = ordersResponse?.pagination || {
+    totalRecords: orders.length,
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: PAGE_SIZE
+  };
+
+  const totalPendingQC = ordersResponse?.totalPendingQC || 0;
+
+  // Reset page to 1 when filters change
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusFilterChange = (status) => {
+    setStatusFilter(status);
+    setCurrentPage(1);
+  };
 
   // Order Status Options (Including Delivered)
   const statusOptions = ['Pending', 'In Progress', 'Completed', 'Delivered', 'Cancelled'];
 
-  // Filter Logic - Robust Search by Order ID, Suit ID, Customer, Phone, Wearer, Fabric, Vol
-  const filteredOrders = orders.filter(order => {
-    const rawSearch = searchTerm.trim().toLowerCase();
-    
-    // Check if matching status filter first if no search
-    if (!rawSearch) {
-      if (statusFilter === 'PendingQC') {
-        return order.suits?.some(s => s.stitchingStatus === 'Submitted for Inspection');
-      }
-      return statusFilter === 'All' || order.orderStatus === statusFilter;
-    }
-
-    // Strip out prefixes like '#', 'bt-', 'bt ' for flexible matching
-    const searchClean = rawSearch.replace(/^#/, '').replace(/^bt[-\s]?/i, '').trim();
-
-    const customerName = (order.customer?.name || '').toLowerCase();
-    const customerPhone = (order.customer?.phone ? order.customer.phone.toString() : '');
-    const orderNum = (order.orderNumber ? order.orderNumber.toString() : '');
-    const orderIdFull = `bt-${orderNum}`.toLowerCase();
-
-    const matchesDirect = 
-      customerName.includes(rawSearch) || 
-      customerPhone.includes(rawSearch) ||
-      customerPhone.includes(searchClean) ||
-      orderNum === searchClean ||
-      orderNum.includes(searchClean) ||
-      orderIdFull.includes(rawSearch);
-
-    const matchesSuit = order.suits && order.suits.some((s, idx) => {
-      const suitNumStr = (s.suitNumber || '').toLowerCase();
-      const suitIndexStr = `${orderNum}-${idx + 1}`.toLowerCase();
-      const formattedSuitId = `bt-${orderNum}-${idx + 1}`.toLowerCase();
-      const wearerName = (s.wearer?.name || '').toLowerCase();
-      const fabric = (s.fabricDetails || '').toLowerCase();
-      const vol = (s.volumeNo || '').toLowerCase();
-      const notes = (s.customDesign || '').toLowerCase();
-      const tags = (s.staticTags || []).join(' ').toLowerCase();
-
-      return (
-        suitNumStr.includes(rawSearch) ||
-        suitNumStr.includes(searchClean) ||
-        suitIndexStr.includes(searchClean) ||
-        suitIndexStr.includes(rawSearch) ||
-        formattedSuitId.includes(rawSearch) ||
-        wearerName.includes(rawSearch) ||
-        fabric.includes(rawSearch) ||
-        vol.includes(rawSearch) ||
-        notes.includes(rawSearch) ||
-        tags.includes(rawSearch)
-      );
-    });
-
-    const matchesSearch = matchesDirect || matchesSuit;
-
-    if (statusFilter === 'PendingQC') {
-      const hasPendingQC = order.suits?.some(s => s.stitchingStatus === 'Submitted for Inspection');
-      return matchesSearch && hasPendingQC;
-    }
-
-    const matchesStatus = statusFilter === 'All' || order.orderStatus === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const filteredOrders = orders;
 
   // Handlers
   const handleStatusChange = (order, newStatus) => {
@@ -171,7 +137,7 @@ const Allorders = () => {
           {/* Quick QC Filter Button */}
           {totalPendingQC > 0 && (
             <button
-              onClick={() => setStatusFilter(statusFilter === 'PendingQC' ? 'All' : 'PendingQC')}
+              onClick={() => handleStatusFilterChange(statusFilter === 'PendingQC' ? 'All' : 'PendingQC')}
               className={`px-4 py-2 rounded-lg font-black text-xs transition border flex items-center gap-1.5 ${
                 statusFilter === 'PendingQC' 
                   ? 'bg-amber-400 text-black border-amber-500 shadow-md' 
@@ -187,7 +153,7 @@ const Allorders = () => {
             <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <select 
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => handleStatusFilterChange(e.target.value)}
               className="pl-9 pr-4 py-2 border-2 border-gray-100 focus:border-black rounded outline-none font-bold text-sm bg-white appearance-none cursor-pointer"
             >
               <option value="All">All Statuses</option>
@@ -201,14 +167,14 @@ const Allorders = () => {
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Search Suit ID (e.g. 1001-1), Name, Phone..." 
+              placeholder="Search Suit ID, Order #, Name, Phone..." 
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
               className="w-full pl-9 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded-lg outline-none text-xs sm:text-sm font-medium transition"
             />
             {searchTerm && (
               <button 
-                onClick={() => setSearchTerm('')}
+                onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full"
                 title="Clear search"
               >
@@ -348,6 +314,20 @@ const Allorders = () => {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* SERVER-SIDE PAGINATION */}
+      {pagination.totalRecords > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-xs text-gray-500">
+            Showing <span className="font-bold text-gray-800">{Math.min((pagination.currentPage - 1) * pagination.pageSize + 1, pagination.totalRecords)}</span> to <span className="font-bold text-gray-800">{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalRecords)}</span> of <span className="font-bold text-gray-800">{pagination.totalRecords}</span> orders
+          </p>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={(p) => setCurrentPage(p)}
+          />
         </div>
       )}
 

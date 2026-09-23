@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useGetWorkerDashboard, useSubmitSuitForInspection, useGetWorkerLedger, useGetWorkerPayments } from '../hooks/useWorkers';
 import { useGetShopSettings } from '../hooks/useShopSettings';
 import useAuthStore from '../Store/authStore';
@@ -29,6 +29,7 @@ import {
   FiCreditCard
 } from 'react-icons/fi';
 import Preloader from '../components/Preloader';
+import Pagination from '../components/Pagination';
 
 const WorkerDashboard = () => {
   const navigate = useNavigate();
@@ -36,16 +37,34 @@ const WorkerDashboard = () => {
   const user = useAuthStore((state) => state.user);
   
   const workerId = user?.id || user?._id;
-  
-  const { data: dashboardData, isLoading, refetch } = useGetWorkerDashboard();
-  const { mutate: submitForQC, isPending: isSubmitting } = useSubmitSuitForInspection();
-  const { data: ledgerData = [], isLoading: loadingLedger } = useGetWorkerLedger(workerId);
-  const { data: paymentsData = [], isLoading: loadingPayments } = useGetWorkerPayments(workerId);
-  
   const [activeTab, setActiveTab] = useState('assigned'); // 'assigned', 'inspection', 'rework', 'completed', or 'ledger'
   const [viewingPayment, setViewingPayment] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSuitForSpecs, setSelectedSuitForSpecs] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
+
+  // Fetch only active tab records with server-side pagination & search
+  const { data: dashboardData, isLoading, refetch } = useGetWorkerDashboard({
+    tab: activeTab,
+    page: currentPage,
+    limit: PAGE_SIZE,
+    search: searchTerm
+  });
+
+  const { mutate: submitForQC, isPending: isSubmitting } = useSubmitSuitForInspection();
+  const { data: ledgerData = [], isLoading: loadingLedger } = useGetWorkerLedger(workerId);
+  const { data: paymentsData = [], isLoading: loadingPayments } = useGetWorkerPayments(workerId);
+
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
   const handleLogout = () => {
     logout();
@@ -76,49 +95,33 @@ const WorkerDashboard = () => {
   const { 
     worker = {}, 
     stats = {}, 
+    suits: tabSuits = [],
+    pagination = { totalRecords: 0, currentPage: 1, totalPages: 1, pageSize: PAGE_SIZE },
     assignedSuits = [], 
     underInspectionSuits = [], 
     reworkSuits = [], 
     stitchedSuits = [] 
   } = dashboardData || {};
 
-  // Search filter helper
-  const filterSuitList = (list) => {
-    if (!searchTerm.trim()) return list;
-    const query = searchTerm.toLowerCase().trim();
-    return list.filter(item => {
-      const suitIdStr = (item.suitNumber || '').toLowerCase();
-      const orderNumStr = (item.orderNumber || '').toString().toLowerCase();
-      const formattedId = `bt-${orderNumStr}-${item.suitIndex || ''}`.toLowerCase();
-      const customerName = (item.customerName || '').toLowerCase();
-      const wearerName = (item.wearerName || '').toLowerCase();
-      const phone = (item.customerPhone || '').toString();
-      const fabric = (item.fabricDetails || '').toLowerCase();
-      const vol = (item.volumeNo || '').toLowerCase();
-      const notes = (item.customDesign || '').toLowerCase();
-      const tags = (item.staticTags || []).join(' ').toLowerCase();
+  const assignedCount = stats.assignedCount !== undefined ? stats.assignedCount : assignedSuits.length;
+  const inspectionCount = stats.inspectionCount !== undefined ? stats.inspectionCount : underInspectionSuits.length;
+  const reworkCount = stats.reworkCount !== undefined ? stats.reworkCount : reworkSuits.length;
+  const completedCount = stats.completedCount !== undefined ? stats.completedCount : stitchedSuits.length;
 
-      return (
-        suitIdStr.includes(query) ||
-        orderNumStr.includes(query) ||
-        formattedId.includes(query) ||
-        customerName.includes(query) ||
-        wearerName.includes(query) ||
-        phone.includes(query) ||
-        fabric.includes(query) ||
-        vol.includes(query) ||
-        notes.includes(query) ||
-        tags.includes(query)
-      );
-    });
-  };
+  // Active tab suits (server-side paginated)
+  const currentSuits = tabSuits.length > 0 || pagination.totalRecords > 0 ? tabSuits : (
+    activeTab === 'assigned' ? assignedSuits.slice(0, PAGE_SIZE) :
+    activeTab === 'inspection' ? underInspectionSuits.slice(0, PAGE_SIZE) :
+    activeTab === 'rework' ? reworkSuits.slice(0, PAGE_SIZE) :
+    stitchedSuits.slice(0, PAGE_SIZE)
+  );
 
-  const filteredAssigned = filterSuitList(assignedSuits);
-  const filteredInspection = filterSuitList(underInspectionSuits);
-  const filteredRework = filterSuitList(reworkSuits);
-  const filteredStitched = filterSuitList(stitchedSuits);
+  const pendingLedger = Array.isArray(ledgerData) ? ledgerData.filter(e => e.status === 'Pending') : (ledgerData?.data || []).filter(e => e.status === 'Pending');
+  const paginatedLedger = pendingLedger.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const paymentsList = Array.isArray(paymentsData) ? paymentsData : (paymentsData?.data || []);
+  const paginatedPayments = paymentsList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
-  const totalFilteredMatches = filteredAssigned.length + filteredInspection.length + filteredRework.length + filteredStitched.length;
+  const totalFilteredMatches = pagination.totalRecords || (assignedCount + inspectionCount + reworkCount + completedCount);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12 font-sans">
@@ -240,14 +243,14 @@ const WorkerDashboard = () => {
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-base" />
               <input
                 type="text"
-                placeholder="Search Suit ID (e.g. BT-1001-1 or 1001), Wearer, Fabric, Vol..."
+                placeholder="Search Suit ID, Order #, Wearer, Fabric..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full pl-10 pr-10 py-2.5 bg-gray-50 border border-gray-300 focus:border-black focus:bg-white rounded outline-none text-xs sm:text-sm font-bold text-gray-900 transition"
               />
               {searchTerm && (
                 <button
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-1 text-sm cursor-pointer"
                   title="Clear Search"
                 >
@@ -259,10 +262,10 @@ const WorkerDashboard = () => {
             {searchTerm && (
               <div className="flex justify-between items-center text-[11px] font-bold text-gray-500 px-1 pt-0.5">
                 <span>
-                  Found <span className="text-black font-black">{totalFilteredMatches}</span> matching suits across all lists
+                  Found <span className="text-black font-black">{totalFilteredMatches}</span> matching records
                 </span>
                 <button 
-                  onClick={() => setSearchTerm('')} 
+                  onClick={() => { setSearchTerm(''); setCurrentPage(1); }} 
                   className="text-[#DFAC43] hover:underline font-black cursor-pointer"
                 >
                   Clear Search
@@ -274,41 +277,41 @@ const WorkerDashboard = () => {
           {/* TAB SELECTORS */}
           <div className="flex overflow-x-auto bg-gray-200/80 p-1 rounded gap-1">
             <button
-              onClick={() => setActiveTab('assigned')}
+              onClick={() => handleTabChange('assigned')}
               className={`flex-1 min-w-[100px] py-2.5 px-3 text-xs md:text-sm font-black rounded transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'assigned' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'
               }`}
             >
-              Assigned ({filteredAssigned.length})
+              Assigned ({assignedCount})
             </button>
             <button
-              onClick={() => setActiveTab('inspection')}
+              onClick={() => handleTabChange('inspection')}
               className={`flex-1 min-w-[110px] py-2.5 px-3 text-xs md:text-sm font-black rounded transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'inspection' ? 'bg-amber-400 text-black shadow-sm font-black' : 'text-gray-600 hover:text-black'
               }`}
             >
-              <FiClock /> In QC ({filteredInspection.length})
+              <FiClock /> In QC ({inspectionCount})
             </button>
-            {filteredRework.length > 0 && (
+            {reworkCount > 0 && (
               <button
-                onClick={() => setActiveTab('rework')}
+                onClick={() => handleTabChange('rework')}
                 className={`flex-1 min-w-[110px] py-2.5 px-3 text-xs md:text-sm font-black rounded transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                   activeTab === 'rework' ? 'bg-red-600 text-white shadow-sm font-black animate-pulse' : 'text-red-600 hover:bg-red-100'
                 }`}
               >
-                <FiAlertTriangle /> Rework ({filteredRework.length})
+                <FiAlertTriangle /> Rework ({reworkCount})
               </button>
             )}
             <button
-              onClick={() => setActiveTab('completed')}
+              onClick={() => handleTabChange('completed')}
               className={`flex-1 min-w-[100px] py-2.5 px-3 text-xs md:text-sm font-black rounded transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'completed' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'
               }`}
             >
-              Approved ({filteredStitched.length})
+              Approved ({completedCount})
             </button>
             <button
-              onClick={() => setActiveTab('ledger')}
+              onClick={() => handleTabChange('ledger')}
               className={`flex-1 min-w-[90px] py-2.5 px-3 text-xs md:text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === 'ledger' ? 'bg-white text-black shadow-sm' : 'text-gray-600 hover:text-black'
               }`}
@@ -322,7 +325,7 @@ const WorkerDashboard = () => {
             
             {/* 1. ASSIGNED TAB (PENDING STITCHING) */}
             {activeTab === 'assigned' && (
-              filteredAssigned.length === 0 ? (
+              currentSuits.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiBox className="text-4xl text-gray-300 mx-auto mb-2" />
                   <p className="text-gray-400 font-bold text-sm">
@@ -344,7 +347,7 @@ const WorkerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {filteredAssigned.map((item, idx) => (
+                      {currentSuits.map((item, idx) => (
                         <tr key={idx} className="hover:bg-gray-50 transition">
                           <td className="p-3 whitespace-nowrap">
                             <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
@@ -387,13 +390,19 @@ const WorkerDashboard = () => {
                       ))}
                     </tbody>
                   </table>
+                  <Pagination 
+                    currentPage={currentPage}
+                    totalItems={pagination.totalRecords || assignedCount}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
               )
             )}
 
             {/* 2. UNDER INSPECTION TAB */}
             {activeTab === 'inspection' && (
-              filteredInspection.length === 0 ? (
+              currentSuits.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiClock className="text-4xl text-amber-400 mx-auto mb-2" />
                   <p className="text-gray-500 font-bold text-sm">
@@ -414,7 +423,7 @@ const WorkerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {filteredInspection.map((item, idx) => (
+                      {currentSuits.map((item, idx) => (
                         <tr key={idx} className="hover:bg-gray-50 transition">
                           <td className="p-3 whitespace-nowrap">
                             <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
@@ -449,13 +458,19 @@ const WorkerDashboard = () => {
                       ))}
                     </tbody>
                   </table>
+                  <Pagination 
+                    currentPage={currentPage}
+                    totalItems={pagination.totalRecords || inspectionCount}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
               )
             )}
 
             {/* 3. REWORK REQUIRED TAB */}
             {activeTab === 'rework' && (
-              filteredRework.length === 0 ? (
+              currentSuits.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiCheckCircle className="text-4xl text-green-500 mx-auto mb-2" />
                   <p className="text-gray-500 font-bold text-sm">Koi alteration ya rework pending nahi hai!</p>
@@ -473,7 +488,7 @@ const WorkerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {filteredRework.map((item, idx) => (
+                      {currentSuits.map((item, idx) => (
                         <tr key={idx} className="hover:bg-gray-50 transition">
                           <td className="p-3 whitespace-nowrap">
                             <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
@@ -512,13 +527,19 @@ const WorkerDashboard = () => {
                       ))}
                     </tbody>
                   </table>
+                  <Pagination 
+                    currentPage={currentPage}
+                    totalItems={pagination.totalRecords || reworkCount}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
               )
             )}
 
             {/* 4. COMPLETED & APPROVED TAB */}
             {activeTab === 'completed' && (
-              filteredStitched.length === 0 ? (
+              currentSuits.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiCheckCircle className="text-4xl text-gray-300 mx-auto mb-2" />
                   <p className="text-gray-400 font-bold text-sm">Abhi tak koi suit approved nahi hua.</p>
@@ -536,7 +557,7 @@ const WorkerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {filteredStitched.map((item, idx) => (
+                      {currentSuits.map((item, idx) => (
                         <tr key={idx} className="hover:bg-gray-50 transition">
                           <td className="p-3 whitespace-nowrap">
                             <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
@@ -562,6 +583,12 @@ const WorkerDashboard = () => {
                       ))}
                     </tbody>
                   </table>
+                  <Pagination 
+                    currentPage={currentPage}
+                    totalItems={pagination.totalRecords || completedCount}
+                    pageSize={PAGE_SIZE}
+                    onPageChange={setCurrentPage}
+                  />
                 </div>
               )
             )}
@@ -574,7 +601,7 @@ const WorkerDashboard = () => {
                   <h3 className="font-black text-black text-sm uppercase tracking-wider border-b border-gray-100 pb-2">Active Ledger (Pending Settle)</h3>
                   {loadingLedger ? (
                     <div className="text-center py-4 text-xs text-gray-500">Loading ledger entries...</div>
-                  ) : ledgerData.filter(e => e.status === 'Pending').length === 0 ? (
+                  ) : pendingLedger.length === 0 ? (
                     <p className="text-xs text-gray-400 italic">No pending entries. Your account is fully settled!</p>
                   ) : (
                     <div className="overflow-x-auto">
@@ -589,7 +616,7 @@ const WorkerDashboard = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                          {ledgerData.filter(e => e.status === 'Pending').map(entry => (
+                          {paginatedLedger.map(entry => (
                             <tr key={entry._id} className="hover:bg-gray-50">
                               <td className="p-2.5 text-gray-500 font-semibold">{new Date(entry.date).toLocaleDateString()}</td>
                               <td className="p-2.5 font-bold text-gray-800">{entry.description}</td>
@@ -608,6 +635,12 @@ const WorkerDashboard = () => {
                           ))}
                         </tbody>
                       </table>
+                      <Pagination 
+                        currentPage={currentPage}
+                        totalItems={pendingLedger.length}
+                        pageSize={PAGE_SIZE}
+                        onPageChange={setCurrentPage}
+                      />
                     </div>
                   )}
                 </div>
@@ -621,7 +654,7 @@ const WorkerDashboard = () => {
                     <p className="text-xs text-gray-400 italic">No paid salary records found.</p>
                   ) : (
                     <div className="space-y-3">
-                      {paymentsData.map(p => (
+                      {paginatedPayments.map(p => (
                         <div key={p._id} className="border border-gray-150 rounded-xl p-3 bg-gray-50/50 flex flex-col sm:flex-row justify-between gap-3 text-xs">
                           <div>
                             <p className="font-bold text-gray-900">Period: {new Date(p.startDate).toLocaleDateString()} to {new Date(p.endDate).toLocaleDateString()}</p>
@@ -645,6 +678,12 @@ const WorkerDashboard = () => {
                           </div>
                         </div>
                       ))}
+                      <Pagination 
+                        currentPage={currentPage}
+                        totalItems={paymentsData.length}
+                        pageSize={PAGE_SIZE}
+                        onPageChange={setCurrentPage}
+                      />
                     </div>
                   )}
                 </div>
@@ -661,6 +700,7 @@ const WorkerDashboard = () => {
       {selectedSuitForSpecs && (
         <SuitSpecsModal
           suit={selectedSuitForSpecs}
+          allSuits={[...assignedSuits, ...underInspectionSuits, ...reworkSuits, ...stitchedSuits]}
           worker={worker}
           closeModal={() => setSelectedSuitForSpecs(null)}
           onSubmitForQC={handleSubmitForQC}
@@ -684,15 +724,40 @@ const WorkerDashboard = () => {
 // -------------------------------------------------------------
 // COMPONENT: SUIT SPECIFICATIONS & AUTHENTIC JOB PARCHI MODAL
 // -------------------------------------------------------------
-const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting }) => {
-  if (!suit) return null;
+const SuitSpecsModal = ({ suit: initialSuit, allSuits = [], worker, closeModal, onSubmitForQC, isSubmitting }) => {
+  const [activeSuit, setActiveSuit] = useState(initialSuit);
 
-  const suitIdBadge = suit.suitNumber || (suit.orderNumber ? `BT-${suit.orderNumber}-${suit.suitIndex || 1}` : 'BT-SUIT');
-  const wearer = suit.wearer || {};
-  const measurements = (suit.measurements && suit.measurements.length > 0) 
-    ? suit.measurements 
+  useEffect(() => {
+    setActiveSuit(initialSuit);
+  }, [initialSuit]);
+
+  if (!activeSuit) return null;
+
+  // Find all suits belonging to this same order assigned to the karigar
+  const orderSuits = useMemo(() => {
+    if (!activeSuit || !allSuits || allSuits.length === 0) return [activeSuit];
+    const list = allSuits.filter(s => 
+      (s.orderId && s.orderId === activeSuit.orderId) || 
+      (s.orderNumber && s.orderNumber === activeSuit.orderNumber)
+    );
+    const seen = new Set();
+    const deduped = [];
+    for (const item of list) {
+      const key = item.suitId || item._id || item.suitNumber || `${item.orderNumber}-${item.suitIndex}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        deduped.push(item);
+      }
+    }
+    return deduped.length > 0 ? deduped : [activeSuit];
+  }, [activeSuit, allSuits]);
+
+  const suitIdBadge = activeSuit.suitNumber || (activeSuit.orderNumber ? `BT-${activeSuit.orderNumber}-${activeSuit.suitIndex || 1}` : 'BT-SUIT');
+  const wearer = activeSuit.wearer || {};
+  const measurements = (activeSuit.measurements && activeSuit.measurements.length > 0) 
+    ? activeSuit.measurements 
     : (wearer.measurements || []);
-  const prefs = suit.stitchingPreferences || wearer.stitchingPreferences || {};
+  const prefs = activeSuit.stitchingPreferences || wearer.stitchingPreferences || {};
 
   // Extract direct active preferences chosen by customer from all sources
   const prefValuesFromObj = [
@@ -709,11 +774,13 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
 
   const rawTags = [
     ...(Array.isArray(prefs.tags) ? prefs.tags : []),
-    ...(Array.isArray(suit.staticTags) ? suit.staticTags : [])
+    ...(Array.isArray(activeSuit.staticTags) ? activeSuit.staticTags : [])
   ];
 
   // Deduplicate all active preferences
   const prefValues = Array.from(new Set([...prefValuesFromObj, ...rawTags])).filter(Boolean);
+
+  const pendingSuitsInOrder = orderSuits.filter(s => s.stitchingStatus !== 'Stitched' && s.stitchingStatus !== 'Submitted for Inspection');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-4 font-sans">
@@ -724,13 +791,18 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
           <div className="flex items-center gap-2.5">
             <span className="w-2 h-6 bg-[#DFAC43] rounded"></span>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="text-base sm:text-lg font-black text-white">Suit Specifications & Job Order Form</h3>
                 <span className="bg-[#DFAC43] text-[#0F172A] font-mono text-xs font-black px-2.5 py-0.5 rounded shadow-xs">
                   #{suitIdBadge}
                 </span>
+                {orderSuits.length > 1 && (
+                  <span className="bg-blue-900/80 text-blue-200 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-700">
+                    {orderSuits.length} Suits in this Order
+                  </span>
+                )}
               </div>
-              <p className="text-[11px] text-gray-400 font-medium">Order #BT-{suit.orderNumber} | Customer: {suit.customerName || 'Walk-in'}</p>
+              <p className="text-[11px] text-gray-400 font-medium">Order #BT-{activeSuit.orderNumber} | Customer: {activeSuit.customerName || 'Walk-in'}</p>
             </div>
           </div>
           <button 
@@ -740,6 +812,38 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
             <FiX />
           </button>
         </div>
+
+        {/* MULTI-SUIT SWITCHER TABS (IF CUSTOMER HAS MULTIPLE ASSIGNED SUITS) */}
+        {orderSuits.length > 1 && (
+          <div className="bg-[#1E293B] px-3 sm:px-5 py-2.5 border-b border-gray-700 flex items-center justify-between flex-wrap gap-2 text-xs shrink-0">
+            <span className="text-gray-300 font-bold flex items-center gap-1.5 text-[11px]">
+              <FiLayers className="text-[#DFAC43]" /> Select Garment / Fabric:
+            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {orderSuits.map((s, idx) => {
+                const isCurrent = (s.suitId && s.suitId === activeSuit.suitId) || (s.suitNumber && s.suitNumber === activeSuit.suitNumber);
+                const badgeLabel = s.suitNumber || `Suit #${s.suitIndex || idx + 1}`;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveSuit(s)}
+                    className={`px-3 py-1 rounded text-xs font-black transition flex items-center gap-1.5 cursor-pointer shadow-xs ${
+                      isCurrent 
+                        ? 'bg-[#DFAC43] text-[#0F172A] ring-2 ring-white/20' 
+                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700'
+                    }`}
+                  >
+                    <span>{badgeLabel}</span>
+                    {s.fabricDetails && (
+                      <span className="text-[10px] font-medium opacity-80 truncate max-w-[90px]">({s.fabricDetails})</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* MODAL BODY (SCROLLABLE AUTHENTIC JOB PARCHI) */}
         <div className="p-3 sm:p-6 overflow-y-auto flex-1 bg-gray-100/70 space-y-4">
@@ -758,14 +862,14 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
                   </h4>
                 </div>
                 <p className="text-[11px] text-gray-500 font-semibold mt-0.5">
-                  Order #BT-{suit.orderNumber} | Suit ID: <strong className="text-black">{suitIdBadge}</strong>
+                  Order #BT-{activeSuit.orderNumber} | Active Suit: <strong className="text-black">{suitIdBadge}</strong>
                 </p>
               </div>
 
               <div className="text-right">
                 <span className="text-[10px] font-bold text-gray-400 uppercase block">Delivery Due:</span>
                 <span className="text-xs sm:text-sm font-black text-red-600">
-                  {new Date(suit.deliveryDate).toLocaleDateString()}
+                  {new Date(activeSuit.deliveryDate).toLocaleDateString()}
                 </span>
               </div>
             </div>
@@ -774,27 +878,97 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-gray-50 p-3 rounded border border-gray-200 text-xs">
               <div>
                 <span className="text-[10px] font-bold text-gray-400 uppercase block">Customer:</span>
-                <span className="font-black text-gray-900">{suit.customerName || 'Walk-in'}</span>
-                <p className="text-[10px] text-gray-500 font-semibold">{suit.customerPhone || '-'}</p>
+                <span className="font-black text-gray-900">{activeSuit.customerName || 'Walk-in'}</span>
+                <p className="text-[10px] text-gray-500 font-semibold">{activeSuit.customerPhone || '-'}</p>
               </div>
 
               <div>
                 <span className="text-[10px] font-bold text-gray-400 uppercase block">Wearer:</span>
-                <span className="font-black text-blue-700">{suit.wearerName || wearer.name || suit.customerName || 'Customer'}</span>
+                <span className="font-black text-blue-700">{activeSuit.wearerName || wearer.name || activeSuit.customerName || 'Customer'}</span>
                 {wearer.relation && <p className="text-[10px] text-gray-500 font-medium">Rel: {wearer.relation}</p>}
               </div>
 
               <div>
                 <span className="text-[10px] font-bold text-gray-400 uppercase block">Fabric & Volume:</span>
-                <span className="font-black text-gray-900">{suit.fabricDetails}</span>
-                {suit.volumeNo && <p className="text-[10px] text-gray-500 font-medium">Vol: {suit.volumeNo}</p>}
+                <span className="font-black text-gray-900">{activeSuit.fabricDetails || 'Fabric Details'}</span>
+                {activeSuit.volumeNo && <p className="text-[10px] text-gray-500 font-medium">Vol: {activeSuit.volumeNo}</p>}
               </div>
 
               <div>
                 <span className="text-[10px] font-bold text-gray-400 uppercase block">Your Wage:</span>
-                <span className="font-black text-green-700 text-sm">Rs {worker?.perSuitWage || suit.price}</span>
+                <span className="font-black text-green-700 text-sm">Rs {worker?.perSuitWage || activeSuit.price}</span>
               </div>
             </div>
+
+            {/* ALL SUITS IN ORDER (EXPANDED GRID IF > 1 SUIT) */}
+            {orderSuits.length > 1 && (
+              <div className="space-y-2 pt-1">
+                <div className="flex justify-between items-center bg-gray-100 px-3 py-1.5 rounded border border-gray-200">
+                  <span className="text-[10px] font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <FiLayers className="text-[#DFAC43]" /> All {orderSuits.length} Suits in this Order (Same Measurements & Style)
+                  </span>
+                  <span className="text-[10px] text-green-700 font-black">Shared Specifications</span>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+                  {orderSuits.map((s, sIdx) => {
+                    const isSelected = (s.suitId && s.suitId === activeSuit.suitId) || (s.suitNumber && s.suitNumber === activeSuit.suitNumber);
+                    const cardBadge = s.suitNumber || `BT-${s.orderNumber}-${s.suitIndex || sIdx + 1}`;
+                    return (
+                      <div 
+                        key={sIdx}
+                        onClick={() => setActiveSuit(s)}
+                        className={`p-3 rounded border-2 transition cursor-pointer relative ${
+                          isSelected 
+                            ? 'border-[#DFAC43] bg-amber-50/60 shadow-xs ring-1 ring-[#DFAC43]' 
+                            : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
+                            {cardBadge}
+                          </span>
+                          <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
+                            s.stitchingStatus === 'Stitched' ? 'bg-green-100 text-green-800' :
+                            s.stitchingStatus === 'Submitted for Inspection' ? 'bg-amber-100 text-amber-800' :
+                            s.stitchingStatus === 'Rework' ? 'bg-red-100 text-red-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {s.stitchingStatus || 'Assigned'}
+                          </span>
+                        </div>
+                        
+                        <p className="text-xs font-black text-gray-900 truncate">{s.fabricDetails || 'Fabric Details'}</p>
+                        {s.volumeNo && <p className="text-[10px] text-gray-500 font-medium">Vol: {s.volumeNo}</p>}
+
+                        {s.fabricImage?.url && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <img src={s.fabricImage.url} alt="fabric" className="w-8 h-8 rounded object-cover border border-gray-300" />
+                            <a href={s.fabricImage.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="text-[10px] text-blue-600 font-bold hover:underline">
+                              View Photo
+                            </a>
+                          </div>
+                        )}
+
+                        {s.stitchingStatus !== 'Stitched' && s.stitchingStatus !== 'Submitted for Inspection' && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSubmitForQC(s.orderId, s.suitId);
+                            }}
+                            disabled={isSubmitting}
+                            className="mt-2.5 w-full bg-black hover:bg-[#DFAC43] hover:text-black text-white text-[10px] font-black py-1.5 rounded transition flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
+                          >
+                            <FiCheckCircle /> Submit QC
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* STYLE & STITCHING PREFERENCES (DIRECT PREFERENCE VALUES) */}
             {prefValues.length > 0 && (
@@ -815,13 +989,13 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
             )}
 
             {/* ADD-ONS IN DEDICATED SEPARATE LINE */}
-            {suit.customizations && suit.customizations.length > 0 && (
+            {activeSuit.customizations && activeSuit.customizations.length > 0 && (
               <div className="bg-amber-50/80 border border-amber-200 p-2.5 rounded flex items-center flex-wrap gap-2 text-xs">
                 <span className="font-black text-amber-950 uppercase text-[10px] shrink-0 flex items-center gap-1">
                   <FiTag className="text-amber-700" /> Add-on Customizations:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
-                  {suit.customizations.map((c, cIdx) => (
+                  {activeSuit.customizations.map((c, cIdx) => (
                     <span key={`cust-${cIdx}`} className="bg-[#0F172A] text-[#DFAC43] px-2.5 py-0.5 rounded text-[10px] font-black shadow-2xs">
                       + {c.name} {c.urduName ? `(${c.urduName})` : ''}
                     </span>
@@ -831,13 +1005,13 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
             )}
 
             {/* SPECIAL TAILOR INSTRUCTIONS */}
-            {suit.customDesign && (
+            {activeSuit.customDesign && (
               <div className="bg-amber-50/80 border-2 border-amber-300 rounded p-3 space-y-1">
                 <span className="text-[10px] font-black text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
                   <FiScissors className="text-amber-800" /> Special Tailor Instructions:
                 </span>
                 <p className="text-xs sm:text-sm font-black text-gray-900 leading-relaxed font-sans text-right" dir="rtl">
-                  {suit.customDesign}
+                  {activeSuit.customDesign}
                 </p>
               </div>
             )}
@@ -882,17 +1056,17 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
               </div>
             </div>
 
-            {/* FABRIC IMAGE PREVIEW (IF AVAILABLE) */}
-            {suit.fabricImage?.url && (
+            {/* FABRIC IMAGE PREVIEW (IF SINGLE SUIT SELECTED & AVAILABLE) */}
+            {activeSuit.fabricImage?.url && (
               <div className="pt-2 border-t border-gray-200 flex items-center gap-3 bg-gray-50 p-2.5 rounded border">
                 <img 
-                  src={suit.fabricImage.url} 
+                  src={activeSuit.fabricImage.url} 
                   alt="Suit Fabric" 
                   className="h-16 w-16 object-cover rounded border border-gray-300 shadow-2xs"
                 />
                 <div className="text-xs">
-                  <span className="font-bold text-gray-800 block">Fabric Photo Attached</span>
-                  <a href={suit.fabricImage.url} target="_blank" rel="noreferrer" className="text-[11px] text-blue-600 font-bold hover:underline">
+                  <span className="font-bold text-gray-800 block">{activeSuit.fabricDetails || 'Fabric Photo Attached'}</span>
+                  <a href={activeSuit.fabricImage.url} target="_blank" rel="noreferrer" className="text-[11px] text-blue-600 font-bold hover:underline">
                     Click here to open high-res fabric photo
                   </a>
                 </div>
@@ -913,7 +1087,7 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
         {/* FOOTER ACTIONS */}
         <div className="bg-white border-t border-gray-200 p-3 sm:p-4 flex flex-col sm:flex-row justify-between items-center gap-2 shrink-0">
           <span className="text-xs font-bold text-gray-500">
-            Suit Status: <span className="font-black text-black">{suit.stitchingStatus}</span>
+            Active Suit Status: <span className="font-black text-black">{activeSuit.stitchingStatus || 'Assigned'}</span>
           </span>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -925,10 +1099,10 @@ const SuitSpecsModal = ({ suit, worker, closeModal, onSubmitForQC, isSubmitting 
               Close
             </button>
 
-            {suit.stitchingStatus !== 'Stitched' && suit.stitchingStatus !== 'Submitted for Inspection' && (
+            {activeSuit.stitchingStatus !== 'Stitched' && activeSuit.stitchingStatus !== 'Submitted for Inspection' && (
               <button
                 type="button"
-                onClick={() => onSubmitForQC(suit.orderId, suit.suitId)}
+                onClick={() => onSubmitForQC(activeSuit.orderId, activeSuit.suitId)}
                 disabled={isSubmitting}
                 className="flex-1 sm:flex-none bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black px-5 py-2.5 rounded text-xs transition shadow flex items-center justify-center gap-1.5 cursor-pointer"
               >

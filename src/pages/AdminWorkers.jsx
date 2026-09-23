@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import defaultLogo from '../assets/BT_Logo.png';
 import { useGetShopSettings } from '../hooks/useShopSettings';
+import Pagination from '../components/Pagination';
 import { 
   useGetWorkers, 
   useAddWorker, 
@@ -35,10 +36,17 @@ import {
 import { toast } from 'react-toastify';
 
 const AdminWorkers = () => {
-  const { data: workers = [], isLoading } = useGetWorkers();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
+
+  const { data: workersResponse, isLoading } = useGetWorkers({
+    page: currentPage,
+    limit: PAGE_SIZE,
+    search: searchTerm
+  });
   const { mutate: deleteWorker, isPending: isDeleting } = useDeleteWorker();
   
-  const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingWorker, setEditingWorker] = useState(null);
   
@@ -50,13 +58,24 @@ const AdminWorkers = () => {
   const [isLedgerModalOpen, setIsLedgerModalOpen] = useState(false);
   const [ledgerWorker, setLedgerWorker] = useState(null);
 
-  // Search Logic
-  const filteredWorkers = workers.filter(w => {
-    const phoneStr = w.phone ? w.phone.toString() : '';
-    const nameStr = w.name ? w.name.toLowerCase() : '';
-    const search = searchTerm.toLowerCase();
-    return phoneStr.includes(search) || nameStr.includes(search);
-  });
+  const workers = Array.isArray(workersResponse) 
+    ? workersResponse 
+    : (workersResponse?.data || []);
+
+  const pagination = workersResponse?.pagination || {
+    totalRecords: workers.length,
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: PAGE_SIZE
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const paginatedWorkers = workers;
+  const filteredWorkers = workers;
 
   const openFormModal = (worker = null) => {
     setEditingWorker(worker);
@@ -94,11 +113,20 @@ const AdminWorkers = () => {
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Search by phone or name..." 
-              className="w-full pl-10 pr-4 py-2 border-2 border-gray-100 focus:border-black rounded-lg outline-none transition"
+              placeholder="Search by phone, name, skill..." 
+              className="w-full pl-10 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded-lg outline-none transition text-sm"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
             />
+            {searchTerm && (
+              <button 
+                onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full"
+                title="Clear search"
+              >
+                <FiX className="text-xs" />
+              </button>
+            )}
           </div>
           <button 
             onClick={() => openFormModal()}
@@ -131,7 +159,7 @@ const AdminWorkers = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredWorkers.map((worker) => (
+              {paginatedWorkers.map((worker) => (
                 <tr key={worker._id} className="hover:bg-gray-50 transition text-sm">
                   <td className="p-4 font-bold text-gray-900 whitespace-nowrap">
                     <div className="flex items-center gap-3">
@@ -169,7 +197,7 @@ const AdminWorkers = () => {
                     {/* Ledger & Salary button */}
                     <button 
                       onClick={() => openLedgerModal(worker)} 
-                      className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black px-2.5 py-1.5 rounded text-xs transition border border-[#0F172A] whitespace-nowrap"
+                      className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black px-2.5 py-1.5 rounded text-xs transition border border-[#0F172A] whitespace-nowrap cursor-pointer"
                       title="Ledger & Salary Manager"
                     >
                       Ledger & Salary
@@ -177,14 +205,14 @@ const AdminWorkers = () => {
                     {/* Advance Manage button */}
                     <button 
                       onClick={() => openAdvanceModal(worker)} 
-                      className="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2.5 py-1.5 rounded text-xs transition border border-red-100 whitespace-nowrap"
+                      className="bg-red-50 hover:bg-red-100 text-red-700 font-bold px-2.5 py-1.5 rounded text-xs transition border border-red-100 whitespace-nowrap cursor-pointer"
                       title="Manage Advance Amount"
                     >
                       ± Advance
                     </button>
                     <button 
                       onClick={() => openFormModal(worker)} 
-                      className="p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded transition text-lg" 
+                      className="p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded transition text-lg cursor-pointer" 
                       title="Edit Profile"
                     >
                       <FiEdit />
@@ -192,7 +220,7 @@ const AdminWorkers = () => {
                     <button 
                       onClick={() => handleDelete(worker._id)} 
                       disabled={isDeleting} 
-                      className="p-2 text-red-600 hover:bg-red-50 rounded transition text-lg" 
+                      className="p-2 text-red-600 hover:bg-red-50 rounded transition text-lg cursor-pointer" 
                       title="Delete Worker"
                     >
                       <FiTrash2 />
@@ -202,6 +230,12 @@ const AdminWorkers = () => {
               ))}
             </tbody>
           </table>
+          <Pagination 
+            currentPage={currentPage}
+            totalItems={filteredWorkers.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
 
@@ -676,6 +710,18 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
 
   const { assignedSuits = [], stitchedSuits = [] } = detailsData || {};
 
+  const [subTabCurrentPage, setSubTabCurrentPage] = useState(1);
+  const SUBTAB_PAGE_SIZE = 10;
+
+  useEffect(() => {
+    setSubTabCurrentPage(1);
+  }, [activeSubTab]);
+
+  const paginatedAssignedSuits = assignedSuits.slice((subTabCurrentPage - 1) * SUBTAB_PAGE_SIZE, subTabCurrentPage * SUBTAB_PAGE_SIZE);
+  const paginatedStitchedSuits = stitchedSuits.slice((subTabCurrentPage - 1) * SUBTAB_PAGE_SIZE, subTabCurrentPage * SUBTAB_PAGE_SIZE);
+  const paginatedLedgerData = ledgerData.slice((subTabCurrentPage - 1) * SUBTAB_PAGE_SIZE, subTabCurrentPage * SUBTAB_PAGE_SIZE);
+  const paginatedPaymentsData = paymentsData.slice((subTabCurrentPage - 1) * SUBTAB_PAGE_SIZE, subTabCurrentPage * SUBTAB_PAGE_SIZE);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded shadow-2xl w-full max-w-4xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-150">
@@ -760,7 +806,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {assignedSuits.map((suit, sIdx) => (
+                    {paginatedAssignedSuits.map((suit, sIdx) => (
                       <tr key={suit.suitId || sIdx} className="hover:bg-gray-50 transition">
                         <td className="p-3">
                           <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
@@ -789,6 +835,12 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                     ))}
                   </tbody>
                 </table>
+                <Pagination 
+                  currentPage={subTabCurrentPage}
+                  totalItems={assignedSuits.length}
+                  pageSize={SUBTAB_PAGE_SIZE}
+                  onPageChange={setSubTabCurrentPage}
+                />
               </div>
             )
           )}
@@ -814,7 +866,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {stitchedSuits.map((suit, sIdx) => (
+                    {paginatedStitchedSuits.map((suit, sIdx) => (
                       <tr key={suit.suitId || sIdx} className="hover:bg-gray-50 transition">
                         <td className="p-3">
                           <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
@@ -840,6 +892,12 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                     ))}
                   </tbody>
                 </table>
+                <Pagination 
+                  currentPage={subTabCurrentPage}
+                  totalItems={stitchedSuits.length}
+                  pageSize={SUBTAB_PAGE_SIZE}
+                  onPageChange={setSubTabCurrentPage}
+                />
               </div>
             )
           )}
@@ -864,7 +922,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-150">
-                    {ledgerData.map(entry => (
+                    {paginatedLedgerData.map(entry => (
                       <tr key={entry._id} className="hover:bg-gray-55 text-xs">
                         <td className="p-3 font-semibold text-gray-500">{new Date(entry.date).toLocaleDateString()}</td>
                         <td className="p-3 font-bold text-gray-900">{entry.description}</td>
@@ -886,14 +944,14 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                             <>
                               <button 
                                 onClick={() => setEditingEntry(entry)}
-                                className="text-blue-600 hover:text-blue-850 font-bold"
+                                className="text-blue-600 hover:text-blue-850 font-bold cursor-pointer"
                                 title="Edit Entry"
                               >
                                 Edit
                               </button>
                               <button 
                                 onClick={() => handleDeleteEntry(entry._id)}
-                                className="text-red-600 hover:text-red-800 font-bold"
+                                className="text-red-600 hover:text-red-800 font-bold cursor-pointer"
                                 title="Delete Entry"
                               >
                                 Delete
@@ -905,6 +963,12 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                     ))}
                   </tbody>
                 </table>
+                <Pagination 
+                  currentPage={subTabCurrentPage}
+                  totalItems={ledgerData.length}
+                  pageSize={SUBTAB_PAGE_SIZE}
+                  onPageChange={setSubTabCurrentPage}
+                />
               </div>
             )
           )}
@@ -936,7 +1000,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                 <button
                   type="submit"
                   disabled={calculateSalaryMutation.isPending}
-                  className="bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg text-xs uppercase tracking-wider shadow"
+                  className="bg-black hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg text-xs uppercase tracking-wider shadow cursor-pointer"
                 >
                   {calculateSalaryMutation.isPending ? 'Calculating...' : 'Calculate Wages'}
                 </button>
@@ -1006,7 +1070,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                     <button
                       onClick={handlePaySalary}
                       disabled={paySalaryMutation.isPending}
-                      className="bg-green-600 hover:bg-green-700 text-white font-black py-2.5 px-6 rounded-lg text-xs uppercase tracking-wider shadow whitespace-nowrap"
+                      className="bg-green-600 hover:bg-green-700 text-white font-black py-2.5 px-6 rounded-lg text-xs uppercase tracking-wider shadow whitespace-nowrap cursor-pointer"
                     >
                       {paySalaryMutation.isPending ? 'Processing...' : 'Mark Paid & Archive'}
                     </button>
@@ -1024,7 +1088,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
               <div className="text-center py-16 text-gray-400 font-bold">No paid salary records found.</div>
             ) : (
               <div className="space-y-4">
-                {paymentsData.map(payment => (
+                {paginatedPaymentsData.map(payment => (
                   <div key={payment._id} className="border border-gray-200 rounded p-4 bg-gray-50/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs hover:shadow-sm transition">
                     <div className="space-y-1">
                       <p className="font-black text-black">
@@ -1043,13 +1107,19 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                       </div>
                       <button
                         onClick={() => setViewingPayment(payment)}
-                        className="bg-black hover:bg-[#D4AF37] text-white hover:text-black font-bold px-3 py-1.5 rounded text-xs transition border border-black"
+                        className="bg-black hover:bg-[#D4AF37] text-white hover:text-black font-bold px-3 py-1.5 rounded text-xs transition border border-black cursor-pointer"
                       >
                         Receipt
                       </button>
                     </div>
                   </div>
                 ))}
+                <Pagination 
+                  currentPage={subTabCurrentPage}
+                  totalItems={paymentsData.length}
+                  pageSize={SUBTAB_PAGE_SIZE}
+                  onPageChange={setSubTabCurrentPage}
+                />
               </div>
             )
           )}

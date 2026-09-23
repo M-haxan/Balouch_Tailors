@@ -17,6 +17,9 @@ import {
 } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import Preloader from '../components/Preloader';
+import Pagination from '../components/Pagination';
+
+const PAGE_SIZE = 10;
 
 const AdminPayments = () => {
   const navigate = useNavigate();
@@ -27,6 +30,7 @@ const AdminPayments = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'partial' | 'paid' | 'unpaid'
+  const [currentPage, setCurrentPage] = useState(1);
   const [settleModalOrder, setSettleModalOrder] = useState(null);
   const [settleAmount, setSettleAmount] = useState('');
 
@@ -235,7 +239,10 @@ const AdminPayments = () => {
               type="text"
               placeholder="Search by Invoice #BT-..., Customer Name or Phone..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 focus:border-[#DFAC43] rounded text-xs font-medium outline-none transition"
             />
           </div>
@@ -243,7 +250,10 @@ const AdminPayments = () => {
           {/* Filter Pills */}
           <div className="flex flex-wrap items-center gap-1.5 bg-gray-50 p-1 rounded border border-gray-200 text-xs font-bold">
             <button
-              onClick={() => setStatusFilter('all')}
+              onClick={() => {
+                setStatusFilter('all');
+                setCurrentPage(1);
+              }}
               className={`px-3 py-1.5 rounded transition ${
                 statusFilter === 'all' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
@@ -253,7 +263,10 @@ const AdminPayments = () => {
               All ({orders.length})
             </button>
             <button
-              onClick={() => setStatusFilter('partial')}
+              onClick={() => {
+                setStatusFilter('partial');
+                setCurrentPage(1);
+              }}
               className={`px-3 py-1.5 rounded transition ${
                 statusFilter === 'partial' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
@@ -263,7 +276,10 @@ const AdminPayments = () => {
               Partial ({partialPaidCount})
             </button>
             <button
-              onClick={() => setStatusFilter('paid')}
+              onClick={() => {
+                setStatusFilter('paid');
+                setCurrentPage(1);
+              }}
               className={`px-3 py-1.5 rounded transition ${
                 statusFilter === 'paid' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
@@ -273,7 +289,10 @@ const AdminPayments = () => {
               Paid ({fullyPaidCount})
             </button>
             <button
-              onClick={() => setStatusFilter('unpaid')}
+              onClick={() => {
+                setStatusFilter('unpaid');
+                setCurrentPage(1);
+              }}
               className={`px-3 py-1.5 rounded transition ${
                 statusFilter === 'unpaid' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
@@ -309,7 +328,7 @@ const AdminPayments = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 font-medium">
-                  {filteredOrders.map((ord) => {
+                  {filteredOrders.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((ord) => {
                     const total = Number(ord.totalAmount) || 0;
                     const advance = Number(ord.advancePaid) || 0;
                     const balance = Number(ord.balanceAmount) || 0;
@@ -414,6 +433,13 @@ const AdminPayments = () => {
                 </tbody>
               </table>
             </div>
+
+            <Pagination
+              currentPage={currentPage}
+              totalItems={filteredOrders.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setCurrentPage}
+            />
           </div>
         )}
 

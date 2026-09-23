@@ -2,12 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import API from '../api/axios';
 import { toast } from 'react-toastify';
 
-// 1. Get All Suppliers
-export const useGetSuppliers = () => {
+// 1. Get All Suppliers (Supports server-side pagination & search)
+export const useGetSuppliers = (params = {}) => {
   return useQuery({
-    queryKey: ['suppliers'],
+    queryKey: ['suppliers', params],
     queryFn: async () => {
-      const res = await API.get('/expenses/suppliers');
+      const res = await API.get('/expenses/suppliers', { params });
       return res.data;
     }
   });
@@ -32,13 +32,13 @@ export const useAddSupplier = () => {
   });
 };
 
-// 3. Get Single Supplier Ledger
-export const useGetSupplierLedger = (supplierId) => {
+// 3. Get Single Supplier Ledger (Supports server-side pagination)
+export const useGetSupplierLedger = (supplierId, params = {}) => {
   return useQuery({
-    queryKey: ['supplierLedger', supplierId],
+    queryKey: ['supplierLedger', supplierId, params],
     queryFn: async () => {
       if (!supplierId) return null;
-      const res = await API.get(`/expenses/suppliers/${supplierId}/ledger`);
+      const res = await API.get(`/expenses/suppliers/${supplierId}/ledger`, { params });
       return res.data;
     },
     enabled: !!supplierId
@@ -106,16 +106,12 @@ export const useDeleteSupplier = () => {
   });
 };
 
-// 7. Get All Direct Expenses
-export const useGetExpenses = (filters = {}) => {
+// 7. Get All Direct Expenses (Supports server-side pagination & search)
+export const useGetExpenses = (params = {}) => {
   return useQuery({
-    queryKey: ['expenses', filters],
+    queryKey: ['expenses', params],
     queryFn: async () => {
-      const params = new URLSearchParams();
-      if (filters.category && filters.category !== 'All') params.append('category', filters.category);
-      if (filters.startDate) params.append('startDate', filters.startDate);
-      if (filters.endDate) params.append('endDate', filters.endDate);
-      const res = await API.get(`/expenses?${params.toString()}`);
+      const res = await API.get('/expenses', { params });
       return res.data;
     }
   });

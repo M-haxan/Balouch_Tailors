@@ -21,24 +21,40 @@ import {
   FiExternalLink
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import Pagination from '../components/Pagination';
 
 const AdminCustomers = () => {
   const navigate = useNavigate();
-  const { data: customers = [], isLoading } = useGetCustomers();
-  
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
 
-  // Search Logic (Name, Phone, ID, City)
-  const filteredCustomers = customers.filter(c => {
-    const phoneStr = c.phone ? c.phone.toString() : '';
-    const nameStr = c.name ? c.name.toLowerCase() : '';
-    const idStr = c.customerNumber ? c.customerNumber.toString() : '';
-    const cityStr = c.city ? c.city.toLowerCase() : '';
-    const search = searchTerm.toLowerCase();
-    return phoneStr.includes(search) || nameStr.includes(search) || idStr.includes(search) || cityStr.includes(search);
+  // Server-side paginated customer fetch
+  const { data: customersResponse, isLoading } = useGetCustomers({
+    page: currentPage,
+    limit: PAGE_SIZE,
+    search: searchTerm
   });
+
+  const customers = Array.isArray(customersResponse) 
+    ? customersResponse 
+    : (customersResponse?.data || []);
+
+  const pagination = customersResponse?.pagination || {
+    totalRecords: customers.length,
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: PAGE_SIZE
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
+
+  const filteredCustomers = customers;
 
   const openFormModal = (customer = null) => {
     setEditingCustomer(customer);
@@ -60,10 +76,19 @@ const AdminCustomers = () => {
             <input 
               type="text" 
               placeholder="Search by ID, name, phone, city..." 
-              className="w-full pl-10 pr-4 py-2 border-2 border-gray-100 focus:border-black rounded outline-none text-sm transition"
+              className="w-full pl-10 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded outline-none text-sm transition"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
             />
+            {searchTerm && (
+              <button 
+                onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full"
+                title="Clear search"
+              >
+                <FiX className="text-xs" />
+              </button>
+            )}
           </div>
           <button 
             onClick={() => openFormModal()}
@@ -179,6 +204,20 @@ const AdminCustomers = () => {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* SERVER-SIDE PAGINATION */}
+      {pagination.totalRecords > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-xs text-gray-500">
+            Showing <span className="font-bold text-gray-800">{Math.min((pagination.currentPage - 1) * pagination.pageSize + 1, pagination.totalRecords)}</span> to <span className="font-bold text-gray-800">{Math.min(pagination.currentPage * pagination.pageSize, pagination.totalRecords)}</span> of <span className="font-bold text-gray-800">{pagination.totalRecords}</span> clients
+          </p>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={pagination.totalPages}
+            onPageChange={(p) => setCurrentPage(p)}
+          />
         </div>
       )}
 

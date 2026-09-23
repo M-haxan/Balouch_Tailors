@@ -25,10 +25,13 @@ import {
 } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import Preloader from '../components/Preloader';
+import Pagination from '../components/Pagination';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [deliveryFilter, setDeliveryFilter] = useState('today'); // 'today' | 'in3days' | 'nextWeek' | 'overdue' | 'all'
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   
   const { data: orders = [], isLoading: loadingOrders } = useGetOrders();
   const { data: workers = [], isLoading: loadingWorkers } = useGetWorkers();
@@ -124,6 +127,16 @@ const AdminDashboard = () => {
     // All active sorted by date
     displayedOrders = [...activeOrders].sort((a, b) => new Date(a.deliveryDate) - new Date(b.deliveryDate));
   }
+
+  const paginatedDisplayedOrders = displayedOrders.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const handleDeliveryFilterChange = (filterKey) => {
+    setDeliveryFilter(filterKey);
+    setCurrentPage(1);
+  };
 
   // WhatsApp quick action
   const handleOpenWhatsApp = (customer) => {
@@ -291,7 +304,7 @@ const AdminDashboard = () => {
           
           {/* Tab 1: Today's Deliveries */}
           <button
-            onClick={() => setDeliveryFilter('today')}
+            onClick={() => handleDeliveryFilterChange('today')}
             className={`px-3.5 py-2 rounded text-xs font-black transition flex items-center gap-1.5 ${
               deliveryFilter === 'today'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
@@ -310,7 +323,7 @@ const AdminDashboard = () => {
 
           {/* Tab 2: Upcoming in 3 Days */}
           <button
-            onClick={() => setDeliveryFilter('in3days')}
+            onClick={() => handleDeliveryFilterChange('in3days')}
             className={`px-3.5 py-2 rounded text-xs font-black transition flex items-center gap-1.5 ${
               deliveryFilter === 'in3days'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
@@ -325,7 +338,7 @@ const AdminDashboard = () => {
 
           {/* Tab 3: Next Week Deliveries */}
           <button
-            onClick={() => setDeliveryFilter('nextWeek')}
+            onClick={() => handleDeliveryFilterChange('nextWeek')}
             className={`px-3.5 py-2 rounded text-xs font-black transition flex items-center gap-1.5 ${
               deliveryFilter === 'nextWeek'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
@@ -341,7 +354,7 @@ const AdminDashboard = () => {
           {/* Tab 4: Overdue (Only if any overdue order exists) */}
           {overdueOrders.length > 0 && (
             <button
-              onClick={() => setDeliveryFilter('overdue')}
+              onClick={() => handleDeliveryFilterChange('overdue')}
               className={`px-3.5 py-2 rounded text-xs font-black transition flex items-center gap-1.5 ${
                 deliveryFilter === 'overdue'
                   ? 'bg-red-700 text-white shadow-sm'
@@ -358,7 +371,7 @@ const AdminDashboard = () => {
 
           {/* Tab 5: All Active Orders */}
           <button
-            onClick={() => setDeliveryFilter('all')}
+            onClick={() => handleDeliveryFilterChange('all')}
             className={`px-3.5 py-2 rounded text-xs font-black transition flex items-center gap-1.5 ${
               deliveryFilter === 'all'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
@@ -401,7 +414,7 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 font-medium">
-                  {displayedOrders.slice(0, 15).map((ord) => {
+                  {paginatedDisplayedOrders.map((ord) => {
                     const dInfo = getDeliveryInfo(ord.deliveryDate);
                     const isOverdue = dInfo.key === 'overdue';
                     const isToday = dInfo.key === 'today';
@@ -503,16 +516,12 @@ const AdminDashboard = () => {
               </table>
             </div>
             
-            {displayedOrders.length > 15 && (
-              <div className="p-3 bg-gray-50 border-t border-gray-200 text-center">
-                <button
-                  onClick={() => navigate('/admin/allorders')}
-                  className="text-xs font-black text-[#DFAC43] hover:underline"
-                >
-                  Viewing 15 of {displayedOrders.length} orders. Click here to view all in All Orders list →
-                </button>
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalItems={displayedOrders.length}
+              pageSize={PAGE_SIZE}
+              onPageChange={setCurrentPage}
+            />
           </div>
         )}
 

@@ -2,12 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import API from '../api/axios';
 import { toast } from 'react-toastify';
 
-// 1. Get All Customers
-export const useGetCustomers = () => {
+// 1. Get All Customers (Supports server-side pagination & search)
+export const useGetCustomers = (params = {}) => {
   return useQuery({
-    queryKey: ['customers'],
+    queryKey: ['customers', params],
     queryFn: async () => {
-      const response = await API.get('/customer');
+      const response = await API.get('/customer', { params });
       return response.data;
     }
   });

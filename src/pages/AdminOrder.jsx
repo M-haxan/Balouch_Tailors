@@ -24,7 +24,8 @@ import {
   FiCheckCircle,
   FiEdit,
   FiShoppingBag,
-  FiCornerDownRight
+  FiCornerDownRight,
+  FiCopy
 } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
 
@@ -334,6 +335,48 @@ const CreateOrder = () => {
   const handleAddSuit = () => {
     const defaultSvc = garmentServices[0];
     setSuits([...suits, createInitialSuit(defaultSvc)]);
+  };
+
+  const handleAddSuitCopy = (sourceIndex = suits.length - 1) => {
+    const src = suits[sourceIndex] || suits[0];
+    if (!src) {
+      handleAddSuit();
+      return;
+    }
+    const clonedSuit = {
+      serviceType: src.serviceType,
+      basePrice: src.basePrice,
+      customizations: JSON.parse(JSON.stringify(src.customizations || [])),
+      fabricDetails: '',
+      volumeNo: '',
+      staticTags: [...(src.staticTags || [])],
+      customDesign: src.customDesign || '',
+      price: src.price,
+      wearer: src.wearer || '',
+      fabricimage: 'null'
+    };
+    setSuits([...suits, clonedSuit]);
+    toast.success(`Suit #${suits.length + 1} added with same specifications as Suit #${sourceIndex + 1}!`);
+  };
+
+  const handleCopySpecs = (targetIndex, sourceIndex) => {
+    const src = suits[sourceIndex];
+    if (!src) return;
+    setSuits(prevSuits => {
+      const updated = [...prevSuits];
+      updated[targetIndex] = {
+        ...updated[targetIndex],
+        serviceType: src.serviceType,
+        basePrice: src.basePrice,
+        customizations: JSON.parse(JSON.stringify(src.customizations || [])),
+        staticTags: [...(src.staticTags || [])],
+        customDesign: src.customDesign || '',
+        wearer: src.wearer || '',
+        price: src.price
+      };
+      return updated;
+    });
+    toast.success(`Suit #${sourceIndex + 1} ki specifications Suit #${targetIndex + 1} me copy ho gayi hain!`);
   };
 
   const handleRemoveSuit = (index) => {
@@ -675,6 +718,17 @@ const CreateOrder = () => {
                       </div>
 
                       <div className="flex items-center gap-1.5 sm:gap-2">
+                        {index > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => handleCopySpecs(index, index - 1)}
+                            className="bg-amber-100 hover:bg-[#DFAC43] hover:text-[#0F172A] text-amber-900 border border-amber-300 text-[11px] font-black px-2.5 py-1 rounded transition flex items-center gap-1 cursor-pointer shadow-2xs"
+                            title={`Suit #${index} ke tamam styles, tags, add-ons aur instructions is suit me copy karein`}
+                          >
+                            <FiCopy /> Same as Suit #{index}
+                          </button>
+                        )}
+
                         <div className="bg-white border border-gray-200 px-2 sm:px-2.5 py-1 rounded shadow-sm flex items-center gap-1.5 text-xs">
                           <span className="text-[10px] font-bold text-gray-500 hidden sm:inline">
                             Base (Rs {currentBasePrice}) + Add-ons (Rs {customTotal}) =
@@ -1009,17 +1063,28 @@ const CreateOrder = () => {
               <button
                 type="button"
                 onClick={handleAddSuit}
-                className="flex-1 sm:flex-initial bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black h-10 px-3 sm:px-4 rounded transition text-xs flex items-center justify-center gap-1.5 shadow-sm"
+                className="flex-1 sm:flex-initial bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black h-10 px-3 sm:px-4 rounded transition text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
               >
-                <FiPlus /> Add Another Suit
+                <FiPlus /> Add Blank Suit
               </button>
+
+              {suits.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleAddSuitCopy(suits.length - 1)}
+                  className="flex-1 sm:flex-initial bg-amber-500 hover:bg-amber-600 text-black font-black h-10 px-3 sm:px-4 rounded transition text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                  title="Add new suit pre-filled with the same specifications and styling"
+                >
+                  <FiCopy /> + Add Suit (Same Specs as Above)
+                </button>
+              )}
 
               <button
                 type="button"
                 onClick={handleAddAlteration}
-                className="flex-1 sm:flex-initial bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold h-10 px-3 sm:px-4 rounded transition text-xs flex items-center justify-center gap-1.5"
+                className="flex-1 sm:flex-initial bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold h-10 px-3 sm:px-4 rounded transition text-xs flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <FiPlus />  Add Alteration
+                <FiPlus /> Add Alteration
               </button>
             </div>
 

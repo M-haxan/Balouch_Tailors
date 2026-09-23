@@ -35,6 +35,9 @@ import { FaMoneyBillWave } from 'react-icons/fa';
 import defaultLogo from '../assets/BT_Logo.png';
 import { useGetShopSettings } from '../hooks/useShopSettings';
 import Preloader from '../components/Preloader';
+import Pagination from '../components/Pagination';
+
+const PAGE_SIZE = 10;
 
 const SUPPLIER_CATEGORIES = [
   'Bukram & Canvas',
@@ -61,6 +64,7 @@ const EXPENSE_CATEGORIES = [
 const AdminExpenses = () => {
   const [activeTab, setActiveTab] = useState('suppliers'); // 'suppliers' | 'direct' | 'all'
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   
   // Modals state
   const [isAddSupplierOpen, setIsAddSupplierOpen] = useState(false);
@@ -211,7 +215,10 @@ const AdminExpenses = () => {
         {/* Navigation Tabs */}
         <div className="flex space-x-2 w-full md:w-auto overflow-x-auto pb-1">
           <button
-            onClick={() => setActiveTab('suppliers')}
+            onClick={() => {
+              setActiveTab('suppliers');
+              setCurrentPage(1);
+            }}
             className={`px-4 py-2 rounded text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'suppliers'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
@@ -222,7 +229,10 @@ const AdminExpenses = () => {
           </button>
           
           <button
-            onClick={() => setActiveTab('direct')}
+            onClick={() => {
+              setActiveTab('direct');
+              setCurrentPage(1);
+            }}
             className={`px-4 py-2 rounded text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'direct'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
@@ -241,7 +251,10 @@ const AdminExpenses = () => {
             placeholder="Search vendor, item or category..." 
             className="w-full pl-9 pr-4 py-2 border border-gray-200 focus:border-black rounded outline-none font-medium text-xs transition"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
           />
         </div>
       </div>
@@ -262,112 +275,121 @@ const AdminExpenses = () => {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1050px] text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider whitespace-nowrap">
-                    <th className="p-4 rounded-tl min-w-[200px]">Shop / Vendor Name</th>
-                    <th className="p-4 min-w-[160px]">Contact Person</th>
-                    <th className="p-4 min-w-[150px]">Category</th>
-                    <th className="p-4 text-right min-w-[130px]">Total Purchases</th>
-                    <th className="p-4 text-right min-w-[120px]">Total Paid</th>
-                    <th className="p-4 text-right min-w-[140px]">Total Dues</th>
-                    <th className="p-4 rounded-tr text-right min-w-[250px]">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredSuppliers.map((supplier) => {
-                    const payable = Number(supplier.balancePayable) || 0;
-                    return (
-                      <tr key={supplier._id} className="hover:bg-gray-50/80 transition font-medium">
-                        
-                        {/* Shop Name & Address */}
-                        <td className="p-4">
-                          <p className="font-black text-gray-900 text-sm whitespace-nowrap">{supplier.shopName}</p>
-                          <p className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5 whitespace-nowrap">
-                            <FiMapPin className="text-gray-400 shrink-0" /> {supplier.address || 'Local Market'}
-                          </p>
-                        </td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1050px] text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider whitespace-nowrap">
+                      <th className="p-4 rounded-tl min-w-[200px]">Shop / Vendor Name</th>
+                      <th className="p-4 min-w-[160px]">Contact Person</th>
+                      <th className="p-4 min-w-[150px]">Category</th>
+                      <th className="p-4 text-right min-w-[130px]">Total Purchases</th>
+                      <th className="p-4 text-right min-w-[120px]">Total Paid</th>
+                      <th className="p-4 text-right min-w-[140px]">Total Dues</th>
+                      <th className="p-4 rounded-tr text-right min-w-[250px]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredSuppliers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((supplier) => {
+                      const payable = Number(supplier.balancePayable) || 0;
+                      return (
+                        <tr key={supplier._id} className="hover:bg-gray-50/80 transition font-medium">
+                          
+                          {/* Shop Name & Address */}
+                          <td className="p-4">
+                            <p className="font-black text-gray-900 text-sm whitespace-nowrap">{supplier.shopName}</p>
+                            <p className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5 whitespace-nowrap">
+                              <FiMapPin className="text-gray-400 shrink-0" /> {supplier.address || 'Local Market'}
+                            </p>
+                          </td>
 
-                        {/* Contact Person */}
-                        <td className="p-4 whitespace-nowrap">
-                          <p className="font-bold text-gray-800">{supplier.name}</p>
-                          <p className="text-[11px] text-gray-500 flex items-center gap-1 font-mono">
-                            <FiPhone className="text-gray-400 shrink-0" /> {supplier.phone}
-                          </p>
-                        </td>
+                          {/* Contact Person */}
+                          <td className="p-4 whitespace-nowrap">
+                            <p className="font-bold text-gray-800">{supplier.name}</p>
+                            <p className="text-[11px] text-gray-500 flex items-center gap-1 font-mono">
+                              <FiPhone className="text-gray-400 shrink-0" /> {supplier.phone}
+                            </p>
+                          </td>
 
-                        {/* Category */}
-                        <td className="p-4 whitespace-nowrap">
-                          <span className="inline-block bg-slate-100 text-gray-800 px-2.5 py-1 rounded text-[10px] font-bold uppercase border border-gray-200 whitespace-nowrap">
-                            {supplier.category}
-                          </span>
-                        </td>
-
-                        {/* Total Purchases */}
-                        <td className="p-4 text-right font-bold text-gray-800 whitespace-nowrap">
-                          Rs {(supplier.totalPurchases || 0).toLocaleString()}
-                        </td>
-
-                        {/* Total Paid */}
-                        <td className="p-4 text-right font-bold text-green-700 whitespace-nowrap">
-                          Rs {(supplier.totalPaid || 0).toLocaleString()}
-                        </td>
-
-                        {/* Total Dues (Payable) */}
-                        <td className="p-4 text-right whitespace-nowrap">
-                          {payable > 0 ? (
-                            <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-[#DFAC43]/40 text-amber-950 px-2.5 py-1 rounded text-xs font-black whitespace-nowrap">
-                              <FiAlertTriangle className="text-xs text-[#DFAC43] shrink-0" />
-                              Rs {payable.toLocaleString()}
+                          {/* Category */}
+                          <td className="p-4 whitespace-nowrap">
+                            <span className="inline-block bg-slate-100 text-gray-800 px-2.5 py-1 rounded text-[10px] font-bold uppercase border border-gray-200 whitespace-nowrap">
+                              {supplier.category}
                             </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-xs font-bold whitespace-nowrap">
-                              <FiCheckCircle className="text-xs text-green-600 shrink-0" /> Settled (Rs 0)
-                            </span>
-                          )}
-                        </td>
+                          </td>
 
-                        {/* Actions */}
-                        <td className="p-4 text-right whitespace-nowrap">
-                          <div className="flex justify-end gap-1.5 items-center whitespace-nowrap">
-                            
-                            {/* + Purchase Goods Button */}
-                            <button
-                              onClick={() => openPurchaseModal(supplier)}
-                              className="bg-[#DFAC43] hover:bg-black hover:text-[#DFAC43] text-[#0F172A] font-black px-2.5 py-1.5 rounded text-xs transition shadow-sm flex items-center gap-1 shrink-0 cursor-pointer"
-                              title="Purchase Material Entry"
-                            >
-                              <FiPlus className="shrink-0" /> Purchase Goods
-                            </button>
+                          {/* Total Purchases */}
+                          <td className="p-4 text-right font-bold text-gray-800 whitespace-nowrap">
+                            Rs {(supplier.totalPurchases || 0).toLocaleString()}
+                          </td>
 
-                            {/* Account Book Button */}
-                            <button
-                              onClick={() => openLedgerModal(supplier)}
-                              className="bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] font-bold px-2.5 py-1.5 rounded text-xs transition flex items-center gap-1 border border-gray-700 shrink-0 cursor-pointer"
-                              title="View Vendor Statement & Pay"
-                            >
-                              <FiBook className="shrink-0" /> Account Book
-                            </button>
+                          {/* Total Paid */}
+                          <td className="p-4 text-right font-bold text-green-700 whitespace-nowrap">
+                            Rs {(supplier.totalPaid || 0).toLocaleString()}
+                          </td>
 
-                            {/* Delete */}
-                            <button
-                              onClick={() => handleDeleteSupplier(supplier._id)}
-                              disabled={deletingSupplier}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded transition text-sm shrink-0 cursor-pointer"
-                              title="Delete Vendor"
-                            >
-                              <FiTrash2 />
-                            </button>
-                          </div>
-                        </td>
+                          {/* Total Dues (Payable) */}
+                          <td className="p-4 text-right whitespace-nowrap">
+                            {payable > 0 ? (
+                              <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-[#DFAC43]/40 text-amber-950 px-2.5 py-1 rounded text-xs font-black whitespace-nowrap">
+                                <FiAlertTriangle className="text-xs text-[#DFAC43] shrink-0" />
+                                Rs {payable.toLocaleString()}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-xs font-bold whitespace-nowrap">
+                                <FiCheckCircle className="text-xs text-green-600 shrink-0" /> Settled (Rs 0)
+                              </span>
+                            )}
+                          </td>
 
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                          {/* Actions */}
+                          <td className="p-4 text-right whitespace-nowrap">
+                            <div className="flex justify-end gap-1.5 items-center whitespace-nowrap">
+                              
+                              {/* + Purchase Goods Button */}
+                              <button
+                                onClick={() => openPurchaseModal(supplier)}
+                                className="bg-[#DFAC43] hover:bg-black hover:text-[#DFAC43] text-[#0F172A] font-black px-2.5 py-1.5 rounded text-xs transition shadow-sm flex items-center gap-1 shrink-0 cursor-pointer"
+                                title="Purchase Material Entry"
+                              >
+                                <FiPlus className="shrink-0" /> Purchase Goods
+                              </button>
+
+                              {/* Account Book Button */}
+                              <button
+                                onClick={() => openLedgerModal(supplier)}
+                                className="bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] font-bold px-2.5 py-1.5 rounded text-xs transition flex items-center gap-1 border border-gray-700 shrink-0 cursor-pointer"
+                                title="View Vendor Statement & Pay"
+                              >
+                                <FiBook className="shrink-0" /> Account Book
+                              </button>
+
+                              {/* Delete */}
+                              <button
+                                onClick={() => handleDeleteSupplier(supplier._id)}
+                                disabled={deletingSupplier}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded transition text-sm shrink-0 cursor-pointer"
+                                title="Delete Vendor"
+                              >
+                                <FiTrash2 />
+                              </button>
+                            </div>
+                          </td>
+
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <Pagination
+                currentPage={currentPage}
+                totalItems={filteredSuppliers.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setCurrentPage}
+              />
+            </>
           )}
         </div>
       )}
@@ -386,58 +408,67 @@ const AdminExpenses = () => {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider whitespace-nowrap">
-                    <th className="p-4 rounded-tl min-w-[200px]">Expense Detail</th>
-                    <th className="p-4 min-w-[140px]">Category</th>
-                    <th className="p-4 min-w-[120px]">Date</th>
-                    <th className="p-4 min-w-[140px]">Paid To</th>
-                    <th className="p-4 min-w-[110px]">Method</th>
-                    <th className="p-4 text-right min-w-[120px]">Amount</th>
-                    <th className="p-4 rounded-tr text-right min-w-[80px]">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredExpenses.map((exp) => (
-                    <tr key={exp._id} className="hover:bg-gray-50/80 transition font-medium">
-                      <td className="p-4">
-                        <p className="font-black text-gray-900 text-sm">{exp.title}</p>
-                        {exp.notes && <p className="text-[11px] text-gray-500 mt-0.5">{exp.notes}</p>}
-                      </td>
-                      <td className="p-4 whitespace-nowrap">
-                        <span className="bg-slate-100 text-gray-800 px-2.5 py-1 rounded text-[10px] font-bold border border-gray-200 whitespace-nowrap">
-                          {exp.category}
-                        </span>
-                      </td>
-                      <td className="p-4 text-gray-600 font-bold whitespace-nowrap">
-                        {new Date(exp.date).toLocaleDateString()}
-                      </td>
-                      <td className="p-4 text-gray-800 font-bold whitespace-nowrap">{exp.paidTo || '-'}</td>
-                      <td className="p-4 whitespace-nowrap">
-                        <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap">
-                          {exp.paymentMethod || 'Cash'}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right font-black text-gray-900 text-sm font-sans whitespace-nowrap">
-                        Rs {(exp.amount || 0).toLocaleString()}
-                      </td>
-                      <td className="p-4 text-right whitespace-nowrap">
-                        <button
-                          onClick={() => handleDeleteExpense(exp._id)}
-                          disabled={deletingExpense}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded transition text-sm cursor-pointer"
-                          title="Delete Expense"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[900px] text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider whitespace-nowrap">
+                      <th className="p-4 rounded-tl min-w-[200px]">Expense Detail</th>
+                      <th className="p-4 min-w-[140px]">Category</th>
+                      <th className="p-4 min-w-[120px]">Date</th>
+                      <th className="p-4 min-w-[140px]">Paid To</th>
+                      <th className="p-4 min-w-[110px]">Method</th>
+                      <th className="p-4 text-right min-w-[120px]">Amount</th>
+                      <th className="p-4 rounded-tr text-right min-w-[80px]">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredExpenses.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((exp) => (
+                      <tr key={exp._id} className="hover:bg-gray-50/80 transition font-medium">
+                        <td className="p-4">
+                          <p className="font-black text-gray-900 text-sm">{exp.title}</p>
+                          {exp.notes && <p className="text-[11px] text-gray-500 mt-0.5">{exp.notes}</p>}
+                        </td>
+                        <td className="p-4 whitespace-nowrap">
+                          <span className="bg-slate-100 text-gray-800 px-2.5 py-1 rounded text-[10px] font-bold border border-gray-200 whitespace-nowrap">
+                            {exp.category}
+                          </span>
+                        </td>
+                        <td className="p-4 text-gray-600 font-bold whitespace-nowrap">
+                          {new Date(exp.date).toLocaleDateString()}
+                        </td>
+                        <td className="p-4 text-gray-800 font-bold whitespace-nowrap">{exp.paidTo || '-'}</td>
+                        <td className="p-4 whitespace-nowrap">
+                          <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap">
+                            {exp.paymentMethod || 'Cash'}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right font-black text-gray-900 text-sm font-sans whitespace-nowrap">
+                          Rs {(exp.amount || 0).toLocaleString()}
+                        </td>
+                        <td className="p-4 text-right whitespace-nowrap">
+                          <button
+                            onClick={() => handleDeleteExpense(exp._id)}
+                            disabled={deletingExpense}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded transition text-sm cursor-pointer"
+                            title="Delete Expense"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <Pagination
+                currentPage={currentPage}
+                totalItems={filteredExpenses.length}
+                pageSize={PAGE_SIZE}
+                onPageChange={setCurrentPage}
+              />
+            </>
           )}
         </div>
       )}
@@ -1037,6 +1068,8 @@ const SupplierLedgerModal = ({ supplier, closeModal }) => {
   const [datePreset, setDatePreset] = useState('all'); // 'all' | 'this_month' | 'last_30' | 'custom'
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [ledgerPage, setLedgerPage] = useState(1);
+  const LEDGER_PAGE_SIZE = 10;
 
   const entries = ledgerData.ledger || [];
   const currentSupplier = ledgerData.supplier || supplier;
@@ -1095,6 +1128,7 @@ const SupplierLedgerModal = ({ supplier, closeModal }) => {
 
   const handlePresetChange = (preset) => {
     setDatePreset(preset);
+    setLedgerPage(1);
     const now = new Date();
     if (preset === 'all') {
       setStartDate('');
@@ -1325,14 +1359,20 @@ const SupplierLedgerModal = ({ supplier, closeModal }) => {
               <input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setLedgerPage(1);
+                }}
                 className="bg-white border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:border-black"
               />
               <span className="text-gray-400 font-bold">to</span>
               <input
                 type="date"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setLedgerPage(1);
+                }}
                 className="bg-white border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:border-black"
               />
             </div>
@@ -1380,7 +1420,7 @@ const SupplierLedgerModal = ({ supplier, closeModal }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredEntries.map((entry) => {
+                  {filteredEntries.slice((ledgerPage - 1) * LEDGER_PAGE_SIZE, ledgerPage * LEDGER_PAGE_SIZE).map((entry) => {
                     const isPurchase = entry.type === 'purchase';
                     const isPaid = entry.paymentStatus === 'Paid';
                     return (
@@ -1420,6 +1460,16 @@ const SupplierLedgerModal = ({ supplier, closeModal }) => {
                 </tbody>
               </table>
             </div>
+          )}
+
+          {filteredEntries.length > 0 && (
+            <Pagination
+              currentPage={ledgerPage}
+              totalItems={filteredEntries.length}
+              pageSize={LEDGER_PAGE_SIZE}
+              onPageChange={setLedgerPage}
+              className="mt-2 rounded border"
+            />
           )}
         </div>
 

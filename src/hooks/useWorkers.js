@@ -2,12 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import API from '../api/axios';
 import { toast } from 'react-toastify';
 
-// 1. Get All Workers
-export const useGetWorkers = () => {
+// 1. Get All Workers (Supports server-side pagination & search)
+export const useGetWorkers = (params = {}) => {
   return useQuery({
-    queryKey: ['workers'],
+    queryKey: ['workers', params],
     queryFn: async () => {
-      const response = await API.get('/workers');
+      const response = await API.get('/workers', { params });
       return response.data;
     }
   });
@@ -89,12 +89,12 @@ export const useAssignWorker = () => {
   });
 };
 
-// 6. Get Worker Dashboard Stats
-export const useGetWorkerDashboard = () => {
+// 6. Get Worker Dashboard Stats & Tab Data
+export const useGetWorkerDashboard = (params = {}) => {
   return useQuery({
-    queryKey: ['workerDashboard'],
+    queryKey: ['workerDashboard', params],
     queryFn: async () => {
-      const response = await API.get('/workers/dashboard');
+      const response = await API.get('/workers/dashboard', { params });
       return response.data;
     }
   });
@@ -215,12 +215,12 @@ export const useMarkSuitStitched = () => {
   });
 };
 
-// 8. Get Worker Ledger
-export const useGetWorkerLedger = (workerId) => {
+// 8. Get Worker Ledger (Supports server-side pagination)
+export const useGetWorkerLedger = (workerId, params = {}) => {
   return useQuery({
-    queryKey: ['workerLedger', workerId],
+    queryKey: ['workerLedger', workerId, params],
     queryFn: async () => {
-      const response = await API.get(`/workers/${workerId}/ledger`);
+      const response = await API.get(`/workers/${workerId}/ledger`, { params });
       return response.data;
     },
     enabled: Boolean(workerId)
@@ -285,12 +285,12 @@ export const usePaySalary = () => {
   });
 };
 
-// 12. Get Worker Payments History
-export const useGetWorkerPayments = (workerId) => {
+// 12. Get Worker Payments History (Supports server-side pagination)
+export const useGetWorkerPayments = (workerId, params = {}) => {
   return useQuery({
-    queryKey: ['workerPayments', workerId],
+    queryKey: ['workerPayments', workerId, params],
     queryFn: async () => {
-      const response = await API.get(`/workers/${workerId}/payments`);
+      const response = await API.get(`/workers/${workerId}/payments`, { params });
       return response.data;
     },
     enabled: Boolean(workerId)

@@ -2,12 +2,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import API from '../api/axios';
 import { toast } from 'react-toastify';
 
-// 1. Get All Orders (Dashboard ke liye)
-export const useGetOrders = () => {
+// 1. Get All Orders (Dashboard ke liye - Supports server-side pagination, search, and status filter)
+export const useGetOrders = (params = {}) => {
   return useQuery({
-    queryKey: ['orders'],
+    queryKey: ['orders', params],
     queryFn: async () => {
-      const response = await API.get('/orders');
+      const response = await API.get('/orders', { params });
       return response.data;
     }
   });
