@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGetOrders } from '../hooks/useOrder';
 import { useGetWorkers, useGetFinancialSummary } from '../hooks/useWorkers';
 import { useGetCustomers } from '../hooks/useCustomers';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 import { 
   FiBox, 
   FiScissors, 
@@ -33,6 +34,8 @@ const AdminDashboard = () => {
   const { data: workers = [], isLoading: loadingWorkers } = useGetWorkers();
   const { data: customers = [], isLoading: loadingCustomers } = useGetCustomers();
   const { data: financialData = {}, isLoading: loadingFinancial } = useGetFinancialSummary();
+  const { data: shopSettings } = useGetShopSettings();
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
 
   const isLoading = loadingOrders || loadingWorkers || loadingCustomers || loadingFinancial;
 
@@ -128,7 +131,7 @@ const AdminDashboard = () => {
     if (!rawNum) return;
     const cleanPhone = rawNum.toString().replace(/[^0-9]/g, '');
     const finalPhone = cleanPhone.startsWith('0') ? '92' + cleanPhone.slice(1) : cleanPhone.startsWith('92') ? cleanPhone : '92' + cleanPhone;
-    const text = `Assalam-o-Alaikum ${customer.name || ''},\nThis is an update regarding your order from *Balouch Tailors*.`;
+    const text = `Assalam-o-Alaikum ${customer.name || ''},\nThis is an update regarding your order from *${shopName}*.`;
     window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -146,7 +149,7 @@ const AdminDashboard = () => {
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-              Balouch Tailors
+              {shopName}
             </h1>
             <p className="text-xs md:text-sm text-gray-400 mt-1 max-w-xl font-medium">
               Real-time oversight of tailoring stages, QC approvals, upcoming delivery deadlines, and production workflow.

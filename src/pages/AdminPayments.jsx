@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetOrders, useDeliverOrder } from '../hooks/useOrder';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 import { 
   FiCreditCard, 
   FiCheckCircle, 
@@ -21,6 +22,8 @@ const AdminPayments = () => {
   const navigate = useNavigate();
   const { data: orders = [], isLoading } = useGetOrders();
   const { mutate: deliverOrder, isPending: isDelivering } = useDeliverOrder();
+  const { data: shopSettings } = useGetShopSettings();
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'partial' | 'paid' | 'unpaid'
@@ -126,7 +129,7 @@ const AdminPayments = () => {
     if (!rawNum) return;
     const cleanPhone = rawNum.toString().replace(/[^0-9]/g, '');
     const finalPhone = cleanPhone.startsWith('0') ? '92' + cleanPhone.slice(1) : cleanPhone.startsWith('92') ? cleanPhone : '92' + cleanPhone;
-    const text = `Assalam-o-Alaikum ${customer.name || ''},\nThis is an update regarding your order payment from *Balouch Tailors*.`;
+    const text = `Assalam-o-Alaikum ${customer.name || ''},\nThis is an update regarding your order payment from *${shopName}*.`;
     window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -166,7 +169,7 @@ const AdminPayments = () => {
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         
         {/* Card 1: Today's Collection */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
+        <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Today's Cash</span>
             <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs"><FaMoneyBillWave /></span>
@@ -176,7 +179,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Card 2: Partially Paid Orders */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-amber-300 transition">
+        <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-amber-300 transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Partially Paid</span>
             <span className="p-1.5 bg-amber-50 text-amber-900 rounded-lg text-xs"><FiClock /></span>
@@ -188,7 +191,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Card 3: Total Outstanding Balance (Udhar) */}
-        <div className="bg-[#0F172A] text-white p-4 rounded-xl border border-gray-800 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
+        <div className="bg-[#0F172A] text-white p-4 rounded border border-gray-800 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider">Outstanding Udhar</span>
             <span className="p-1.5 bg-[#DFAC43]/10 text-[#DFAC43] rounded-lg text-xs"><FiAlertCircle /></span>
@@ -198,7 +201,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Card 4: Fully Paid Orders */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-green-300 transition">
+        <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-green-300 transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Paid Orders</span>
             <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs"><FiCheckCircle /></span>
@@ -208,7 +211,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Card 5: Unpaid Orders (Zero Advance) */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-red-300 transition">
+        <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-red-300 transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Unpaid Orders</span>
             <span className="p-1.5 bg-red-50 text-red-700 rounded-lg text-xs"><FiAlertCircle /></span>
@@ -233,15 +236,15 @@ const AdminPayments = () => {
               placeholder="Search by Invoice #BT-..., Customer Name or Phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 focus:border-[#DFAC43] rounded-xl text-xs font-medium outline-none transition"
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 focus:border-[#DFAC43] rounded text-xs font-medium outline-none transition"
             />
           </div>
 
           {/* Filter Pills */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-gray-50 p-1 rounded-xl border border-gray-200 text-xs font-bold">
+          <div className="flex flex-wrap items-center gap-1.5 bg-gray-50 p-1 rounded border border-gray-200 text-xs font-bold">
             <button
               onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`px-3 py-1.5 rounded transition ${
                 statusFilter === 'all' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                   : 'text-gray-600 hover:bg-gray-200'
@@ -251,7 +254,7 @@ const AdminPayments = () => {
             </button>
             <button
               onClick={() => setStatusFilter('partial')}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`px-3 py-1.5 rounded transition ${
                 statusFilter === 'partial' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                   : 'text-gray-600 hover:bg-gray-200'
@@ -261,7 +264,7 @@ const AdminPayments = () => {
             </button>
             <button
               onClick={() => setStatusFilter('paid')}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`px-3 py-1.5 rounded transition ${
                 statusFilter === 'paid' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                   : 'text-gray-600 hover:bg-gray-200'
@@ -271,7 +274,7 @@ const AdminPayments = () => {
             </button>
             <button
               onClick={() => setStatusFilter('unpaid')}
-              className={`px-3 py-1.5 rounded-lg transition ${
+              className={`px-3 py-1.5 rounded transition ${
                 statusFilter === 'unpaid' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                   : 'text-gray-600 hover:bg-gray-200'
@@ -290,7 +293,7 @@ const AdminPayments = () => {
             <p className="text-gray-600 text-xs font-bold">No orders found matching the filter.</p>
           </div>
         ) : (
-          <div className="border border-gray-200 rounded-xl overflow-hidden shadow-xs">
+          <div className="border border-gray-200 rounded overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] border-b border-gray-200">
@@ -371,7 +374,7 @@ const AdminPayments = () => {
 
                         {/* Payment Status Badge */}
                         <td className="py-3 px-4 text-center whitespace-nowrap">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          <span className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase ${
                             isPaid 
                               ? 'bg-green-100 text-green-800 border border-green-200' 
                               : isPartial 
@@ -388,7 +391,7 @@ const AdminPayments = () => {
                             <button
                               onClick={() => navigate(`/admin/print/${ord._id}`)}
                               title="Print Order Slip"
-                              className="p-1.5 bg-gray-100 hover:bg-[#0F172A] text-gray-700 hover:text-[#DFAC43] rounded-lg transition"
+                              className="p-1.5 bg-gray-100 hover:bg-[#0F172A] text-gray-700 hover:text-[#DFAC43] rounded transition"
                             >
                               <FiPrinter className="text-xs" />
                             </button>
@@ -397,7 +400,7 @@ const AdminPayments = () => {
                               <button
                                 onClick={() => handleOpenSettle(ord)}
                                 title="Settle / Receive Payment"
-                                className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-2 py-1 rounded-lg text-[10px] font-black transition whitespace-nowrap shadow-xs"
+                                className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-2 py-1 rounded text-[10px] font-black transition whitespace-nowrap shadow-xs"
                               >
                                 Settle
                               </button>
@@ -426,7 +429,7 @@ const AdminPayments = () => {
               </h2>
               <button 
                 onClick={() => setSettleModalOrder(null)}
-                className="text-gray-400 hover:text-black p-1 rounded-lg hover:bg-gray-200 transition"
+                className="text-gray-400 hover:text-black p-1 rounded hover:bg-gray-200 transition"
               >
                 <FiX className="text-lg" />
               </button>

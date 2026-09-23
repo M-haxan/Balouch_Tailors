@@ -71,7 +71,7 @@ const Footer = () => {
                 
                 <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row items-center justify-between text-gray-500 text-sm">
                     <p>
-                        Copyright &copy;{new Date().getFullYear()} All rights reserved | Built with <i className="fas fa-heart text-red-500 mx-1"></i> Balouch Tailors
+                        Copyright &copy;{new Date().getFullYear()} All rights reserved | Built with <i className="fas fa-heart text-red-500 mx-1"></i> {shopName}
                     </p>
                 </div>
             </div>

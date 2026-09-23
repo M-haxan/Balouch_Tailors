@@ -49,6 +49,8 @@ const CustomerProfile = () => {
 
   const { data: profileData, isLoading, refetch } = useGetCustomerProfile(id);
   const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer();
+  const { data: shopSettings } = useGetShopSettings();
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'measurements' | 'orders' | 'khata'
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -128,7 +130,7 @@ const CustomerProfile = () => {
     const cleanPhone = rawNum.toString().replace(/[^0-9]/g, '');
     const finalPhone = cleanPhone.startsWith('0') ? '92' + cleanPhone.slice(1) : cleanPhone.startsWith('92') ? cleanPhone : '92' + cleanPhone;
 
-    const text = `Assalam-o-Alaikum ${customer.name} Sahab,\nThis message is from *Balouch Tailors*.\n\nYour Customer ID: *${formattedCustomerId}*`;
+    const text = `Assalam-o-Alaikum ${customer.name} Sahab,\nThis message is from *${shopName}*.\n\nYour Customer ID: *${formattedCustomerId}*`;
     window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -859,7 +861,7 @@ const OrdersTab = ({ orders = [], customer, newOrderUrl }) => {
             to={newOrderUrl}
             className="flex-1 sm:flex-none justify-center px-4 py-2 bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] font-black text-xs rounded transition flex items-center gap-1.5 shadow whitespace-nowrap"
           >
-            <FiPlus /> + New Order
+            <FiPlus />  New Order
           </Link>
         </div>
       </div>
@@ -973,11 +975,11 @@ const KhataLedgerTab = ({ customer, ledger = [], khataBalance = 0, openSettleMod
       balanceText = `*Status:* Khata Clear (Rs 0)`;
     }
 
-    const message = `*BALOUCH TAILORS - KHATA STATEMENT*\n` +
+    const message = `*${shopName.toUpperCase()} - KHATA STATEMENT*\n` +
       `Mohtaram *${customer.name}* Sahab (ID: #C-${customer.customerNumber || customer._id.slice(-4)}),\n\n` +
       `${balanceText}\n\n` +
       `Date: ${new Date().toLocaleDateString()}\n` +
-      `Shukriya!\n*Balouch Tailors*`;
+      `Shukriya!\n*${shopName}*`;
 
     window.open(`https://wa.me/${finalPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
@@ -1124,7 +1126,7 @@ const KhataLedgerTab = ({ customer, ledger = [], khataBalance = 0, openSettleMod
 // COMPONENT: CUSTOMER KHATA PRINT MODAL (56mm, 80mm, A4 STATEMENT)
 // ====================================================================
 const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, closeModal }) => {
-  const [paperSize, setPaperSize] = useState('a4'); // '56mm' | '80mm' | 'a4'
+  const [paperSize, setPaperSize] = useState('80mm'); // '56mm' | '80mm' | 'a4'
   const { data: shopSettings } = useGetShopSettings();
 
   const currentLogo = shopSettings?.logoUrl || defaultLogo;
@@ -1160,9 +1162,9 @@ const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, clos
   };
 
   const containerWidthClass = 
-    paperSize === '56mm' ? 'w-[56mm] max-w-[56mm] text-[10px] p-2.5' :
-    paperSize === '80mm' ? 'w-[80mm] max-w-[80mm] text-xs p-4' :
-    'w-full max-w-3xl text-xs p-8';
+    paperSize === '56mm' ? 'w-[56mm] max-w-[56mm] text-[10px] p-2' :
+    paperSize === '80mm' ? 'w-[80mm] max-w-[80mm] text-xs p-3.5' :
+    'w-full max-w-3xl text-sm px-8 py-10';
 
   return (
     <div className="fixed inset-0 z-70 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 font-sans overflow-y-auto">
@@ -1214,12 +1216,12 @@ const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, clos
         }
       `}</style>
 
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full border border-gray-200 overflow-hidden flex flex-col max-h-[92vh] animate-scale-up">
+      <div className="bg-white rounded shadow-2xl max-w-4xl w-full border overflow-hidden flex flex-col max-h-[92vh] animate-scale-up">
         
         {/* TOP CONTROLS BAR (SCREEN ONLY) */}
         <div className="bg-[#0F172A] text-white p-4 flex flex-wrap justify-between items-center gap-3 no-print">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-5 bg-[#DFAC43] rounded-sm"></span>
+            <span className="w-2 h-5 bg-[#DFAC43] rounded"></span>
             <h3 className="text-sm sm:text-base font-black text-white flex items-center gap-1.5">
               <FiPrinter className="text-[#DFAC43]" /> Customer Khata Statement
             </h3>
@@ -1242,13 +1244,13 @@ const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, clos
               ))}
             </div>
 
-            <button
+            {/* <button
               type="button"
               onClick={handlePrint}
               className="bg-[#DFAC43] hover:bg-yellow-400 text-[#0F172A] font-black text-xs px-4 py-1.5 rounded transition shadow flex items-center gap-1 cursor-pointer"
             >
               <FiPrinter /> Print / PDF
-            </button>
+            </button> */}
 
             <button
               type="button"
@@ -1268,7 +1270,7 @@ const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, clos
             className={`bg-white shadow-md border border-gray-300 text-black leading-tight ${containerWidthClass}`}
           >
             {/* SHOP HEADER */}
-            <div className="text-center pb-3 border-b-2 border-black space-y-1">
+            <div className="text-center pb-3 border-b-2 border-dashed border-gray-300 mb-3 space-y-1">
               {/* Logo */}
               <div className="flex justify-center mb-1">
                 <img 
@@ -1278,137 +1280,181 @@ const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, clos
                 />
               </div>
 
-              <h1 className="text-base sm:text-2xl font-black tracking-wider uppercase font-serif leading-tight">
+              {/* Shop Name */}
+              <h1 className={`font-black uppercase tracking-wider text-black leading-tight ${
+                paperSize === '56mm' ? 'text-xs' : paperSize === '80mm' ? 'text-base sm:text-lg' : 'text-2xl sm:text-3xl'
+              }`}>
                 {shopName}
               </h1>
               
+              {/* Tagline */}
               <p className={`font-bold tracking-widest text-gray-500 uppercase -mt-0.5 ${
                 paperSize === '56mm' ? 'text-[7px]' : paperSize === '80mm' ? 'text-[8px]' : 'text-xs'
               }`}>
                 {tagline}
               </p>
               
-              <div className="pt-2 pb-1">
-                <span className="inline-block bg-[#0F172A] text-white text-[10px] sm:text-xs font-black px-4 py-1 uppercase tracking-widest rounded-xs">
-                  CUSTOMER KHATA STATEMENT / کھاتہ لیجر سٹیٹمنٹ
-                </span>
+              {/* Document Badge */}
+              <div className="pt-1">
+                <div className="inline-block bg-[#0F172A] text-white px-3 py-0.5 rounded print:border print:border-black">
+                  <span className={`font-black uppercase tracking-widest ${paperSize === '56mm' ? 'text-[8px]' : 'text-[10px] sm:text-xs'}`}>
+                    KHATA STATEMENT {formattedCustomerId}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* CUSTOMER & STATEMENT METADATA */}
-            <div className="py-3 border-b border-dashed border-gray-400 space-y-1.5 text-[11px] sm:text-xs">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-gray-600 block text-[10px] uppercase font-bold">Customer Name:</span>
-                  <span className="font-black text-sm text-gray-900">{customer.name}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-gray-600 block text-[10px] uppercase font-bold">Customer ID:</span>
-                  <span className="font-black font-sans text-sm">{formattedCustomerId}</span>
-                </div>
+            <div className={`mb-3 pb-2 border-b border-gray-200 ${
+              paperSize === 'a4' ? 'flex justify-between items-center' : 'space-y-1 text-left'
+            }`}>
+              <div>
+                <span className="text-gray-400 font-bold uppercase text-[8px] sm:text-[9px] block">Customer:</span>
+                <p className="font-black text-gray-900 text-xs sm:text-sm">{customer.name}</p>
+                <p className="font-semibold text-gray-700 text-[10px] sm:text-xs">{customer.phone || '-'}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-1 border-t border-gray-100">
-                <div>
-                  <span className="text-gray-600 text-[10px]">Phone: </span>
-                  <span className="font-bold">{customer.phone || '-'}</span>
+              <div className={paperSize === 'a4' ? 'text-right' : 'pt-1 border-t border-dashed border-gray-100'}>
+                <div className="flex justify-between sm:justify-end gap-2 text-[10px] sm:text-xs">
+                  <span className="text-gray-500 font-bold">Statement Date:</span>
+                  <span className="font-bold text-gray-800">{new Date().toLocaleDateString()}</span>
                 </div>
-                <div className="text-right">
-                  <span className="text-gray-600 text-[10px]">Date: </span>
-                  <span className="font-bold">{new Date().toLocaleDateString()}</span>
+                <div className="flex justify-between sm:justify-end gap-2 text-[10px] sm:text-xs text-gray-600 font-bold mt-0.5">
+                  <span>Total Entries:</span>
+                  <span className="font-black text-gray-900">{ledger.length}</span>
                 </div>
               </div>
             </div>
 
-            {/* FINANCIAL SUMMARY BOX */}
-            <div className="my-3 p-3 bg-gray-50 border border-gray-200 rounded text-xs space-y-1.5">
-              <div className="flex justify-between">
-                <span className="text-gray-600 font-semibold">Total Debit (Orders Bill):</span>
-                <span className="font-black font-sans text-red-600">Rs {totalDebit.toLocaleString()}</span>
+            {/* FINANCIAL SUMMARY / TO-DATE ACCOUNT BREAKDOWN */}
+            <div className="mb-3 p-2.5 bg-gray-50 border border-gray-300 rounded space-y-1.5 text-[10px] sm:text-xs">
+              <div className="flex justify-between items-center text-gray-700 font-medium">
+                <span>Total Billed Amount:</span>
+                <span className="font-bold text-gray-900 font-sans">Rs {totalDebit.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 font-semibold">Total Credit (Payments Received):</span>
-                <span className="font-black font-sans text-green-700">Rs {totalCredit.toLocaleString()}</span>
+              <div className="flex justify-between items-center text-gray-700 font-medium">
+                <span>Total Paid to Date:</span>
+                <span className="font-bold text-green-700 font-sans">Rs {totalCredit.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between pt-1.5 border-t border-gray-300 font-black text-sm">
-                <span>Current Account Net Balance:</span>
+              <div className="flex justify-between items-center pt-1.5 border-t-2 border-dashed border-gray-300 font-black text-xs sm:text-sm text-black">
+                <span>Remaining Balance to Date:</span>
                 <span>
                   {khataBalance > 0 ? (
-                    <span className="text-red-700 font-black">Rs {khataBalance.toLocaleString()} (Udhar / Payable)</span>
+                    <span className="text-red-600 font-sans">Rs {khataBalance.toLocaleString()} (Balance Due)</span>
                   ) : khataBalance < 0 ? (
-                    <span className="text-green-700 font-black">Rs {Math.abs(khataBalance).toLocaleString()} (Advance Jama)</span>
+                    <span className="text-green-700 font-sans">Rs {Math.abs(khataBalance).toLocaleString()} (Advance Credit)</span>
                   ) : (
-                    <span className="text-gray-700 font-black">Rs 0 (Khata Clear)</span>
+                    <span className="text-gray-700 font-sans">Rs 0 (Account Cleared)</span>
                   )}
                 </span>
               </div>
             </div>
 
-            {/* TRANSACTION HISTORY TABLE */}
-            <div className="py-2 space-y-2">
-              <h3 className="text-[10px] sm:text-xs font-black uppercase tracking-wider border-b border-black pb-1">
-                Transaction Ledger Entries ({ledger.length})
-              </h3>
+            {/* TRANSACTION LEDGER ENTRIES */}
+            <div className="mb-3">
+              <div className="border-b-2 border-black pb-1 mb-2 flex justify-between items-center">
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-black">
+                  Transaction History
+                </span>
+                <span className="text-[9px] sm:text-[10px] font-bold text-gray-500">
+                  ({ledger.length} entries)
+                </span>
+              </div>
 
               {ledger.length === 0 ? (
                 <p className="text-center py-4 text-xs text-gray-400 italic">No transactions recorded.</p>
-              ) : (
-                <table className="w-full text-left border-collapse text-[10px] sm:text-xs">
+              ) : paperSize === 'a4' ? (
+                /* Full spacious corporate table for A4 Sheet */
+                <table className="w-full text-left border-collapse mb-2 text-xs">
                   <thead>
-                    <tr className="border-b-2 border-gray-300 font-black uppercase text-[9px] sm:text-[10px]">
-                      <th className="py-1.5">Date</th>
-                      <th className="py-1.5">Description</th>
-                      <th className="py-1.5 text-right">Debit (+)</th>
-                      <th className="py-1.5 text-right">Credit (-)</th>
-                      <th className="py-1.5 text-right">Balance</th>
+                    <tr className="border-b-2 border-black font-black uppercase text-gray-800 bg-gray-50">
+                      <th className="py-2 px-2 w-28">Date</th>
+                      <th className="py-2 px-2">Description / Details</th>
+                      <th className="py-2 px-2 text-right w-28">Debit (+ Rs)</th>
+                      <th className="py-2 px-2 text-right w-28">Credit (- Rs)</th>
+                      <th className="py-2 px-2 text-right w-32">Balance (Rs)</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {ledger.map((entry, idx) => (
-                      <tr key={idx} className="py-1">
-                        <td className="py-1.5 whitespace-nowrap text-gray-600 font-mono">
-                          {new Date(entry.date || entry.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="py-1.5 font-bold">
-                          {entry.description}
-                          {entry.orderNumber && (
-                            <span className="ml-1 font-mono text-[9px] bg-gray-100 px-1 py-0.2 rounded">
-                              #BT-{entry.orderNumber}
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-1.5 text-right font-mono font-bold text-red-600 whitespace-nowrap">
-                          {entry.type === 'debit' ? `+Rs ${entry.amount}` : '-'}
-                        </td>
-                        <td className="py-1.5 text-right font-mono font-bold text-green-700 whitespace-nowrap">
-                          {entry.type === 'credit' || entry.type === 'payment' ? `-Rs ${entry.amount}` : '-'}
-                        </td>
-                        <td className="py-1.5 text-right font-mono font-black whitespace-nowrap">
-                          Rs {entry.runningBalance?.toLocaleString() || 0}
-                        </td>
-                      </tr>
-                    ))}
+                    {ledger.map((entry, idx) => {
+                      const isDebit = entry.type === 'debit';
+                      return (
+                        <tr key={idx} className="hover:bg-gray-50/50">
+                          <td className="py-2 px-2 text-gray-700 whitespace-nowrap font-medium">
+                            {new Date(entry.date || entry.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="py-2 px-2 font-bold text-gray-900">
+                            {entry.description}
+                            {entry.orderNumber && (
+                              <span className="ml-2 text-[10px] bg-[#0F172A] text-white px-1.5 py-0.5 rounded font-black print:border print:border-black">
+                                #BT-{entry.orderNumber}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2 px-2 text-right font-bold text-red-600 whitespace-nowrap font-sans">
+                            {isDebit ? `+${Number(entry.amount || 0).toLocaleString()}` : '-'}
+                          </td>
+                          <td className="py-2 px-2 text-right font-bold text-green-700 whitespace-nowrap font-sans">
+                            {!isDebit ? `-${Number(entry.amount || 0).toLocaleString()}` : '-'}
+                          </td>
+                          <td className="py-2 px-2 text-right font-black text-gray-900 whitespace-nowrap font-sans">
+                            Rs {Number(entry.runningBalance || 0).toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
+              ) : (
+                /* Clean, non-overlapping card rows for 80mm POS & 56mm Thermal */
+                <div className="divide-y divide-dashed divide-gray-300">
+                  {ledger.map((entry, idx) => {
+                    const isDebit = entry.type === 'debit';
+                    return (
+                      <div key={idx} className="py-2 space-y-1">
+                        {/* Row 1: Date and Reference */}
+                        <div className="flex justify-between items-center text-[9px] sm:text-[10px]">
+                          <span className="text-gray-500 font-bold">
+                            {new Date(entry.date || entry.createdAt).toLocaleDateString()}
+                          </span>
+                          {entry.orderNumber ? (
+                            <span className="bg-[#0F172A] text-white text-[8px] sm:text-[9px] font-black px-1.5 py-0.2 rounded print:border print:border-black">
+                              Order #BT-{entry.orderNumber}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400 font-medium text-[8px]">
+                              Payment / Rec
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Row 2: Description */}
+                        <div className="text-[10px] sm:text-xs font-bold text-gray-900 leading-snug">
+                          {entry.description}
+                        </div>
+
+                        {/* Row 3: Amount Added / Deducted & Remaining Balance */}
+                        <div className="flex justify-between items-center pt-0.5 text-[9px] sm:text-[11px] bg-gray-50 px-2 py-1 rounded">
+                          <span className={`font-black ${isDebit ? 'text-red-600' : 'text-green-700'}`}>
+                            {isDebit ? `+ Rs ${Number(entry.amount || 0).toLocaleString()} (Bill)` : `- Rs ${Number(entry.amount || 0).toLocaleString()} (Paid)`}
+                          </span>
+                          <span className="font-bold text-gray-800">
+                            <span className="text-gray-500 text-[8px] sm:text-[9px] font-normal mr-1">Balance:</span>
+                            Rs {Number(entry.runningBalance || 0).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
-            {/* FOOTER & SIGNATURE */}
-            <div className="pt-6 border-t border-gray-300 space-y-3 text-[9px] sm:text-[10px] text-gray-600 text-center">
-              <p className="font-bold">
-                Computerized Khata Statement generated by {shopName} POS Management System.
+            {/* FOOTER NOTICE & SHOP STAMP */}
+            <div className="text-center pt-2 space-y-1.5 text-[8px] sm:text-[10px] text-gray-600">
+              <p className="text-[9px] sm:text-[10px] text-gray-800 font-medium pt-1">
+                This is a computerized statement of account. Thank you for your business.
               </p>
-
-              <div className="flex justify-between items-end pt-6 px-4 font-bold text-gray-800">
-                <div className="text-center">
-                  <div className="w-24 border-t border-black mb-1"></div>
-                  <span>Customer Signature</span>
-                </div>
-                <div className="text-center">
-                  <div className="w-24 border-t border-black mb-1"></div>
-                  <span>{shopName}</span>
-                </div>
-              </div>
 
               {/* Shop & Proprietor Footer Stamp */}
               <div className="pt-2 border-t-2 border-black text-center space-y-0.5 text-black">
@@ -1442,12 +1488,11 @@ const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, clos
             onClick={handlePrint}
             className="px-5 py-2 bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] rounded font-black text-xs transition shadow flex items-center gap-1.5 cursor-pointer"
           >
-            <FiPrinter /> Print Khata Statement
+            <FiPrinter /> Print / PDF
           </button>
         </div>
 
       </div>
-
     </div>
   );
 };
@@ -1931,7 +1976,7 @@ const StitchingPreferencesModal = ({ customer, closeModal }) => {
     {
       key: 'collar',
       label: 'Collar / Bain',
-      options: ['Half Bain', 'Full Bain', 'Shirt Collar', 'Cut Bain', 'Gol Gala / No Collar']
+      options: ['Half Bain', 'Full Bain', 'Cut Bain', 'Gol Gala / No Collar']
     },
     {
       key: 'sleeves',
@@ -1957,16 +2002,6 @@ const StitchingPreferencesModal = ({ customer, closeModal }) => {
       key: 'shalwarPocket',
       label: 'Shalwar Pocket ',
       options: ['1 Shalwar Pocket',  'No Shalwar Pocket']
-    },
-    {
-      key: 'patti',
-      label: 'Button Patti ',
-      options: ['small Patti','Half Patti',]
-    },
-    {
-      key: 'stitchingStyle',
-      label: 'Stitching Style ',
-      options: ['Single Silai', 'Double Silai']
     }
   ];
 

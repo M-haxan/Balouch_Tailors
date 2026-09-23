@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { FiInfo, FiScissors, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import Preloader from '../components/Preloader';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://bt-backend-5d1ec458f8eb.herokuapp.com/api';
 
@@ -11,6 +12,8 @@ const PublicSuitTrack = () => {
   const [suit, setSuit] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { data: shopSettings } = useGetShopSettings();
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
 
   useEffect(() => {
     const fetchSuitDetails = async () => {
@@ -61,7 +64,7 @@ const PublicSuitTrack = () => {
         
         {/* Header */}
         <div className="text-center space-y-1.5 border-b-2 border-double border-gray-800 pb-4">
-          <h1 className="text-2xl font-black tracking-widest text-[#D4AF37] uppercase font-serif">Balouch Tailors</h1>
+          <h1 className="text-2xl font-black tracking-widest text-[#D4AF37] uppercase">{shopName}</h1>
           <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Suit Cutting & Stitching Specification Sheet</p>
         </div>
 

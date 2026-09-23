@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { FiCheck, FiClock, FiScissors, FiSmile, FiAlertCircle } from 'react-icons/fi';
 import Preloader from '../components/Preloader';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://bt-backend-5d1ec458f8eb.herokuapp.com/api';
 
@@ -11,6 +12,8 @@ const PublicOrderTrack = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const { data: shopSettings } = useGetShopSettings();
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
 
   useEffect(() => {
     const fetchOrderStatus = async () => {
@@ -83,7 +86,7 @@ const PublicOrderTrack = () => {
         
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-3xl md:text-4xl font-black tracking-widest text-[#D4AF37] uppercase font-serif">Balouch Tailors</h1>
+          <h1 className="text-3xl md:text-4xl font-black tracking-widest text-[#D4AF37] uppercase">{shopName}</h1>
           <p className="text-xs text-gray-400 font-black uppercase tracking-wider">Premium Stitching Status Tracker</p>
           <div className="w-24 h-0.5 bg-[#D4AF37] mx-auto my-2"></div>
         </div>

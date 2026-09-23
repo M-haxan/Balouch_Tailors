@@ -7,12 +7,18 @@ import {
 } from 'react-icons/ai';
 import { FiEye, FiMaximize2, FiGrid, FiLayers } from 'react-icons/fi';
 import { useGetCatalogue } from '../hooks/useCatalogue';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 
 const Catalogue = () => {
   const [activeTab, setActiveTab] = useState('Shalwar Qameez');
   const [sliderIndex, setSliderIndex] = useState(null); // null means slider is closed, number means open at that index
 
   const { data: catalogueItems = [], isLoading, isError } = useGetCatalogue();
+  const { data: shopSettings } = useGetShopSettings();
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
+  const whatsappNum = (shopSettings?.secondaryPhone || shopSettings?.primaryPhone || '03067379919').replace(/[^0-9]/g, '');
+  const finalWaPhone = whatsappNum.startsWith('0') ? '92' + whatsappNum.slice(1) : whatsappNum.startsWith('92') ? whatsappNum : '92' + whatsappNum;
+  
   const categories = ['Shalwar Qameez', 'Kurta', 'Shirts'];
 
   // Filter items for active tab strictly from database
@@ -45,8 +51,8 @@ const Catalogue = () => {
 
   const handleWhatsAppInquiry = (item, index) => {
     const volTitle = item.title || `Vol. ${String(index + 1).padStart(2, '0')}`;
-    const message = `Assalam-o-Alaikum Balouch Tailors! I am interested in ${item.category} (${volTitle}). Please share fabric and stitching details.`;
-    window.open(`https://wa.me/923067379919?text=${encodeURIComponent(message)}`, '_blank');
+    const message = `Assalam-o-Alaikum ${shopName}! I am interested in ${item.category} (${volTitle}). Please share fabric and stitching details.`;
+    window.open(`https://wa.me/${finalWaPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
   const currentSliderItem = sliderIndex !== null ? activeData[sliderIndex] : null;

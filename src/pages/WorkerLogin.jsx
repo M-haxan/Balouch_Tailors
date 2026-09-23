@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import logo from '../assets/BT_Logo.png';
+import defaultLogo from '../assets/BT_Logo.png';
 import { useWorkerLoginMutation } from '../hooks/useAuth';
+import { useGetShopSettings } from '../hooks/useShopSettings';
 import Preloader from '../components/Preloader';
 import { FiEye, FiEyeOff, FiPhone } from 'react-icons/fi';
 
@@ -11,6 +12,9 @@ const WorkerLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const workerLogin = useWorkerLoginMutation();
+  const { data: shopSettings } = useGetShopSettings();
+  const currentLogo = shopSettings?.logoUrl || defaultLogo;
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
 
   const isPending = workerLogin.isPending;
   const isError = workerLogin.isError;
@@ -34,10 +38,10 @@ const WorkerLogin = () => {
         {/* Logo */}
         <div className="flex flex-col items-center mb-6 sm:mb-8 text-center">
           <Link to="/">
-            <img src={logo} alt="Balouch Tailors" className="h-16 sm:h-20 w-auto object-contain" />
+            <img src={currentLogo} alt={shopName} className="h-16 sm:h-20 w-auto object-contain" />
           </Link>
           <h1 className="mt-3 sm:mt-4 text-xl sm:text-2xl font-black text-gray-900 tracking-tighter uppercase">
-            Balouch <span className="text-gray-400 font-light">Tailors</span>
+            {shopName.split(' ')[0]} <span className="text-gray-400 font-light">{shopName.split(' ').slice(1).join(' ') || 'Tailors'}</span>
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">Sign in to your account</p>
         </div>

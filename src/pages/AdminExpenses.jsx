@@ -74,6 +74,8 @@ const AdminExpenses = () => {
   // Data Queries
   const { data: supplierData = {}, isLoading: loadingSuppliers } = useGetSuppliers();
   const { data: expenseData = {}, isLoading: loadingExpenses } = useGetExpenses();
+  const { data: shopSettings } = useGetShopSettings();
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
 
   const suppliers = supplierData.data || [];
   const supplierSummary = supplierData.summary || {};
@@ -144,7 +146,7 @@ const AdminExpenses = () => {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="w-2 h-2 rounded-full bg-[#DFAC43]"></span>
-              <span className="text-xs text-gray-400 font-medium">Balouch Tailors Supply & Expense Control</span>
+              <span className="text-xs text-gray-400 font-medium">{shopName} Supply & Expense Control</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
               Shop Expenses & Material Vendors

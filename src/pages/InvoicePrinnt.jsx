@@ -415,7 +415,7 @@ const InvoicePrint = () => {
         {/* ========================================= */}
         <div className="text-center pt-1.5 space-y-1.5">
           <p className="font-black text-[10px] sm:text-xs text-gray-900 tracking-wide">
-            Thank you for choosing Balouch Tailors!
+            Thank you for choosing {shopName}!
           </p>
           <p className="text-[9px] sm:text-[10px] text-gray-700 font-bold" dir="rtl">
             آپ کے اعتماد کا شکریہ۔

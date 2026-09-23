@@ -29,7 +29,8 @@ import {
   FiBook,
   FiTrendingUp,
   FiCheckCircle,
-  FiClock
+  FiClock,
+  FiPrinter
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 
@@ -680,29 +681,37 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
       <div className="bg-white rounded shadow-2xl w-full max-w-4xl relative flex flex-col max-h-[90vh] overflow-hidden border border-gray-150">
         
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
+        <div className="flex justify-between items-center p-5 sm:p-6 border-b border-gray-100 bg-gray-50/50 shrink-0">
           <div>
             <h2 className="text-xl font-black text-black">Karigar Ledger & Salary Manager</h2>
-            <p className="text-xs text-gray-505 font-bold text-gray-500 mt-0.5">Worker Name: {worker.name} | Specialization: {worker.specialization}</p>
+            <p className="text-xs font-bold text-gray-500 mt-0.5">Worker Name: {worker.name} | Specialization: {worker.specialization}</p>
           </div>
-          <button onClick={closeModal} className="p-2 text-gray-400 hover:text-black transition rounded-full hover:bg-gray-200">
+          <button onClick={closeModal} className="p-2 text-gray-400 hover:text-black transition rounded hover:bg-gray-200 cursor-pointer">
             <FiX className="text-xl" />
           </button>
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex border-b border-gray-200 bg-gray-50 px-6 pt-2">
+        <div className="flex overflow-x-auto border-b border-gray-200 bg-gray-50 px-6 pt-2 gap-1 shrink-0">
           <button
             onClick={() => setActiveSubTab('assigned')}
-            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider border-b-2 transition-all ${
+            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeSubTab === 'assigned' ? 'border-black text-black font-extrabold' : 'border-transparent text-gray-400 hover:text-black'
             }`}
           >
-            Assigned Suits ({assignedSuits.length + stitchedSuits.length})
+            Assigned ({assignedSuits.length})
+          </button>
+          <button
+            onClick={() => setActiveSubTab('stitched')}
+            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'stitched' ? 'border-black text-black font-extrabold' : 'border-transparent text-gray-400 hover:text-black'
+            }`}
+          >
+            Stitched ({stitchedSuits.length})
           </button>
           <button
             onClick={() => setActiveSubTab('ledger')}
-            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider border-b-2 transition-all ${
+            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeSubTab === 'ledger' ? 'border-black text-black font-extrabold' : 'border-transparent text-gray-400 hover:text-black'
             }`}
           >
@@ -710,7 +719,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
           </button>
           <button
             onClick={() => setActiveSubTab('calculator')}
-            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider border-b-2 transition-all ${
+            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeSubTab === 'calculator' ? 'border-black text-black font-extrabold' : 'border-transparent text-gray-400 hover:text-black'
             }`}
           >
@@ -718,7 +727,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
           </button>
           <button
             onClick={() => setActiveSubTab('history')}
-            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider border-b-2 transition-all ${
+            className={`py-3 px-4 font-bold text-xs uppercase tracking-wider border-b-2 transition-all cursor-pointer whitespace-nowrap ${
               activeSubTab === 'history' ? 'border-black text-black font-extrabold' : 'border-transparent text-gray-400 hover:text-black'
             }`}
           >
@@ -729,63 +738,108 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
         {/* Content */}
         <div className="overflow-y-auto p-6 flex-1 min-h-[50vh]">
           
-          {/* ASSIGNED SUITS TAB */}
+          {/* 1. ASSIGNED SUITS (PENDING STITCHING) TAB */}
           {activeSubTab === 'assigned' && (
             loadingDetails ? (
               <div className="text-center py-10 text-gray-500 font-bold">Loading assignments...</div>
+            ) : assignedSuits.length === 0 ? (
+              <div className="text-center py-16 bg-gray-50 border border-gray-200 rounded text-gray-400 font-bold text-xs italic">
+                No suits currently assigned for stitching.
+              </div>
             ) : (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="font-black text-sm text-gray-800 uppercase tracking-wider mb-3">Pending Stitching ({assignedSuits.length})</h3>
-                  {assignedSuits.length === 0 ? (
-                    <p className="text-xs text-gray-400 italic">No suits currently assigned for stitching.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {assignedSuits.map(suit => (
-                        <div key={suit.suitId} className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 flex flex-col justify-between">
-                          <div>
-                            <div className="flex justify-between items-start">
-                              <span className="bg-black text-[#D4AF37] text-[10px] font-black px-2 py-0.5 rounded uppercase">#BT-{suit.orderNumber}</span>
-                              <span className="bg-yellow-100 text-yellow-855 border border-yellow-200 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Assigned</span>
-                            </div>
-                            <h4 className="font-extrabold text-sm text-gray-900 mt-2 uppercase">{suit.fabricDetails}</h4>
-                            <p className="text-xs text-gray-550 font-bold mt-1">Wearer: <span className="font-bold text-black">{suit.wearerName}</span></p>
-                          </div>
-                          <div className="border-t border-gray-150 pt-2 mt-3 flex justify-between items-center text-xs">
-                            <span className="text-gray-405 font-bold">Wage: Rs {worker.perSuitWage}</span>
-                            <span className="text-gray-400">Due: {new Date(suit.deliveryDate).toLocaleDateString()}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+              <div className="overflow-x-auto bg-white border border-gray-200 rounded shadow-xs">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] border-b border-gray-200">
+                      <th className="p-3">Order / Suit ID</th>
+                      <th className="p-3">Fabric & Suit Details</th>
+                      <th className="p-3">Wearer / Customer</th>
+                      <th className="p-3">Delivery Due</th>
+                      <th className="p-3 text-right">Stitch Wage</th>
+                      <th className="p-3 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {assignedSuits.map((suit, sIdx) => (
+                      <tr key={suit.suitId || sIdx} className="hover:bg-gray-50 transition">
+                        <td className="p-3">
+                          <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
+                            #BT-{suit.orderNumber}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <span className="font-black text-gray-900 block">{suit.fabricDetails}</span>
+                          {suit.volumeNo && <span className="text-[10px] text-gray-500 font-medium">Vol: {suit.volumeNo}</span>}
+                        </td>
+                        <td className="p-3">
+                          <span className="font-bold text-gray-800">{suit.wearerName || 'Customer'}</span>
+                        </td>
+                        <td className="p-3 font-bold text-red-600 font-sans">
+                          {new Date(suit.deliveryDate).toLocaleDateString()}
+                        </td>
+                        <td className="p-3 text-right font-black text-gray-900 font-sans">
+                          Rs {worker.perSuitWage}
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className="bg-yellow-100 text-yellow-800 border border-yellow-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase">
+                            Assigned
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          )}
 
-                <div className="border-t border-gray-100 pt-6">
-                  <h3 className="font-black text-sm text-gray-800 uppercase tracking-wider mb-3">Stitched / Completed ({stitchedSuits.length})</h3>
-                  {stitchedSuits.length === 0 ? (
-                    <p className="text-xs text-gray-400 italic">No suits marked as completed in current cycle.</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {stitchedSuits.map(suit => (
-                        <div key={suit.suitId} className="border border-green-150 bg-green-50/20 rounded-xl p-4 flex flex-col justify-between">
-                          <div>
-                            <div className="flex justify-between items-start">
-                              <span className="bg-black text-[#D4AF37] text-[10px] font-black px-2 py-0.5 rounded uppercase">#BT-{suit.orderNumber}</span>
-                              <span className="bg-green-100 text-green-800 border border-green-200 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Stitched</span>
-                            </div>
-                            <h4 className="font-extrabold text-sm text-gray-900 mt-2 uppercase">{suit.fabricDetails}</h4>
-                            <p className="text-xs text-gray-550 font-bold mt-1">Wearer: <span className="font-bold text-black">{suit.wearerName}</span></p>
-                          </div>
-                          <div className="border-t border-green-100 pt-2 mt-3 flex justify-between items-center text-xs">
-                            <span className="text-green-600 font-bold">Earned: Rs {worker.perSuitWage}</span>
-                            <span className="text-gray-400">Finished</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+          {/* 2. STITCHED SUITS (COMPLETED) TAB */}
+          {activeSubTab === 'stitched' && (
+            loadingDetails ? (
+              <div className="text-center py-10 text-gray-500 font-bold">Loading completed suits...</div>
+            ) : stitchedSuits.length === 0 ? (
+              <div className="text-center py-16 bg-gray-50 border border-gray-200 rounded text-gray-400 font-bold text-xs italic">
+                No suits marked as completed in current cycle.
+              </div>
+            ) : (
+              <div className="overflow-x-auto bg-white border border-gray-200 rounded shadow-xs">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] border-b border-gray-200">
+                      <th className="p-3">Order / Suit ID</th>
+                      <th className="p-3">Fabric & Suit Details</th>
+                      <th className="p-3">Wearer / Customer</th>
+                      <th className="p-3 text-right">Earned Wage</th>
+                      <th className="p-3 text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {stitchedSuits.map((suit, sIdx) => (
+                      <tr key={suit.suitId || sIdx} className="hover:bg-gray-50 transition">
+                        <td className="p-3">
+                          <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-[10px] font-black px-2 py-0.5 rounded">
+                            #BT-{suit.orderNumber}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <span className="font-black text-gray-900 block">{suit.fabricDetails}</span>
+                          {suit.volumeNo && <span className="text-[10px] text-gray-500 font-medium">Vol: {suit.volumeNo}</span>}
+                        </td>
+                        <td className="p-3">
+                          <span className="font-bold text-gray-800">{suit.wearerName || 'Customer'}</span>
+                        </td>
+                        <td className="p-3 text-right font-black text-green-600 font-sans">
+                          + Rs {worker.perSuitWage}
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className="bg-green-100 text-green-800 border border-green-200 text-[10px] font-black px-2.5 py-0.5 rounded uppercase">
+                            Stitched
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )
           )}
@@ -971,7 +1025,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
             ) : (
               <div className="space-y-4">
                 {paymentsData.map(payment => (
-                  <div key={payment._id} className="border border-gray-200 rounded-xl p-4 bg-gray-50/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs hover:shadow-sm transition">
+                  <div key={payment._id} className="border border-gray-200 rounded p-4 bg-gray-50/50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs hover:shadow-sm transition">
                     <div className="space-y-1">
                       <p className="font-black text-black">
                         Period: {new Date(payment.startDate).toLocaleDateString()} to {new Date(payment.endDate).toLocaleDateString()}
@@ -984,12 +1038,12 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
                         <span className="text-[10px] text-gray-400 uppercase font-bold block">Earned / Advance</span>
                         <span className="font-bold text-gray-750 font-sans">Rs {payment.totalEarned} / Rs {payment.totalAdvance}</span>
                       </div>
-                      <div className="bg-green-50 border border-green-200 text-green-800 px-3.5 py-1.5 rounded-lg text-center font-black font-sans">
+                      <div className="bg-green-50 border border-green-200 text-green-800 px-3.5 py-1.5 rounded text-center font-black font-sans">
                         Net Paid: Rs {payment.netPaid}
                       </div>
                       <button
                         onClick={() => setViewingPayment(payment)}
-                        className="bg-black hover:bg-[#D4AF37] text-white hover:text-black font-bold px-3 py-1.5 rounded-lg text-xs transition border border-black"
+                        className="bg-black hover:bg-[#D4AF37] text-white hover:text-black font-bold px-3 py-1.5 rounded text-xs transition border border-black"
                       >
                         Receipt
                       </button>
@@ -1003,10 +1057,10 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end">
+        <div className="p-4 sm:p-5 border-t border-gray-100 bg-gray-50/50 flex justify-end shrink-0">
           <button
             onClick={closeModal}
-            className="bg-black text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black border border-black px-6 py-2 rounded-lg text-xs font-black uppercase transition"
+            className="bg-black text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black border border-black px-6 py-2 rounded text-xs font-black uppercase transition cursor-pointer"
           >
             Close
           </button>
@@ -1137,8 +1191,11 @@ const EditLedgerModal = ({ entry, closeModal, refetchLedger, refetchDetails }) =
 // -------------------------------------------------------------
 // COMPONENT: PAYMENT INVOICE RECEIPT MODAL (PRINT FRIENDLY)
 // -------------------------------------------------------------
+// COMPONENT: PAYMENT INVOICE RECEIPT MODAL (PRINT FRIENDLY - ADMIN)
+// -------------------------------------------------------------
 const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
   const { data: shopSettings } = useGetShopSettings();
+  const [paperSize, setPaperSize] = useState('80mm'); // '56mm' | '80mm' | 'a4'
 
   const currentLogo = shopSettings?.logoUrl || defaultLogo;
   const shopName = shopSettings?.shopName || 'Balouch Tailors';
@@ -1148,146 +1205,292 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
   const secondaryPhone = shopSettings?.secondaryPhone || '0306-7379919';
   const address = shopSettings?.address || 'Hazori Bagh Road, Street 1, Muhallah Muhammadi, Near Peer Muhammad Murad Masjid, Multan';
 
+  const receiptNum = `#SR-${payment._id.substring(payment._id.length - 6).toUpperCase()}`;
+
   const handlePrint = () => {
-    const printContent = document.getElementById('receipt-print-area').innerHTML;
-    const originalContent = document.body.innerHTML;
-    
-    // Inject printable HTML and trigger print dialog
-    document.body.innerHTML = printContent;
-    window.print();
-    document.body.innerHTML = originalContent;
-    window.location.reload(); // Quick state refresh to restore React events
+    try {
+      const originalTitle = document.title;
+      document.title = `SalaryReceipt_${receiptNum}`;
+      window.print();
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1500);
+    } catch (err) {
+      console.error('Print error:', err);
+      window.print();
+    }
   };
 
+  const containerWidthClass = 
+    paperSize === '56mm' ? 'w-[56mm] max-w-[56mm] text-[10px] p-2.5' :
+    paperSize === '80mm' ? 'w-[80mm] max-w-[80mm] text-xs p-4' :
+    'w-full max-w-xl text-xs p-6';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 backdrop-blur-sm p-4">
-      <div className="bg-white rounded shadow-2xl w-full max-w-lg border border-gray-150 overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50/50">
-          <h3 className="text-xs font-black text-black uppercase tracking-wider">Salary Payment Receipt</h3>
-          <button onClick={closeModal} className="p-1.5 text-gray-400 hover:text-black transition rounded-full hover:bg-gray-200">
-            <FiX className="text-lg" />
-          </button>
+    <div className="fixed inset-0 z-80 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 font-sans overflow-y-auto">
+      
+      {/* Print Specific CSS */}
+      <style>{`
+        @media print {
+          @page {
+            size: ${paperSize === '56mm' ? '56mm auto' : paperSize === '80mm' ? '80mm auto' : 'A4 portrait'};
+            margin: ${paperSize === '56mm' ? '0mm' : paperSize === '80mm' ? '0mm' : '8mm'};
+          }
+          *, *:before, *:after {
+            box-shadow: none !important;
+            text-shadow: none !important;
+          }
+          html, body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          header, nav, aside, footer, .no-print, .Toastify {
+            display: none !important;
+          }
+          body * {
+            visibility: hidden !important;
+          }
+          #admin-salary-payment-slip, #admin-salary-payment-slip * {
+            visibility: visible !important;
+          }
+          #admin-salary-payment-slip {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            right: 0 !important;
+            margin: 0 auto !important;
+            box-shadow: none !important;
+            border: none !important;
+            width: ${paperSize === '56mm' ? '54mm' : paperSize === '80mm' ? '76mm' : '100%'} !important;
+            max-width: ${paperSize === '56mm' ? '54mm' : paperSize === '80mm' ? '76mm' : '100%'} !important;
+            padding: ${paperSize === '56mm' ? '1.5mm' : paperSize === '80mm' ? '2.5mm' : '0mm'} !important;
+            background: #ffffff !important;
+          }
+        }
+      `}</style>
+
+      <div className="bg-white rounded shadow-2xl max-w-2xl w-full border overflow-hidden flex flex-col max-h-[92vh] animate-scale-up">
+        
+        {/* TOP CONTROLS BAR (SCREEN ONLY) */}
+        <div className="bg-[#0F172A] text-white p-4 flex flex-wrap justify-between items-center gap-3 no-print">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-5 bg-[#DFAC43] rounded"></span>
+            <h3 className="text-sm sm:text-base font-black text-white flex items-center gap-1.5">
+              <FiPrinter className="text-[#DFAC43]" /> Salary Payment Receipt Details
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Paper Size Selector */}
+            <div className="flex bg-gray-800 p-0.5 rounded border border-gray-700 text-xs">
+              <button
+                type="button"
+                onClick={() => setPaperSize('56mm')}
+                className={`px-2.5 py-1 rounded font-bold transition cursor-pointer ${
+                  paperSize === '56mm' ? 'bg-[#DFAC43] text-[#0F172A]' : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                56mm
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaperSize('80mm')}
+                className={`px-2.5 py-1 rounded font-bold transition cursor-pointer ${
+                  paperSize === '80mm' ? 'bg-[#DFAC43] text-[#0F172A]' : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                80mm
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaperSize('a4')}
+                className={`px-2.5 py-1 rounded font-bold transition cursor-pointer ${
+                  paperSize === 'a4' ? 'bg-[#DFAC43] text-[#0F172A]' : 'text-gray-300 hover:text-white'
+                }`}
+              >
+                A4 (Standard)
+              </button>
+            </div>
+{/* 
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="bg-[#DFAC43] hover:bg-yellow-500 text-[#0F172A] font-black text-xs px-3.5 py-1.5 rounded transition flex items-center gap-1.5 cursor-pointer shadow"
+            >
+              <FiPrinter /> Print Slip
+            </button> */}
+
+            <button
+              type="button"
+              onClick={closeModal}
+              className="text-gray-400 hover:text-white p-1 text-xl leading-none transition cursor-pointer"
+            >
+              <FiX />
+            </button>
+          </div>
         </div>
 
-        {/* Printable Section */}
-        <div className="p-6 overflow-y-auto flex-1 font-sans bg-gray-50" id="receipt-print-area">
-          <div className="border-4 border-double border-black p-5 space-y-4 bg-white text-black rounded-lg shadow-sm">
-            
-            {/* Invoice Header */}
-            <div className="text-center space-y-1">
-              <div className="flex justify-center mb-1">
-                <img src={currentLogo} alt={shopName} className="h-11 w-auto object-contain" />
-              </div>
-              <h1 className="text-xl font-black tracking-wider uppercase font-serif text-black leading-tight">{shopName}</h1>
-              <p className="text-[9px] font-bold tracking-widest text-gray-500 uppercase -mt-0.5">
+        {/* PRINTABLE SLIP CONTAINER */}
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-gray-100 flex justify-center items-start">
+          <div 
+            id="admin-salary-payment-slip"
+            className={`bg-white shadow-md border border-gray-300 text-black rounded space-y-3 ${containerWidthClass}`}
+          >
+            {/* SLIP BRAND HEADER */}
+            <div className="text-center space-y-1 pb-2.5 border-b-2 border-black">
+              {currentLogo && (
+                <div className="flex justify-center mb-1">
+                  <img 
+                    src={currentLogo} 
+                    alt={shopName} 
+                    className={paperSize === '56mm' ? 'h-8 max-w-[90px] object-contain' : paperSize === '80mm' ? 'h-10 max-w-[120px] object-contain' : 'h-12 max-w-[140px] object-contain'} 
+                  />
+                </div>
+              )}
+              
+              <h2 className={`font-black tracking-wider uppercase text-black leading-tight ${
+                paperSize === '56mm' ? 'text-xs sm:text-sm' : paperSize === '80mm' ? 'text-base sm:text-lg' : 'text-xl sm:text-2xl'
+              }`}>
+                {shopName}
+              </h2>
+              
+              <p className={`font-bold tracking-widest text-gray-500 uppercase -mt-0.5 ${
+                paperSize === '56mm' ? 'text-[7px]' : paperSize === '80mm' ? 'text-[8px]' : 'text-xs'
+              }`}>
                 {tagline}
               </p>
+              
               <div className="pt-1">
-                <span className="text-[10px] font-black tracking-wider uppercase bg-black text-white px-3 py-0.5 inline-block rounded">
-                  Karigar Salary Slip (تنخواہ رسید)
+                <span className="inline-block bg-[#0F172A] text-white text-[9px] sm:text-[10px] font-black px-3 py-0.5 uppercase tracking-widest rounded-xs">
+                  KARIGAR SALARY PAYMENT RECEIPT
                 </span>
               </div>
             </div>
 
-            {/* Invoice Metadata */}
-            <div className="grid grid-cols-2 gap-2 text-[10px] border-b border-dashed border-gray-400 pb-3 font-semibold text-gray-700">
-              <div className="space-y-1">
-                <p>Receipt No: <span className="font-black text-black">#SR-{payment._id.substring(18).toUpperCase()}</span></p>
-                <p>Date: <span className="font-bold text-black">{new Date(payment.paymentDate).toLocaleDateString()}</span></p>
+            {/* RECEIPT & SETTLEMENT METADATA */}
+            <div className="py-2 border-b border-dashed border-gray-400 space-y-1 text-[11px]">
+              <div className="flex justify-between font-bold">
+                <span className="text-gray-600">Receipt No:</span>
+                <span className="font-black font-sans bg-gray-100 px-1.5 py-0.2 rounded border border-gray-300">
+                  {receiptNum}
+                </span>
               </div>
-              <div className="space-y-1 text-right">
-                <p>Period Start: <span className="font-bold text-black">{new Date(payment.startDate).toLocaleDateString()}</span></p>
-                <p>Period End: <span className="font-bold text-black">{new Date(payment.endDate).toLocaleDateString()}</span></p>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Payment Date:</span>
+                <span className="font-black font-sans text-gray-900">{new Date(payment.paymentDate).toLocaleDateString()}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Settlement Period:</span>
+                <span className="font-bold font-sans">
+                  {new Date(payment.startDate).toLocaleDateString()} - {new Date(payment.endDate).toLocaleDateString()}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Karigar Name:</span>
+                <span className="font-black text-gray-900">{worker.name}</span>
+              </div>
+              {worker.specialization && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Specialization:</span>
+                  <span className="font-bold text-gray-800">{worker.specialization}</span>
+                </div>
+              )}
             </div>
 
-            {/* Worker metadata */}
-            <div className="text-[10px] space-y-1 bg-gray-50 p-2.5 rounded border border-gray-150">
-              <span className="font-black uppercase tracking-wider text-[8px] text-gray-450 block mb-1">Karigar Info</span>
-              <div className="flex justify-between font-semibold">
-                <p>Name: <span className="font-black text-black">{worker.name}</span></p>
-                <p>Specialization: <span className="font-bold text-black">{worker.specialization}</span></p>
+            {/* WAGES & DEDUCTIONS SUMMARY TABLE */}
+            <div className="py-2 border-b border-dashed border-gray-400 space-y-1 text-[11px]">
+              <div className="font-black uppercase text-[10px] tracking-wider text-gray-700 pb-1">
+                Wages & Deductions Summary
               </div>
-            </div>
-
-            {/* Detailed Ledger Summary */}
-            <div className="space-y-2">
-              <span className="font-black text-[8px] uppercase text-gray-450 tracking-wider block">Wages & Deductions Summary</span>
-              <table className="w-full text-[10px] text-left border-collapse font-medium">
+              <table className="w-full text-left border-collapse font-medium">
                 <thead>
-                  <tr className="border-b border-black font-bold uppercase text-[8px] text-gray-500">
+                  <tr className="border-b border-black font-bold uppercase text-[9px] text-gray-600">
                     <th className="py-1">Description</th>
-                    <th className="py-1 text-right">Amount (Rs)</th>
+                    <th className="py-1 text-right">Amount</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   <tr>
-                    <td className="py-2 text-gray-700">Total Stitching Wages Earned (Wages Credit)</td>
-                    <td className="py-2 text-right font-bold text-green-700 font-sans">+ Rs {payment.totalEarned}</td>
+                    <td className="py-1.5 text-gray-800">Total Stitching Wages Earned</td>
+                    <td className="py-1.5 text-right font-black text-green-700 font-sans">+ Rs {Number(payment.totalEarned || 0).toLocaleString()}</td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-gray-700">Total Advances Taken Deducted (Deductions Debit)</td>
-                    <td className="py-2 text-right font-bold text-red-600 font-sans">- Rs {payment.totalAdvance}</td>
+                    <td className="py-1.5 text-gray-800">Advance Deductions</td>
+                    <td className="py-1.5 text-right font-black text-red-600 font-sans">- Rs {Number(payment.totalAdvance || 0).toLocaleString()}</td>
                   </tr>
-                  <tr className="border-t-2 border-black font-black text-xs bg-gray-50">
-                    <td className="py-2 pl-1.5 uppercase font-black">Net Cash Paid Out</td>
-                    <td className="py-2 pr-1.5 text-right font-black font-sans">Rs {payment.netPaid}</td>
+                  <tr className="border-t-2 border-black font-black bg-gray-50 text-xs">
+                    <td className="py-2 pl-1 uppercase font-black text-gray-900">Net Cash Paid Out</td>
+                    <td className="py-2 pr-1 text-right font-black font-sans text-black">Rs {Number(payment.netPaid || 0).toLocaleString()}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            {/* Notes if any */}
+            {/* NOTES (IF ANY) */}
             {payment.notes && (
-              <div className="text-[9px] bg-amber-50/20 border border-amber-100 p-2 rounded">
-                <span className="font-bold block uppercase text-amber-800 tracking-wider">Notes</span>
-                <p className="font-medium text-gray-650 italic leading-relaxed">{payment.notes}</p>
+              <div className="py-2 border-b border-dashed border-gray-400 space-y-0.5 bg-amber-50/40 p-2 rounded text-[10px]">
+                <span className="font-black uppercase text-amber-900 block tracking-wider text-[9px]">
+                  Payment Notes:
+                </span>
+                <p className="font-semibold text-gray-800 italic leading-relaxed">
+                  {payment.notes}
+                </p>
               </div>
             )}
 
-            {/* Signature fields */}
-            <div className="grid grid-cols-2 gap-4 pt-6 text-[9px] font-bold text-center">
-              <div className="space-y-1">
-                <div className="border-b border-black w-28 mx-auto"></div>
-                <p className="uppercase text-gray-500">Karigar Signature</p>
-              </div>
-              <div className="space-y-1">
-                <div className="border-b border-black w-28 mx-auto"></div>
-                <p className="uppercase text-gray-500">Shop Stamp & Sig</p>
+            {/* AUTHENTIC OFFICIAL PAID STAMP */}
+            <div className="flex justify-center my-2.5 py-1">
+              <div className="border-2 border-dashed border-green-600 text-green-700 font-black text-[11px] sm:text-xs uppercase px-4 py-1.5 rounded-lg tracking-widest inline-flex items-center gap-1.5 rotate-[-2deg] bg-green-50/70 shadow-2xs">
+                <FiCheckCircle className="text-sm text-green-600" />
+                <span>PAID & SETTLED</span>
               </div>
             </div>
 
-            {/* Shop & Proprietor Footer Stamp */}
-            <div className="pt-3 border-t-2 border-black text-center space-y-0.5 text-black">
+            {/* SHOP & PROPRIETOR FOOTER */}
+            <div className="pt-2.5 border-t-2 border-black text-center space-y-0.5 text-black pb-1">
               <p className="font-black text-[10px] uppercase tracking-wider">
                 Proprietor: {proprietor}
               </p>
-              <p className="font-black text-[10px] font-sans">
-                📞 {primaryPhone}{secondaryPhone ? ` | ${secondaryPhone}` : ''}
+              <p className="font-black text-[10px] font-sans flex items-center justify-center gap-1">
+                <FiPhone className="text-gray-700 text-[10px]" /> {primaryPhone}{secondaryPhone ? ` | ${secondaryPhone}` : ''}
               </p>
-              <p className="text-[8px] text-gray-600">
+              <p className="text-[8px] text-gray-600 leading-tight">
                 {address}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="p-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={closeModal}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-xs font-bold uppercase hover:bg-gray-100"
-          >
-            Close
-          </button>
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="bg-black hover:bg-gray-800 text-white px-5 py-2 rounded-lg text-xs font-bold uppercase flex items-center gap-1"
-          >
-            Print Slip
-          </button>
+        {/* SCREEN FOOTER */}
+        <div className="p-3.5 border-t border-gray-200 bg-gray-50 flex justify-between items-center gap-2 shrink-0 no-print">
+          <span className="text-[11px] text-gray-500 font-semibold">
+            Status: <strong className="text-green-700 uppercase">Paid & Settled</strong>
+          </span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded font-bold text-xs transition cursor-pointer"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] font-black px-4 py-2 rounded text-xs transition flex items-center gap-1.5 cursor-pointer shadow"
+            >
+              <FiPrinter /> Print Slip
+            </button>
+          </div>
         </div>
+
       </div>
     </div>
   );
