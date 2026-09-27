@@ -22,6 +22,7 @@ import {
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import Pagination from '../components/Pagination';
+import { formatPhone } from '../utils/formatters';
 
 const AdminCustomers = () => {
   const navigate = useNavigate();
@@ -156,7 +157,7 @@ const AdminCustomers = () => {
                     {/* CONTACT & WHATSAPP */}
                     <td className="p-4 text-gray-600 font-medium whitespace-nowrap">
                       <div>
-                        <p className="font-semibold text-gray-900">{customer.phone}</p>
+                        <p className="font-semibold text-gray-900">{formatPhone(customer.phone)}</p>
                       </div>
                     </td>
                     
@@ -250,7 +251,7 @@ const CustomerFormModal = ({ customer, closeModal }) => {
 
   const [basicInfo, setBasicInfo] = useState({
     name: customer?.name || '',
-    phone: customer?.phone || '',
+    phone: customer?.phone ? formatPhone(customer.phone) : '',
     whatsapp: customer?.whatsapp || '',
     city: customer?.city || '',
     address: customer?.address || '',

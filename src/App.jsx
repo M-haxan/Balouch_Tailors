@@ -12,6 +12,8 @@ import Pricing from './components/Pricing';
 import VisitTailor from './components/VisitTailor';
 import Footer from './components/Footer';
 import Login from './pages/Login';
+import Register from './pages/Register';
+import ResetPassword from './pages/ResetPassword';
 import WorkerLogin from './pages/WorkerLogin';
 import AdminLayout from './Layouts/AdminLayout';
 import AdminDashboard from './pages/AdminDashboard';
@@ -50,8 +52,16 @@ function Home() {
 
 function App() {
   const location = useLocation();
-  // Yeh variable check karta hai ke URL /admin ya /worker ya /track se shuru ho raha hai ya nahi
-  const hideHeaderAndFooter = location.pathname.startsWith('/admin') || location.pathname.startsWith('/worker') || location.pathname.startsWith('/track');
+  // Check if current route should hide public website header and footer
+  const hideHeaderAndFooter = 
+    location.pathname.startsWith('/admin') || 
+    location.pathname.startsWith('/worker') || 
+    location.pathname.startsWith('/track') ||
+    location.pathname === '/login' ||
+    location.pathname === '/register' ||
+    location.pathname === '/admin-register' ||
+    location.pathname === '/secret-register' ||
+    location.pathname.startsWith('/reset-password');
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -72,8 +82,17 @@ function App() {
           <Route path="/track/:orderNumber" element={<PublicOrderTrack />} />
           <Route path="/track/suit/:suitId" element={<PublicSuitTrack />} />
 
-          {/* Admin Login */}
+          {/* Admin Login & Authentication */}
+          <Route path="/login" element={<Login />} />
           <Route path="/admin/login" element={<Login />} />
+          
+          {/* Hidden Admin Direct Registration Routes */}
+          <Route path="/register" element={<Register />} />
+          <Route path="/admin-register" element={<Register />} />
+          <Route path="/secret-register" element={<Register />} />
+
+          {/* Password Reset Confirmation */}
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* Worker Login */}
           <Route path="/worker/login" element={<WorkerLogin />} />
@@ -81,6 +100,9 @@ function App() {
 
           {/* Worker Protected Routes */}
           <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+          <Route path="/worker/orders/create" element={<CreateOrder />} />
+          <Route path="/worker/print/:id" element={<InvoicePrint />} />
+          <Route path="/print/:id" element={<InvoicePrint />} />
 
           {/* Admin Protected Routes */}
           <Route element={<AdminLayout />}>

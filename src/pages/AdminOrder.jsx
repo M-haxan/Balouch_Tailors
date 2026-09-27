@@ -4,6 +4,8 @@ import { useCreateOrder } from '../hooks/useOrder';
 import { useGetTailoringServices } from '../hooks/useTailoringServices';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { formatPhone } from '../utils/formatters';
+import useAuthStore from '../Store/authStore';
 import { 
   FiPlus, 
   FiTrash2, 
@@ -25,7 +27,8 @@ import {
   FiEdit,
   FiShoppingBag,
   FiCornerDownRight,
-  FiCopy
+  FiCopy,
+  FiArrowLeft
 } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
 
@@ -49,6 +52,8 @@ const COMMON_TAGS = [
 const CreateOrder = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const user = useAuthStore((state) => state.user);
+  const isWorker = user?.role === 'worker';
   const { data: customers = [], isLoading: loadingCustomers } = useGetCustomers();
   const { data: tailoringList = [], isLoading: loadingPricing } = useGetTailoringServices();
   const { mutate: createOrder, isPending } = useCreateOrder();
@@ -498,6 +503,12 @@ const CreateOrder = () => {
     }));
     formData.append('alterations', JSON.stringify(alterationsData));
 
+    // Attach who created this order for transparency
+    const createdByData = isWorker
+      ? { userType: 'worker', workerId: user?.id || user?._id, name: user?.name || 'Worker' }
+      : { userType: 'admin', name: user?.name || 'Admin' };
+    formData.append('createdBy', JSON.stringify(createdByData));
+
     suits.forEach((suit) => {
       if (suit.fabricimage && suit.fabricimage !== 'null') {
          formData.append('fabricImages', suit.fabricimage);
@@ -550,10 +561,10 @@ const CreateOrder = () => {
           
           <div className="space-y-2.5 sm:space-y-3">
             <button 
-              onClick={() => navigate(`/admin/print/${savedOrder._id}`)}
-              className="w-full bg-[#DFAC43] hover:bg-[#0F172A] text-[#0F172A] hover:text-[#DFAC43] font-black h-10 sm:h-11 rounded transition shadow-sm flex justify-center items-center gap-2 text-xs sm:text-sm"
+              onClick={() => navigate(`/print/${savedOrder._id}`)}
+              className="w-full bg-[#DFAC43] hover:bg-[#0F172A] text-[#0F172A] hover:text-[#DFAC43] font-black h-10 sm:h-11 rounded transition shadow-sm flex justify-center items-center gap-2 text-xs sm:text-sm cursor-pointer"
             >
-              <FiScissors /> Print Invoice Slip
+              <FiScissors /> Print Customer Booking Slip
             </button>
             
             <button 
@@ -564,9 +575,16 @@ const CreateOrder = () => {
                 setAdvancePaid('');
                 setCustomerId('');
               }}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold h-10 sm:h-11 rounded transition text-xs sm:text-sm"
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold h-10 sm:h-11 rounded transition text-xs sm:text-sm cursor-pointer"
             >
-              + Create Another Order
+              + Book Another Order
+            </button>
+
+            <button 
+              onClick={() => navigate(isWorker ? '/worker/dashboard' : '/admin/allorders')}
+              className="w-full text-xs font-bold text-gray-500 hover:text-black py-2 transition cursor-pointer"
+            >
+              ← Back to {isWorker ? 'Worker Portal' : 'All Orders'}
             </button>
           </div>
         </div>
@@ -580,14 +598,26 @@ const CreateOrder = () => {
         
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div>
-            <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-              <span className="w-2 h-4 sm:h-5 bg-[#DFAC43] rounded inline-block"></span>
-              Create New Order
-            </h2>
-            <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5 font-medium">
-              Configure garments, customizations, and billing details in section order.
-            </p>
+          <div className="flex items-center gap-3">
+            {isWorker && (
+              <button 
+                onClick={() => navigate('/worker/dashboard')} 
+                type="button"
+                className="p-2 bg-white hover:bg-gray-100 border border-gray-200 rounded text-gray-700 hover:text-black transition shadow-xs cursor-pointer"
+                title="Back to Worker Dashboard"
+              >
+                <FiArrowLeft className="text-base" />
+              </button>
+            )}
+            <div>
+              <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+                <span className="w-2 h-4 sm:h-5 bg-[#DFAC43] rounded inline-block"></span>
+                {isWorker ? 'Karigar Order Booking' : 'Create New Order'}
+              </h2>
+              <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5 font-medium">
+                {isWorker ? `Booking on behalf of: ${user?.name || 'Worker'}` : 'Configure garments, customizations, and billing details in section order.'}
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-bold text-gray-700 bg-white px-2.5 sm:px-3 py-1.5 rounded border border-gray-200 shadow-sm self-start sm:self-auto">
             <span>Garment Items:</span>
@@ -632,7 +662,7 @@ const CreateOrder = () => {
                   const balBadge = bal > 0 ? ` [Due: Rs ${bal}]` : bal < 0 ? ` [Credit: Rs ${Math.abs(bal)}]` : '';
                   return (
                     <option key={c._id} value={c._id}>
-                      {c.name} - {c.phone}{balBadge}
+                      {c.name} - {formatPhone(c.phone)}{balBadge}
                     </option>
                   );
                 })}
@@ -959,7 +989,7 @@ const CreateOrder = () => {
                       >
                         <option value="">-- Main Customer (Default) --</option>
                         {customers.map(c => (
-                          <option key={c._id} value={c._id}>{c.name} - {c.phone}</option>
+                          <option key={c._id} value={c._id}>{c.name} - {formatPhone(c.phone)}</option>
                         ))}
                       </select>
                     </div>

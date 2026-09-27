@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatPhone } from '../utils/formatters';
 import { 
   useGetSuppliers, 
   useAddSupplier, 
@@ -307,7 +308,7 @@ const AdminExpenses = () => {
                           <td className="p-4 whitespace-nowrap">
                             <p className="font-bold text-gray-800">{supplier.name}</p>
                             <p className="text-[11px] text-gray-500 flex items-center gap-1 font-mono">
-                              <FiPhone className="text-gray-400 shrink-0" /> {supplier.phone}
+                              <FiPhone className="text-gray-400 shrink-0" /> {formatPhone(supplier.phone)}
                             </p>
                           </td>
 
@@ -959,7 +960,7 @@ const VendorStatementPrintModal = ({ supplier, processedEntries, balance, period
             <div>
               <span className="text-gray-400 font-bold uppercase text-[8px] sm:text-[9px] block">Vendor Details:</span>
               <p className="font-black text-gray-900 text-xs sm:text-sm">{supplier.shopName}</p>
-              <p className="font-bold text-gray-700 text-[10px] sm:text-xs">Contact: {supplier.name} ({supplier.phone})</p>
+              <p className="font-bold text-gray-700 text-[10px] sm:text-xs">Contact: {supplier.name} ({formatPhone(supplier.phone)})</p>
               <p className="text-[9px] sm:text-[10px] text-gray-500">{supplier.category} | {supplier.address || 'Local Market'}</p>
             </div>
             <div className={paperSize === 'a4' ? 'text-right' : 'pt-1 border-t border-dashed border-gray-100 text-[9px] sm:text-[10px]'}>
@@ -1191,7 +1192,7 @@ const SupplierLedgerModal = ({ supplier, closeModal }) => {
               {currentSupplier.shopName}
             </h3>
             <p className="text-xs text-gray-400 mt-1">
-              Contact: <span className="text-white font-bold">{currentSupplier.name}</span> ({currentSupplier.phone}) | <span className="text-[#DFAC43] font-semibold">{currentSupplier.category}</span>
+              Contact: <span className="text-white font-bold">{currentSupplier.name}</span> ({formatPhone(currentSupplier.phone)}) | <span className="text-[#DFAC43] font-semibold">{currentSupplier.category}</span>
             </p>
           </div>
           

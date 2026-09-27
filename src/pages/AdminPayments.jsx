@@ -18,6 +18,7 @@ import {
 import { FaMoneyBillWave } from 'react-icons/fa';
 import Preloader from '../components/Preloader';
 import Pagination from '../components/Pagination';
+import { formatPhone } from '../utils/formatters';
 
 const PAGE_SIZE = 10;
 
@@ -352,7 +353,7 @@ const AdminPayments = () => {
                                 {ord.customer?.name || 'Customer'}
                               </span>
                               <span className="text-[10px] text-gray-500">
-                                {ord.customer?.phone || '-'}
+                                {formatPhone(ord.customer?.phone)}
                               </span>
                             </div>
                             {ord.customer?.phone && (

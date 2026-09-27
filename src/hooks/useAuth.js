@@ -104,3 +104,71 @@ export const useUpdateAdminProfile = () => {
     }
   });
 };
+
+// 5. REGISTER Admin (Via hidden registration route)
+export const useRegisterAdminMutation = () => {
+  const loginSuccess = useAuthStore((state) => state.loginSuccess);
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: async ({ name, email, password }) => {
+      const response = await API.post('/auth/register', { name, email, password });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      const payload = data?.data || data?.result || data;
+      const token = payload?.token || payload?.accessToken || payload?.jwt || data?.token || null;
+      const userPayload = payload?.user || data?.user || {
+        id: payload?._id || data?._id,
+        name: payload?.name || data?.name,
+        email: payload?.email || data?.email,
+        role: payload?.role || data?.role || 'admin',
+      };
+
+      loginSuccess(userPayload, token);
+      toast.success('Admin registered successfully! Welcome to Balouch Tailors.');
+      navigate('/admin/dashboard');
+    },
+    onError: (error) => {
+      const msg = error.response?.data?.message || error.message || 'Registration failed';
+      toast.error(msg);
+    }
+  });
+};
+
+// 6. FORGOT Password (Request reset email link)
+export const useForgotPasswordMutation = () => {
+  return useMutation({
+    mutationFn: async ({ email }) => {
+      const response = await API.post('/auth/forgot-password', { email });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Password reset link sent to your email!');
+    },
+    onError: (error) => {
+      const msg = error.response?.data?.message || error.message || 'Failed to send reset email';
+      toast.error(msg);
+    }
+  });
+};
+
+// 7. RESET Password (Submit new password with token)
+export const useResetPasswordMutation = () => {
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: async ({ token, password }) => {
+      const response = await API.post(`/auth/reset-password/${token}`, { password });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'Password reset successfully! Please login with your new password.');
+      navigate('/login');
+    },
+    onError: (error) => {
+      const msg = error.response?.data?.message || error.message || 'Failed to reset password';
+      toast.error(msg);
+    }
+  });
+};

@@ -1,9 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useGetWorkerDashboard, useSubmitSuitForInspection, useGetWorkerLedger, useGetWorkerPayments } from '../hooks/useWorkers';
+import { useGetOrders, useDeliverOrder } from '../hooks/useOrder';
 import { useGetShopSettings } from '../hooks/useShopSettings';
 import useAuthStore from '../Store/authStore';
 import { useNavigate } from 'react-router-dom';
 import defaultLogo from '../assets/BT_Logo.png';
+import { formatPhone } from '../utils/formatters';
 import { 
   FiScissors, 
   FiCheckCircle, 
@@ -26,10 +28,14 @@ import {
   FiChevronUp,
   FiChevronDown,
   FiPrinter,
-  FiCreditCard
+  FiCreditCard,
+  FiShoppingBag,
+  FiTruck,
+  FiPlus
 } from 'react-icons/fi';
 import Preloader from '../components/Preloader';
 import Pagination from '../components/Pagination';
+import DeliveryReceiptModal from '../components/DeliveryReceiptModal';
 
 const WorkerDashboard = () => {
   const navigate = useNavigate();
@@ -37,28 +43,60 @@ const WorkerDashboard = () => {
   const user = useAuthStore((state) => state.user);
   
   const workerId = user?.id || user?._id;
-  const [activeTab, setActiveTab] = useState('assigned'); // 'assigned', 'inspection', 'rework', 'completed', or 'ledger'
+  const [activeTab, setActiveTab] = useState('assigned'); // 'assigned', 'inspection', 'rework', 'completed', 'ledger', or 'delivery_counter'
   const [viewingPayment, setViewingPayment] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deliverySearchTerm, setDeliverySearchTerm] = useState('');
+  const [deliveryPage, setDeliveryPage] = useState(1);
   const [selectedSuitForSpecs, setSelectedSuitForSpecs] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 10;
 
+  // Delivery Modal States for counter delivery
+  const [orderToDeliver, setOrderToDeliver] = useState(null);
+  const [deliverySettlementData, setDeliverySettlementData] = useState(null);
+  const [showDeliveryReceipt, setShowDeliveryReceipt] = useState(false);
+
   // Fetch only active tab records with server-side pagination & search
   const { data: dashboardData, isLoading, refetch } = useGetWorkerDashboard({
-    tab: activeTab,
+    tab: activeTab === 'delivery_counter' ? 'assigned' : activeTab,
     page: currentPage,
     limit: PAGE_SIZE,
     search: searchTerm
+  });
+
+  // Orders for Delivery Counter (active when worker has permission)
+  const { data: ordersResponse, isLoading: loadingOrders } = useGetOrders({
+    page: 1,
+    limit: 100,
+    search: deliverySearchTerm
   });
 
   const { mutate: submitForQC, isPending: isSubmitting } = useSubmitSuitForInspection();
   const { data: ledgerData = [], isLoading: loadingLedger } = useGetWorkerLedger(workerId);
   const { data: paymentsData = [], isLoading: loadingPayments } = useGetWorkerPayments(workerId);
 
+  const { 
+    worker = {}, 
+    stats = {}, 
+    suits: tabSuits = [],
+    pagination = { totalRecords: 0, currentPage: 1, totalPages: 1, pageSize: PAGE_SIZE },
+    assignedSuits = [], 
+    underInspectionSuits = [], 
+    reworkSuits = [], 
+    stitchedSuits = [] 
+  } = dashboardData || {};
+
+  // Check worker special permissions
+  const canCreateOrder = Boolean(worker?.canCreateOrder ?? user?.canCreateOrder);
+  const canDeliverOrder = Boolean(worker?.canDeliverOrder ?? user?.canDeliverOrder);
+
   const handleTabChange = (tabName) => {
     setActiveTab(tabName);
     setCurrentPage(1);
+    if (tabName === 'delivery_counter') {
+      setDeliveryPage(1);
+    }
   };
 
   const handleSearchChange = (e) => {
@@ -92,17 +130,6 @@ const WorkerDashboard = () => {
     );
   }
 
-  const { 
-    worker = {}, 
-    stats = {}, 
-    suits: tabSuits = [],
-    pagination = { totalRecords: 0, currentPage: 1, totalPages: 1, pageSize: PAGE_SIZE },
-    assignedSuits = [], 
-    underInspectionSuits = [], 
-    reworkSuits = [], 
-    stitchedSuits = [] 
-  } = dashboardData || {};
-
   const assignedCount = stats.assignedCount !== undefined ? stats.assignedCount : assignedSuits.length;
   const inspectionCount = stats.inspectionCount !== undefined ? stats.inspectionCount : underInspectionSuits.length;
   const reworkCount = stats.reworkCount !== undefined ? stats.reworkCount : reworkSuits.length;
@@ -123,11 +150,16 @@ const WorkerDashboard = () => {
 
   const totalFilteredMatches = pagination.totalRecords || (assignedCount + inspectionCount + reworkCount + completedCount);
 
+  // Delivery Orders Filtering - Strictly filter out orders that are 'Delivered'
+  const allOrdersList = Array.isArray(ordersResponse) ? ordersResponse : (ordersResponse?.data || []);
+  const undeliveredOrders = allOrdersList.filter(o => o.orderStatus !== 'Delivered');
+  const paginatedDeliveryOrders = undeliveredOrders.slice((deliveryPage - 1) * PAGE_SIZE, deliveryPage * PAGE_SIZE);
+
   return (
     <div className="min-h-screen bg-gray-50 pb-12 font-sans">
       
       {/* MOBILE-FRIENDLY HEADER */}
-      <header className="bg-black text-[#D4AF37] sticky top-0 z-40 px-6 py-4 shadow-md flex justify-between items-center">
+      <header className="bg-black text-[#D4AF37] sticky top-0 z-40 px-4 sm:px-6 py-3.5 shadow-md flex flex-wrap justify-between items-center gap-3">
         <div className="flex items-center gap-3">
           {worker.profileImage?.url ? (
             <img 
@@ -142,17 +174,34 @@ const WorkerDashboard = () => {
           )}
           <div>
             <h1 className="text-base font-black text-white">{worker.name}</h1>
-            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">{worker.specialization || 'Karigar Portal'}</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <span>{worker.specialization || 'Karigar Portal'}</span>
+              {canCreateOrder && <span className="bg-amber-500/20 text-amber-300 px-1.5 py-0.2 rounded text-[9px] font-black">Booking Allowed</span>}
+              {canDeliverOrder && <span className="bg-emerald-500/20 text-emerald-300 px-1.5 py-0.2 rounded text-[9px] font-black">Delivery Allowed</span>}
+            </p>
           </div>
         </div>
-        
-        <button 
-          onClick={handleLogout}
-          className="bg-red-950/40 hover:bg-red-900/50 text-red-400 p-2.5 rounded-lg border border-red-900/40 transition-colors flex items-center gap-1 text-xs font-bold"
-          title="Logout"
-        >
-          <FiLogOut /> Logout
-        </button>
+
+        <div className="flex items-center gap-2">
+          {/* If worker is allowed to create orders, show Book Order button */}
+          {canCreateOrder && (
+            <button
+              onClick={() => navigate('/worker/orders/create')}
+              className="bg-[#DFAC43] hover:bg-yellow-400 text-[#0F172A] px-3 py-1.5 rounded font-black text-xs transition shadow flex items-center gap-1.5 cursor-pointer"
+              title="Book New Customer Order"
+            >
+              <FiPlus className="text-sm font-black" /> Book Order (نیا آرڈر)
+            </button>
+          )}
+          
+          <button 
+            onClick={handleLogout}
+            className="bg-red-950/40 hover:bg-red-900/50 text-red-400 p-2 rounded-lg border border-red-900/40 transition-colors flex items-center gap-1 text-xs font-bold cursor-pointer"
+            title="Logout"
+          >
+            <FiLogOut /> Logout
+          </button>
+        </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 mt-6 space-y-6">
@@ -223,7 +272,7 @@ const WorkerDashboard = () => {
             <div className="flex items-center gap-2">
               <FiPhone className="text-gray-400" />
               <span className="text-gray-500 font-semibold">Phone:</span>
-              <span className="font-bold text-gray-700">{worker.phone}</span>
+              <span className="font-bold text-gray-700">{formatPhone(worker.phone)}</span>
             </div>
           )}
           {worker.address && (
@@ -318,6 +367,20 @@ const WorkerDashboard = () => {
             >
               Ledger
             </button>
+
+            {/* Special Permission: Delivery Counter Tab */}
+            {canDeliverOrder && (
+              <button
+                onClick={() => handleTabChange('delivery_counter')}
+                className={`flex-1 min-w-[130px] py-2.5 px-3 text-xs md:text-sm font-black rounded transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activeTab === 'delivery_counter' 
+                    ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm font-black' 
+                    : 'bg-emerald-100/70 text-emerald-900 hover:bg-emerald-100'
+                }`}
+              >
+                <FiTruck /> Delivery Counter ({undeliveredOrders.length})
+              </button>
+            )}
           </div>
 
           {/* TAB CONTENT */}
@@ -690,6 +753,186 @@ const WorkerDashboard = () => {
               </div>
             )}
 
+            {/* 6. DELIVERY & CASH COUNTER TAB */}
+            {activeTab === 'delivery_counter' && canDeliverOrder && (
+              <div className="space-y-4 animate-fade-in">
+                {/* Search Bar specifically for Delivery */}
+                <div className="bg-white p-3 sm:p-4 rounded border border-gray-200 shadow-xs space-y-2">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <div>
+                      <h3 className="text-sm font-black text-gray-900 flex items-center gap-2">
+                        <FiTruck className="text-[#DFAC43]" /> Ready Suits Delivery & Cash Counter
+                      </h3>
+                      <p className="text-xs text-gray-500">Search customer orders to settle remaining payment and generate official Delivery Slip.</p>
+                    </div>
+                    {canCreateOrder && (
+                      <button
+                        onClick={() => navigate('/worker/orders/create')}
+                        className="bg-[#DFAC43] hover:bg-[#0F172A] text-[#0F172A] hover:text-[#DFAC43] px-3 py-1.5 rounded font-black text-xs transition shadow-xs flex items-center gap-1.5 cursor-pointer self-stretch sm:self-auto justify-center"
+                      >
+                        <FiPlus /> + Book New Order
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="relative pt-1">
+                    <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                    <input
+                      type="text"
+                      placeholder="Search order by #BT number, customer name or phone..."
+                      value={deliverySearchTerm}
+                      onChange={(e) => {
+                        setDeliverySearchTerm(e.target.value);
+                        setDeliveryPage(1);
+                      }}
+                      className="w-full pl-9 pr-9 py-2 bg-gray-50 border border-gray-200 focus:border-black focus:bg-white rounded text-xs font-bold outline-none"
+                    />
+                    {deliverySearchTerm && (
+                      <button
+                        onClick={() => {
+                          setDeliverySearchTerm('');
+                          setDeliveryPage(1);
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 cursor-pointer"
+                        title="Clear Search"
+                      >
+                        <FiX />
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {loadingOrders ? (
+                  <div className="p-10 text-center text-gray-400 font-bold">Loading delivery counter orders...</div>
+                ) : undeliveredOrders.length === 0 ? (
+                  <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
+                    <FiCheckCircle className="text-4xl text-green-500 mx-auto mb-2" />
+                    <p className="text-gray-700 font-bold text-sm">
+                      {deliverySearchTerm ? 'Is search ke mutabiq koi undelivered order nahi mila.' : 'Koi pending delivery order nahi hai.'}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">Tamam orders deliver ho chuke hain ya koi pending order nahi hai.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto bg-white border border-gray-200 rounded shadow-xs">
+                    <table className="w-full min-w-[850px] text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-[#0F172A] text-[#DFAC43] font-black uppercase text-[10px] border-b border-gray-800 whitespace-nowrap">
+                          <th className="p-3">Order #</th>
+                          <th className="p-3">Customer Details</th>
+                          <th className="p-3">Suits / Items</th>
+                          <th className="p-3 text-right">Total Bill</th>
+                          <th className="p-3 text-right">Advance Paid</th>
+                          <th className="p-3 text-right">Balance Due</th>
+                          <th className="p-3 text-center">Status</th>
+                          <th className="p-3 text-right">Counter Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 font-medium">
+                        {paginatedDeliveryOrders.map((order) => {
+                          const balanceDue = Number(order.balanceAmount) || 0;
+                          return (
+                            <tr key={order._id} className="hover:bg-gray-50/80 transition">
+                              
+                              {/* Order Number & Booking Date */}
+                              <td className="p-3 whitespace-nowrap">
+                                <span className="bg-[#0F172A] text-[#DFAC43] font-mono text-xs font-black px-2 py-0.5 rounded shadow-2xs block w-fit">
+                                  #BT-{order.orderNumber}
+                                </span>
+                                <span className="text-[10px] text-gray-400 font-mono block mt-1">
+                                  {order.bookingDate ? new Date(order.bookingDate).toLocaleDateString() : (order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '-')}
+                                </span>
+                              </td>
+
+                              {/* Customer Details */}
+                              <td className="p-3 whitespace-nowrap">
+                                <span className="font-bold text-gray-900 block">{order.customer?.name || 'Walk-in Customer'}</span>
+                                <span className="text-[11px] text-gray-500 font-mono font-semibold flex items-center gap-1 mt-0.5">
+                                  <FiPhone className="text-gray-400 text-[10px]" /> {formatPhone(order.customer?.phone)}
+                                </span>
+                              </td>
+
+                              {/* Suits list summary */}
+                              <td className="p-3 max-w-[220px]">
+                                <div className="space-y-0.5">
+                                  <span className="font-bold text-gray-800 text-[11px] block">
+                                    {order.suits?.length || 1} Suit(s)
+                                  </span>
+                                  <p className="text-[10px] text-gray-500 truncate">
+                                    {order.suits && order.suits.map(s => s.serviceType || 'Shalwar Qameez').join(', ')}
+                                  </p>
+                                </div>
+                              </td>
+
+                              {/* Total Bill */}
+                              <td className="p-3 text-right font-black text-gray-900 font-sans whitespace-nowrap">
+                                Rs {Number(order.totalAmount || 0).toLocaleString()}
+                              </td>
+
+                              {/* Advance Paid */}
+                              <td className="p-3 text-right font-bold text-green-700 font-sans whitespace-nowrap">
+                                Rs {Number(order.advancePaid || 0).toLocaleString()}
+                              </td>
+
+                              {/* Balance Due */}
+                              <td className="p-3 text-right whitespace-nowrap">
+                                <span className={`font-black font-sans text-xs px-2 py-0.5 rounded ${
+                                  balanceDue > 0 ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
+                                }`}>
+                                  Rs {balanceDue.toLocaleString()}
+                                </span>
+                              </td>
+
+                              {/* Order Status */}
+                              <td className="p-3 text-center whitespace-nowrap">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase inline-block ${
+                                  order.orderStatus === 'Completed' 
+                                    ? 'bg-green-100 text-green-800 border border-green-200' 
+                                    : 'bg-blue-100 text-blue-800 border border-blue-200'
+                                }`}>
+                                  {order.orderStatus}
+                                </span>
+                              </td>
+
+                              {/* Actions */}
+                              <td className="p-3 text-right whitespace-nowrap">
+                                <div className="flex justify-end items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => navigate(`/print/${order._id}`)}
+                                    className="p-1.5 text-gray-500 hover:text-black hover:bg-gray-100 rounded transition border border-gray-200 cursor-pointer"
+                                    title="View & Print Customer Booking Slip"
+                                  >
+                                    <FiPrinter className="text-xs" />
+                                  </button>
+                                  
+                                  <button
+                                    type="button"
+                                    onClick={() => setOrderToDeliver(order)}
+                                    className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] text-xs font-black px-3 py-1.5 rounded transition flex items-center gap-1 cursor-pointer shadow-xs"
+                                  >
+                                    <FiCheckCircle className="text-xs" /> Deliver & Cash
+                                  </button>
+                                </div>
+                              </td>
+
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+
+                    {/* Pagination */}
+                    <Pagination 
+                      currentPage={deliveryPage}
+                      totalItems={undeliveredOrders.length}
+                      pageSize={PAGE_SIZE}
+                      onPageChange={setDeliveryPage}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
 
         </section>
@@ -714,6 +957,32 @@ const WorkerDashboard = () => {
           payment={viewingPayment}
           worker={worker}
           closeModal={() => setViewingPayment(null)}
+        />
+      )}
+
+      {/* Worker Order Delivery & Settlement Modal */}
+      {orderToDeliver && (
+        <WorkerOrderDeliveryModal
+          order={orderToDeliver}
+          worker={worker}
+          closeModal={() => setOrderToDeliver(null)}
+          onDelivered={(settlement) => {
+            setDeliverySettlementData(settlement);
+            setShowDeliveryReceipt(true);
+          }}
+        />
+      )}
+
+      {/* Official Delivery & Cash Receiving Slip */}
+      {showDeliveryReceipt && orderToDeliver && (
+        <DeliveryReceiptModal
+          order={orderToDeliver}
+          settlementData={deliverySettlementData}
+          closeModal={() => {
+            setShowDeliveryReceipt(false);
+            setOrderToDeliver(null);
+            setDeliverySettlementData(null);
+          }}
         />
       )}
 
@@ -1297,6 +1566,178 @@ const PaymentReceiptModal = ({ payment, worker, closeModal }) => {
           >
             Close
           </button>
+        </div>
+
+      </div>
+    </div>
+  );
+};
+
+// -------------------------------------------------------------
+// COMPONENT: WORKER ORDER DELIVERY MODAL
+// -------------------------------------------------------------
+const WorkerOrderDeliveryModal = ({ order, worker, closeModal, onDelivered }) => {
+  const { mutate: deliverOrder, isPending } = useDeliverOrder();
+  
+  const balanceDue = Number(order.balanceAmount) || 0;
+  const [receivedAmount, setReceivedAmount] = useState(balanceDue.toString());
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
+
+  const numReceived = Number(receivedAmount) || 0;
+  const diff = balanceDue - numReceived;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const payload = {
+      receivedAmount: numReceived,
+      paymentMethod,
+      deliveredBy: {
+        userType: 'worker',
+        workerId: worker._id || worker.id,
+        name: worker.name || 'Worker'
+      }
+    };
+
+    deliverOrder({
+      id: order._id,
+      data: payload
+    }, {
+      onSuccess: () => {
+        onDelivered({
+          receivedAmount: numReceived,
+          paymentMethod,
+          diff,
+          deliveredByName: worker.name || 'Worker'
+        });
+      }
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-4 font-sans">
+      <div className="bg-white rounded shadow-2xl w-full max-w-md overflow-hidden border border-gray-200 animate-scale-up">
+        
+        {/* Modal Header */}
+        <div className="bg-[#0F172A] text-white p-4 sm:p-5 flex justify-between items-center">
+          <div className="flex items-center gap-2.5">
+            <span className="w-1.5 h-6 bg-[#DFAC43] rounded-sm"></span>
+            <div>
+              <h3 className="text-base font-black text-white flex items-center gap-2">
+                <FiCheckCircle className="text-[#DFAC43]" /> Deliver Suit & Receive Payment
+              </h3>
+              <p className="text-[11px] text-gray-400 font-medium">
+                Order #BT-{order.orderNumber} | Customer: <strong className="text-gray-200">{order.customer?.name || 'Customer'}</strong>
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={closeModal} 
+            className="text-gray-400 hover:text-white p-1 text-xl leading-none transition cursor-pointer"
+          >
+            <FiX />
+          </button>
+        </div>
+
+        {/* Financial Snapshot */}
+        <div className="p-5 space-y-4 bg-gray-50/50">
+          <div className="bg-white border border-gray-200 p-4 rounded space-y-2.5 shadow-2xs">
+            <div className="flex justify-between text-xs font-bold text-gray-600">
+              <span>Total Order Bill:</span>
+              <span className="text-black font-black font-sans">Rs {order.totalAmount}</span>
+            </div>
+            <div className="flex justify-between text-xs font-bold text-gray-600">
+              <span>Advance Paid Earlier:</span>
+              <span className="text-green-700 font-black font-sans">Rs {order.advancePaid || 0}</span>
+            </div>
+            <div className="flex justify-between text-sm font-black text-black pt-2 border-t border-gray-200">
+              <span>Remaining Balance Due:</span>
+              <span className="text-red-600 font-black font-sans text-base">Rs {balanceDue}</span>
+            </div>
+          </div>
+
+          {/* Handover Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-black text-gray-700 uppercase tracking-wider mb-1">
+                Amount Received from Customer (PKR)
+              </label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-gray-500 text-xs">PKR</span>
+                <input
+                  type="number"
+                  min="0"
+                  required
+                  value={receivedAmount}
+                  onChange={(e) => setReceivedAmount(e.target.value)}
+                  placeholder="0"
+                  className="w-full pl-12 pr-3 py-2.5 border-2 border-gray-200 focus:border-black rounded-lg text-base font-black outline-none font-sans text-gray-900 bg-white"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-black text-gray-700 uppercase tracking-wider mb-1">
+                Payment Method
+              </label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className="w-full border-2 border-gray-200 focus:border-black rounded-lg p-2.5 text-xs font-bold outline-none bg-white cursor-pointer"
+              >
+                <option value="Cash">Cash (نقد)</option>
+                <option value="JazzCash">JazzCash</option>
+                <option value="EasyPaisa">EasyPaisa</option>
+                <option value="Bank">Bank Transfer / Card</option>
+              </select>
+            </div>
+
+            {/* Dynamic Feedback Alert */}
+            <div className={`p-3.5 rounded border text-xs font-bold ${
+              diff > 0 
+                ? 'bg-red-50 border-red-200 text-red-900' 
+                : diff < 0 
+                ? 'bg-green-50 border-green-200 text-green-900' 
+                : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+            }`}>
+              {diff > 0 && (
+                <p className="flex items-center gap-1.5">
+                  <FiAlertTriangle className="text-red-600 shrink-0 text-sm" />
+                  <span>Rs {diff.toLocaleString()} baqiya balance customer ke khata mein darj hoga.</span>
+                </p>
+              )}
+              {diff < 0 && (
+                <p className="flex items-center gap-1.5">
+                  <FiCheck className="text-green-600 shrink-0 text-sm" />
+                  <span>Rs {Math.abs(diff).toLocaleString()} extra payment customer ke advance mein jama hogi.</span>
+                </p>
+              )}
+              {diff === 0 && (
+                <p className="flex items-center gap-1.5">
+                  <FiCheckCircle className="text-emerald-600 shrink-0 text-sm" />
+                  <span>Full payment received! Nill balance (Khata mukamal clear).</span>
+                </p>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isPending}
+                className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] text-xs font-black px-5 py-2.5 rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <FiCheckCircle /> {isPending ? 'Processing...' : 'Confirm Delivery & Generate Slip'}
+              </button>
+            </div>
+          </form>
         </div>
 
       </div>

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FiInfo, FiScissors, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import Preloader from '../components/Preloader';
 import { useGetShopSettings } from '../hooks/useShopSettings';
+import { formatPhone } from '../utils/formatters';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://bt-backend-5d1ec458f8eb.herokuapp.com/api';
 
@@ -74,7 +75,7 @@ const PublicSuitTrack = () => {
             <div>
               <span className="text-[9px] text-[#D4AF37] font-black uppercase tracking-wider block">Customer / Wearer</span>
               <h2 className="text-xl font-black text-white uppercase">{suit.wearer?.name}</h2>
-              <p className="text-xs text-gray-400 font-bold font-sans mt-0.5">{suit.wearer?.phone}</p>
+              <p className="text-xs text-gray-400 font-bold font-sans mt-0.5">{formatPhone(suit.wearer?.phone)}</p>
             </div>
             <div className="bg-black/55 border border-gray-800 px-3.5 py-1.5 rounded text-center">
               <span className="text-[8px] text-gray-500 font-bold block uppercase">Order ID</span>

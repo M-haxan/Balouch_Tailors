@@ -16,6 +16,8 @@ import {
   FiEyeOff
 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { validatePassword } from '../utils/validators';
 
 const AdminProfile = () => {
   const authUser = useAuthStore((state) => state.user);
@@ -57,10 +59,23 @@ const AdminProfile = () => {
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    if (!currentPassword) return alert('Please enter your current password');
-    if (!newPassword) return alert('Please enter a new password');
-    if (newPassword.length < 6) return alert('New password must be at least 6 characters long');
-    if (newPassword !== confirmPassword) return alert('New passwords do not match');
+    if (!currentPassword) {
+      toast.error('Please enter your current password');
+      return;
+    }
+    if (!newPassword) {
+      toast.error('Please enter a new password');
+      return;
+    }
+    const passwordStatus = validatePassword(newPassword);
+    if (!passwordStatus.isValid) {
+      toast.error(passwordStatus.error);
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
 
     updateProfile(
       { currentPassword, newPassword },
@@ -272,7 +287,7 @@ const AdminProfile = () => {
                     <input
                       type={showNew ? "text" : "password"}
                       required
-                      placeholder="Minimum 6 characters"
+                      placeholder="Min. 8 chars with special symbol"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       className="w-full pl-9 pr-10 py-2 rounded border border-gray-300 text-xs sm:text-sm font-medium focus:border-[#DFAC43] outline-none"
@@ -311,6 +326,35 @@ const AdminProfile = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Password Requirements Checklist */}
+              {newPassword && (
+                <div className="bg-gray-50 p-3 rounded border border-gray-200 text-xs space-y-1">
+                  <span className="text-gray-500 font-bold block text-[10px] uppercase tracking-wider">
+                    Password Security Rules:
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${newPassword.length >= 8 ? 'bg-emerald-500' : 'bg-gray-300'}`}></span>
+                    <span className={newPassword.length >= 8 ? 'text-emerald-700 font-bold' : 'text-gray-500'}>
+                      At least 8 characters long ({newPassword.length}/8)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${/[!@#$%^&*(),.?":{}|<>_\-+=\\/\[\]`~]/.test(newPassword) ? 'bg-emerald-500' : 'bg-gray-300'}`}></span>
+                    <span className={/[!@#$%^&*(),.?":{}|<>_\-+=\\/\[\]`~]/.test(newPassword) ? 'text-emerald-700 font-bold' : 'text-gray-500'}>
+                      At least one special symbol (!@#$%^&*)
+                    </span>
+                  </div>
+                  {confirmPassword && (
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${newPassword === confirmPassword ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
+                      <span className={newPassword === confirmPassword ? 'text-emerald-700 font-bold' : 'text-rose-600 font-bold'}>
+                        {newPassword === confirmPassword ? 'Passwords match' : 'Passwords do not match'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex justify-end pt-2">
                 <button

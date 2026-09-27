@@ -3,6 +3,7 @@ import { useGetOrders, useUpdateOrder, useDeleteOrder, useDeliverOrder } from '.
 import { useGetShopSettings } from '../hooks/useShopSettings';
 import { useNavigate } from 'react-router-dom';
 import defaultLogo from '../assets/BT_Logo.png';
+import { formatPhone } from '../utils/formatters';
 import { 
   FiSearch, 
   FiPrinter, 
@@ -28,7 +29,8 @@ import {
   FiFileText,
   FiPhone,
   FiUserCheck,
-  FiStar
+  FiStar,
+  FiTruck
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { 
@@ -76,7 +78,8 @@ const Allorders = () => {
     pageSize: PAGE_SIZE
   };
 
-  const totalPendingQC = ordersResponse?.totalPendingQC || 0;
+  const counts = ordersResponse?.counts || {};
+  const totalPendingQC = ordersResponse?.totalPendingQC || counts.pendingQC || 0;
 
   // Reset page to 1 when filters change
   const handleSearchChange = (e) => {
@@ -93,6 +96,14 @@ const Allorders = () => {
   const statusOptions = ['Pending', 'In Progress', 'Completed', 'Delivered', 'Cancelled'];
 
   const filteredOrders = orders;
+
+  // Tabs Definition
+  const tabs = [
+    { id: 'All', label: 'All Orders', count: counts.all ?? pagination.totalRecords, icon: FiBox },
+    { id: 'Active', label: 'Active Orders', count: counts.active, icon: FiScissors },
+    { id: 'Delivered', label: 'Delivered Orders', count: counts.delivered, icon: FiTruck },
+    { id: 'PendingQC', label: 'Waiting QC', count: totalPendingQC, icon: FiClock, isAlert: totalPendingQC > 0 }
+  ];
 
   // Handlers
   const handleStatusChange = (order, newStatus) => {
@@ -125,7 +136,7 @@ const Allorders = () => {
     <div className="bg-white rounded-xl shadow-sm p-6 min-h-[85vh] relative">
       
       {/* HEADER & CONTROLS */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-6 mb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-6 mb-4 gap-4">
         <div>
           <h2 className="text-2xl font-black text-black flex items-center gap-2">
             <FiBox className="text-[#D4AF37]" /> All Orders Directory
@@ -134,21 +145,7 @@ const Allorders = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          {/* Quick QC Filter Button */}
-          {totalPendingQC > 0 && (
-            <button
-              onClick={() => handleStatusFilterChange(statusFilter === 'PendingQC' ? 'All' : 'PendingQC')}
-              className={`px-4 py-2 rounded-lg font-black text-xs transition border flex items-center gap-1.5 ${
-                statusFilter === 'PendingQC' 
-                  ? 'bg-amber-400 text-black border-amber-500 shadow-md' 
-                  : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100 animate-pulse'
-              }`}
-            >
-              <FiClock /> {totalPendingQC} Suits Waiting QC
-            </button>
-          )}
-
-          {/* Status Filter */}
+          {/* Status Filter Dropdown */}
           <div className="relative">
             <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <select 
@@ -157,6 +154,8 @@ const Allorders = () => {
               className="pl-9 pr-4 py-2 border-2 border-gray-100 focus:border-black rounded outline-none font-bold text-sm bg-white appearance-none cursor-pointer"
             >
               <option value="All">All Statuses</option>
+              <option value="Active">Active (In-Progress / Pending)</option>
+              <option value="Delivered">Delivered</option>
               <option value="PendingQC">Waiting QC Approval ({totalPendingQC})</option>
               {statusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
@@ -183,6 +182,41 @@ const Allorders = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* QUICK STATUS TABS (ALL, ACTIVE, DELIVERED, WAITING QC) */}
+      <div className="flex flex-wrap gap-2 pb-4 mb-4 border-b border-gray-100">
+        {tabs.map((t) => {
+          const Icon = t.icon;
+          const isActive = statusFilter === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => handleStatusFilterChange(t.id)}
+              className={`px-3.5 py-2 rounded-lg text-xs font-black transition flex items-center gap-2 cursor-pointer ${
+                isActive
+                  ? 'bg-[#0F172A] text-white shadow-md'
+                  : t.isAlert
+                  ? 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <Icon className={isActive ? 'text-[#DFAC43]' : t.isAlert ? 'text-amber-600' : 'text-gray-500'} />
+              <span>{t.label}</span>
+              {t.count !== undefined && (
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                  isActive 
+                    ? 'bg-[#DFAC43] text-[#0F172A]' 
+                    : t.isAlert
+                    ? 'bg-amber-400 text-black'
+                    : 'bg-white text-gray-700 shadow-2xs'
+                }`}>
+                  {t.count}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* ORDERS TABLE */}
@@ -213,17 +247,35 @@ const Allorders = () => {
                 return (
                   <tr key={order._id} className={`hover:bg-gray-50/80 transition-colors group ${hasPendingQC ? 'bg-amber-50/40' : ''}`}>
                     
-                    {/* Order ID & Dates */}
+                    {/* Order ID & Dates & Handlers */}
                     <td className="p-4">
                       <p className="font-black text-black text-sm uppercase">#BT-{order.orderNumber}</p>
                       <p className="text-[11px] text-gray-500 font-bold mt-1">Booked: {new Date(order.bookingDate).toLocaleDateString()}</p>
                       <p className="text-[11px] text-amber-900 font-black">Due: {new Date(order.deliveryDate).toLocaleDateString()}</p>
+                      
+                      {/* Handler Badges (Booked By & Delivered By) */}
+                      <div className="mt-2 flex flex-col gap-1 border-t border-gray-100 pt-1.5">
+                        <div className="text-[11px] text-gray-600 font-medium flex items-center gap-1">
+                          <span className="text-gray-400 font-bold">Booked:</span>
+                          <span className="font-bold text-gray-800 bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">
+                            {order.createdBy?.name || 'Admin'}
+                          </span>
+                        </div>
+                        {order.orderStatus === 'Delivered' && (
+                          <div className="text-[11px] text-emerald-800 font-medium flex items-center gap-1">
+                            <span className="text-emerald-600 font-bold">Delivered:</span>
+                            <span className="font-black bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded text-[10px]">
+                              {order.deliveredBy?.name || order.receivedAtDelivery?.receivedBy || 'Admin'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </td>
 
                     {/* Customer Info */}
                     <td className="p-4">
                       <p className="font-bold text-gray-900">{order.customer?.name || 'Unknown'}</p>
-                      <p className="text-xs text-gray-500 font-semibold">{order.customer?.phone || '-'}</p>
+                      <p className="text-xs text-gray-500 font-semibold">{formatPhone(order.customer?.phone)}</p>
                     </td>
 
                     {/* Suit Count & QC Badges */}
@@ -477,20 +529,20 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
           {/* Modal Body */}
           <div className="overflow-y-auto p-3 sm:p-6 space-y-6 flex-1 bg-gray-100/70">
             
-            {/* Top 3 Info Cards: Customer, Timeline, Financials */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Top 4 Info Cards: Customer, Timeline, Financials, Staff Handling */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
               
               {/* Customer Details Card */}
               <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1.5">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                   <FiUser className="text-[#DFAC43]" /> Customer Information
                 </span>
-                <p className="text-base font-bold text-gray-900">{order.customer?.name || 'Walk-in Customer'}</p>
+                <p className="text-sm font-bold text-gray-900 truncate">{order.customer?.name || 'Walk-in Customer'}</p>
                 <p className="text-xs text-gray-600 font-semibold flex items-center gap-1">
-                  <FiPhone className="text-gray-400 text-[10px]" /> {order.customer?.phone || '-'}
+                  <FiPhone className="text-gray-400 text-[10px]" /> {formatPhone(order.customer?.phone)}
                 </p>
                 {order.customer?.address && (
-                  <p className="text-[11px] text-gray-400 mt-1">{order.customer.address}</p>
+                  <p className="text-[11px] text-gray-400 mt-1 line-clamp-1">{order.customer.address}</p>
                 )}
               </div>
 
@@ -526,6 +578,31 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                   <span className="text-gray-500">Balance Due:</span>
                   <span className="text-red-500 font-black">Rs {order.balanceAmount || 0}</span>
                 </div>
+              </div>
+
+              {/* Staff Handling & Audit Card */}
+              <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1.5">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <FiUserCheck className="text-[#DFAC43]" /> Staff & Delivery Audit
+                </span>
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-gray-500">Booked By:</span>
+                  <span className="text-gray-900 font-bold">{order.createdBy?.name || 'Admin'} <span className="text-[10px] text-gray-500 font-normal">({order.createdBy?.userType === 'worker' ? 'Worker' : 'Admin'})</span></span>
+                </div>
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-gray-500">Delivered By:</span>
+                  <span className={`font-bold ${order.orderStatus === 'Delivered' ? 'text-emerald-700' : 'text-gray-400'}`}>
+                    {order.orderStatus === 'Delivered' 
+                      ? (order.deliveredBy?.name || order.receivedAtDelivery?.receivedBy || 'Admin')
+                      : 'Not Delivered'}
+                  </span>
+                </div>
+                {order.orderStatus === 'Delivered' && order.receivedAtDelivery?.amount !== undefined && (
+                  <div className="flex justify-between text-[11px] font-semibold border-t border-gray-100 pt-1">
+                    <span className="text-gray-500">Cash Received:</span>
+                    <span className="text-emerald-800 font-black">Rs {order.receivedAtDelivery.amount} ({order.receivedAtDelivery.paymentMethod || 'Cash'})</span>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -764,7 +841,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                             <div>
                               <span className="text-[10px] font-bold text-gray-400 uppercase block">Customer:</span>
                               <span className="font-black text-gray-900">{order.customer?.name || 'Walk-in'}</span>
-                              <p className="text-[10px] text-gray-500 font-semibold">{order.customer?.phone || '-'}</p>
+                              <p className="text-[10px] text-gray-500 font-semibold">{formatPhone(order.customer?.phone)}</p>
                             </div>
 
                             <div>
@@ -1062,7 +1139,11 @@ const OrderDeliveryModal = ({ order, closeModal }) => {
 
     const payload = {
       receivedAmount: numReceived,
-      paymentMethod
+      paymentMethod,
+      deliveredBy: {
+        userType: 'admin',
+        name: 'Admin'
+      }
     };
 
     deliverOrder({
@@ -1414,7 +1495,7 @@ const DeliveryReceiptModal = ({ order, settlementData, closeModal }) => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Phone:</span>
-                <span className="font-bold">{order.customer?.phone || '-'}</span>
+                <span className="font-bold">{formatPhone(order.customer?.phone)}</span>
               </div>
             </div>
 
@@ -1747,7 +1828,7 @@ const SuitJobCardPrintModal = ({ order, suit, suitIndex = 0, closeModal }) => {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Customer:</span>
-                <span className="font-black">{order?.customer?.name || 'Walk-in'} ({order?.customer?.phone || '-'})</span>
+                <span className="font-black">{order?.customer?.name || 'Walk-in'} ({formatPhone(order?.customer?.phone)})</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Wearer:</span>

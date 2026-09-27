@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useGetCustomers } from '../hooks/useCustomers';
 import { FiSearch, FiScissors, FiChevronDown, FiChevronUp, FiUser, FiPhone } from 'react-icons/fi';
+import { formatPhone } from '../utils/formatters';
 
 const AdminMeasurements = () => {
   const { data: customers = [], isLoading } = useGetCustomers();
@@ -10,11 +11,12 @@ const AdminMeasurements = () => {
   const [expandedCustomerId, setExpandedCustomerId] = useState(null);
 
   // Search filter (Name aur Phone dono par safely string check)
-  const filteredCustomers = customers.filter(c => {
-    const phoneStr = c.phone ? c.phone.toString() : '';
+  const filteredCustomers = (Array.isArray(customers) ? customers : (customers?.data || [])).filter(c => {
+    const phoneStr = c.phone ? formatPhone(c.phone) : '';
+    const rawPhone = c.phone ? c.phone.toString() : '';
     const nameStr = c.name ? c.name.toLowerCase() : '';
     const search = searchTerm.toLowerCase();
-    return phoneStr.includes(search) || nameStr.includes(search);
+    return phoneStr.includes(search) || rawPhone.includes(search) || nameStr.includes(search);
   });
 
   const toggleExpand = (id) => {
@@ -88,7 +90,7 @@ const AdminMeasurements = () => {
                     {/* Contact Info */}
                     <div className="flex items-center gap-1 text-sm text-gray-500 font-semibold">
                       <FiPhone className="text-gray-400 shrink-0" />
-                      {customer.phone}
+                      {formatPhone(customer.phone)}
                     </div>
                   </div>
 

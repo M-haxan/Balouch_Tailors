@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import defaultLogo from '../assets/BT_Logo.png';
 import { useGetShopSettings } from '../hooks/useShopSettings';
+import { formatPhone } from '../utils/formatters';
 import {
   useGetCustomerProfile,
   useUpdateCustomer,
@@ -216,7 +217,7 @@ const CustomerProfile = () => {
               <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-2 text-xs sm:text-sm text-gray-600 font-medium pt-1">
                 <div className="flex items-center gap-1.5">
                   <FiPhone className="text-[#DFAC43] shrink-0" />
-                  <span className="font-semibold text-gray-900">{customer.phone}</span>
+                  <span className="font-semibold text-gray-900">{formatPhone(customer.phone)}</span>
                 </div>
 
                 {customer.whatsapp && (
@@ -440,7 +441,7 @@ const CustomerProfile = () => {
                     <span className="text-[10px] font-black uppercase text-gray-400 block tracking-wider">Primary Mobile Contact</span>
                     <p className="text-base font-bold text-gray-900 flex items-center gap-2">
                       <FiPhone className="text-gray-500 text-sm" />
-                      <span>{customer.phone}</span>
+                      <span>{formatPhone(customer.phone)}</span>
                     </p>
                   </div>
 
@@ -1311,7 +1312,7 @@ const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, clos
               <div>
                 <span className="text-gray-400 font-bold uppercase text-[8px] sm:text-[9px] block">Customer:</span>
                 <p className="font-black text-gray-900 text-xs sm:text-sm">{customer.name}</p>
-                <p className="font-semibold text-gray-700 text-[10px] sm:text-xs">{customer.phone || '-'}</p>
+                <p className="font-semibold text-gray-700 text-[10px] sm:text-xs">{formatPhone(customer.phone) || '-'}</p>
               </div>
 
               <div className={paperSize === 'a4' ? 'text-right' : 'pt-1 border-t border-dashed border-gray-100'}>
@@ -1505,7 +1506,7 @@ const EditProfileModal = ({ customer, closeModal }) => {
 
   const [formData, setFormData] = useState({
     name: customer.name || '',
-    phone: customer.phone || '',
+    phone: customer.phone ? formatPhone(customer.phone) : '',
     whatsapp: customer.whatsapp || '',
     city: customer.city || '',
     cnic: customer.cnic || '',

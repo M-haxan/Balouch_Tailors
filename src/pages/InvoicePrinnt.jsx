@@ -4,6 +4,7 @@ import { useGetOrders } from '../hooks/useOrder';
 import { useGetShopSettings } from '../hooks/useShopSettings';
 import { FiPrinter, FiArrowLeft, FiSliders } from 'react-icons/fi';
 import defaultLogo from '../assets/BT_Logo.png';
+import { formatPhone } from '../utils/formatters';
 
 const InvoicePrint = () => {
   const { id } = useParams();
@@ -231,7 +232,7 @@ const InvoicePrint = () => {
           <div>
             <span className="text-gray-400 font-bold uppercase text-[8px] sm:text-[9px] block">Customer:</span>
             <p className="font-black text-gray-900 text-xs sm:text-sm">{order.customer?.name || 'Customer'}</p>
-            <p className="font-semibold text-gray-700 text-[10px] sm:text-xs">{order.customer?.phone || '-'}</p>
+            <p className="font-semibold text-gray-700 text-[10px] sm:text-xs">{formatPhone(order.customer?.phone)}</p>
           </div>
 
           <div className={paperSize === 'a4' ? 'text-right' : 'pt-1 border-t border-dashed border-gray-100'}>
@@ -411,6 +412,21 @@ const InvoicePrint = () => {
         </div>
 
         {/* ========================================= */}
+        {/* CUSTOMER NOTICE & TRANSPARENCY BANNER     */}
+        {/* ========================================= */}
+        <div className="my-2 p-2 bg-yellow-50/80 border border-yellow-300 rounded text-center text-black space-y-1 print:border-black print:bg-transparent">
+          <p className="font-black text-[9px] sm:text-[10px] text-red-750" dir="rtl">
+            ⚠️ ضروری ہدایت: سوٹ صرف یہ اصل بکنگ پرچی دکھانے پر ہی حوالے کیا جائے گا۔
+          </p>
+          <p className="font-bold text-[8px] sm:text-[9px] text-gray-800" dir="rtl">
+            سوٹ وصول کرتے وقت کاؤنٹر پر بقایا ادائیگی کی باقاعدہ 'رسید وصولی سوٹ' (Delivery Slip) لازمی لیں۔
+          </p>
+          <p className="text-[7px] sm:text-[8px] text-gray-600 font-semibold uppercase tracking-wider">
+            Suits strictly delivered only on presenting this slip. Collect receiving receipt upon delivery.
+          </p>
+        </div>
+
+        {/* ========================================= */}
         {/* FOOTER: PROPRIETOR, CONTACT & TERMS       */}
         {/* ========================================= */}
         <div className="text-center pt-1.5 space-y-1.5">
@@ -423,8 +439,8 @@ const InvoicePrint = () => {
 
           <div className="border-t border-gray-200 pt-1.5 text-[7px] sm:text-[8px] text-gray-500 text-left space-y-0.5">
             <p className="font-bold text-gray-700 uppercase">Terms & Conditions:</p>
-            <p>1. Please bring this receipt when collecting your stitched clothes.</p>
-            <p>2. Delivery will be handed over only after clearance of remaining balance.</p>
+            <p>1. Please bring this original booking receipt when collecting your stitched clothes.</p>
+            <p>2. Delivery will be handed over only upon clearance of remaining balance with official receipt.</p>
             <p>3. Any fitting complaints/alterations must be reported within 7 days of delivery.</p>
             <p>4. Advance payment is non-refundable.</p>
           </div>
