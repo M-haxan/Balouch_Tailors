@@ -1089,32 +1089,35 @@ const CreateOrder = () => {
             )}
 
             {/* Action Buttons */}
-            <div className="flex flex-wrap gap-2 sm:gap-2.5 mt-4 sm:mt-5 pt-3 border-t border-gray-100">
+            <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2 sm:gap-2.5 mt-4 sm:mt-5 pt-3 border-t border-gray-100">
               <button
                 type="button"
                 onClick={handleAddSuit}
-                className="flex-1 sm:flex-initial bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black h-10 px-3 sm:px-4 rounded transition text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                className="w-full sm:w-auto min-h-[42px] py-2 px-3.5 sm:px-4 bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black rounded transition text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
               >
-                <FiPlus /> Add Blank Suit
+                <FiPlus className="text-sm shrink-0" />
+                <span>Add Blank Suit</span>
               </button>
 
               {suits.length > 0 && (
                 <button
                   type="button"
                   onClick={() => handleAddSuitCopy(suits.length - 1)}
-                  className="flex-1 sm:flex-initial bg-amber-500 hover:bg-amber-600 text-black font-black h-10 px-3 sm:px-4 rounded transition text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                  className="w-full sm:w-auto min-h-[42px] py-2 px-3.5 sm:px-4 bg-[#DFAC43] hover:bg-amber-500 text-[#0F172A] font-black rounded transition text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer text-center"
                   title="Add new suit pre-filled with the same specifications and styling"
                 >
-                  <FiCopy /> + Add Suit (Same Specs as Above)
+                  <FiCopy className="text-sm shrink-0" />
+                  <span>Add Suit (Same Specs as Above)</span>
                 </button>
               )}
 
               <button
                 type="button"
                 onClick={handleAddAlteration}
-                className="flex-1 sm:flex-initial bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold h-10 px-3 sm:px-4 rounded transition text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full sm:w-auto min-h-[42px] py-2 px-3.5 sm:px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded transition text-xs flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <FiPlus /> Add Alteration
+                <FiPlus className="text-sm shrink-0" />
+                <span>Add Alteration</span>
               </button>
             </div>
 
