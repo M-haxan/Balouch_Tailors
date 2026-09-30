@@ -133,25 +133,26 @@ const Allorders = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 min-h-[85vh] relative">
+    <div className="bg-white rounded-xl shadow-sm p-3.5 sm:p-6 min-h-[85vh] relative">
       
       {/* HEADER & CONTROLS */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-100 pb-6 mb-4 gap-4">
-        <div>
-          <h2 className="text-2xl font-black text-black flex items-center gap-2">
-            <FiBox className="text-[#D4AF37]" /> All Orders Directory
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center border-b border-gray-100 pb-5 mb-4 gap-4">
+        <div className="w-full xl:w-auto">
+          <h2 className="text-xl sm:text-2xl font-black text-black flex items-center gap-2">
+            <FiBox className="text-[#D4AF37] shrink-0" /> <span>All Orders Directory</span>
           </h2>
-          <p className="text-sm text-gray-500 mt-1 font-medium">Manage tailoring jobs, statuses, QC approvals, and cash flow.</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">Manage tailoring jobs, statuses, QC approvals, and cash flow.</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+        {/* Controls: Status Dropdown & Search Bar */}
+        <div className="flex flex-col sm:flex-row gap-2.5 w-full xl:w-auto">
           {/* Status Filter Dropdown */}
-          <div className="relative">
+          <div className="relative w-full sm:w-56 md:w-60 shrink-0">
             <FiFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <select 
               value={statusFilter}
               onChange={(e) => handleStatusFilterChange(e.target.value)}
-              className="pl-9 pr-4 py-2 border-2 border-gray-100 focus:border-black rounded outline-none font-bold text-sm bg-white appearance-none cursor-pointer"
+              className="w-full pl-9 pr-4 py-2.5 border-2 border-gray-100 focus:border-black rounded-lg outline-none font-bold text-xs sm:text-sm bg-white appearance-none cursor-pointer shadow-2xs"
             >
               <option value="All">All Statuses</option>
               <option value="Active">Active (In-Progress / Pending)</option>
@@ -162,19 +163,19 @@ const Allorders = () => {
           </div>
 
           {/* Search Bar */}
-          <div className="relative w-full sm:w-72">
+          <div className="relative w-full sm:flex-1 md:w-64">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Search Suit ID, Order #, Name, Phone..." 
+              placeholder="Search Suit ID, Order #, Name..." 
               value={searchTerm}
               onChange={handleSearchChange}
-              className="w-full pl-9 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded-lg outline-none text-xs sm:text-sm font-medium transition"
+              className="w-full pl-9 pr-8 py-2.5 border-2 border-gray-100 focus:border-black rounded-lg outline-none text-xs sm:text-sm font-medium transition shadow-2xs"
             />
             {searchTerm && (
               <button 
                 onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full cursor-pointer"
                 title="Clear search"
               >
                 <FiX className="text-xs" />
@@ -184,8 +185,8 @@ const Allorders = () => {
         </div>
       </div>
 
-      {/* QUICK STATUS TABS (ALL, ACTIVE, DELIVERED, WAITING QC) */}
-      <div className="flex flex-wrap gap-2 pb-4 mb-4 border-b border-gray-100">
+      {/* QUICK STATUS TABS (RESPONSIVE GRID WITHOUT TEXT TRUNCATION) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 pb-4 mb-4 border-b border-gray-100">
         {tabs.map((t) => {
           const Icon = t.icon;
           const isActive = statusFilter === t.id;
@@ -193,7 +194,7 @@ const Allorders = () => {
             <button
               key={t.id}
               onClick={() => handleStatusFilterChange(t.id)}
-              className={`px-3.5 py-2 rounded-lg text-xs font-black transition flex items-center gap-2 cursor-pointer ${
+              className={`w-full px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between sm:justify-center gap-1.5 cursor-pointer shadow-2xs ${
                 isActive
                   ? 'bg-[#0F172A] text-white shadow-md'
                   : t.isAlert
@@ -201,10 +202,12 @@ const Allorders = () => {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <Icon className={isActive ? 'text-[#DFAC43]' : t.isAlert ? 'text-amber-600' : 'text-gray-500'} />
-              <span>{t.label}</span>
+              <div className="flex items-center gap-1.5 whitespace-nowrap min-w-0">
+                <Icon className={`shrink-0 text-xs sm:text-sm ${isActive ? 'text-[#DFAC43]' : t.isAlert ? 'text-amber-600' : 'text-gray-500'}`} />
+                <span className="whitespace-nowrap">{t.label}</span>
+              </div>
               {t.count !== undefined && (
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
                   isActive 
                     ? 'bg-[#DFAC43] text-[#0F172A]' 
                     : t.isAlert
@@ -227,145 +230,290 @@ const Allorders = () => {
           <p className="text-gray-500 font-medium">Koi order nahi mila.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead>
-              <tr className="bg-[#0F172A] text-[#DFAC43] text-xs uppercase tracking-widest">
-                <th className="p-4 rounded-tl">Order ID & Date</th>
-                <th className="p-4">Customer Details</th>
-                <th className="p-4 text-center">Suits & QC Status</th>
-                <th className="p-4">Financials</th>
-                <th className="p-4 text-center">Status</th>
-                <th className="p-4 rounded-tr text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredOrders.map((order) => {
-                const hasPendingQC = order.suits?.some(s => s.stitchingStatus === 'Submitted for Inspection');
-                const hasRework = order.suits?.some(s => s.stitchingStatus === 'Rework Required');
+        <div className="space-y-4">
+          {/* 1. DESKTOP VIEW (TABLE) */}
+          <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-xl shadow-xs">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider border-b border-gray-200">
+                  <th className="py-3.5 px-4 rounded-tl min-w-[200px]">Order ID & Date</th>
+                  <th className="py-3.5 px-4 min-w-[160px]">Customer Details</th>
+                  <th className="py-3.5 px-4 text-center min-w-[130px]">Suits & QC Status</th>
+                  <th className="py-3.5 px-4 min-w-[130px]">Financials</th>
+                  <th className="py-3.5 px-4 text-center min-w-[130px]">Status</th>
+                  <th className="py-3.5 px-4 rounded-tr text-right min-w-[180px]">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 font-medium">
+                {filteredOrders.map((order) => {
+                  const hasPendingQC = order.suits?.some(s => s.stitchingStatus === 'Submitted for Inspection');
+                  const hasRework = order.suits?.some(s => s.stitchingStatus === 'Rework Required');
 
-                return (
-                  <tr key={order._id} className={`hover:bg-gray-50/80 transition-colors group ${hasPendingQC ? 'bg-amber-50/40' : ''}`}>
-                    
-                    {/* Order ID & Dates & Handlers */}
-                    <td className="p-4">
-                      <p className="font-black text-black text-sm uppercase">#BT-{order.orderNumber}</p>
-                      <p className="text-[11px] text-gray-500 font-bold mt-1">Booked: {new Date(order.bookingDate).toLocaleDateString()}</p>
-                      <p className="text-[11px] text-amber-900 font-black">Due: {new Date(order.deliveryDate).toLocaleDateString()}</p>
+                  return (
+                    <tr key={order._id} className={`hover:bg-gray-50/80 transition-colors group ${hasPendingQC ? 'bg-amber-50/30' : ''}`}>
                       
-                      {/* Handler Badges (Booked By & Delivered By) */}
-                      <div className="mt-2 flex flex-col gap-1 border-t border-gray-100 pt-1.5">
-                        <div className="text-[11px] text-gray-600 font-medium flex items-center gap-1">
-                          <span className="text-gray-400 font-bold">Booked:</span>
-                          <span className="font-bold text-gray-800 bg-gray-100 px-1.5 py-0.5 rounded text-[10px]">
-                            {order.createdBy?.name || 'Admin'}
-                          </span>
+                      {/* Order ID & Dates & Handlers */}
+                      <td className="py-3.5 px-4">
+                        <span className="font-black text-black text-sm uppercase">#BT-{order.orderNumber}</span>
+                        <div className="flex items-center gap-2 text-[11px] text-gray-500 font-medium mt-0.5">
+                          <span>Booked: {new Date(order.bookingDate).toLocaleDateString()}</span>
+                          <span className="text-gray-300">•</span>
+                          <span className="font-bold text-amber-950">Due: {new Date(order.deliveryDate).toLocaleDateString()}</span>
                         </div>
-                        {order.orderStatus === 'Delivered' && (
-                          <div className="text-[11px] text-emerald-800 font-medium flex items-center gap-1">
-                            <span className="text-emerald-600 font-bold">Delivered:</span>
-                            <span className="font-black bg-emerald-50 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded text-[10px]">
-                              {order.deliveredBy?.name || order.receivedAtDelivery?.receivedBy || 'Admin'}
+                        
+                        {/* Compact Handler Badges */}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-[10px]">
+                          <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded border border-slate-200" title="Booked by">
+                            <FiUser className="text-[9px] text-slate-400" /> Booked: {order.createdBy?.name || 'Admin'}
+                          </span>
+                          {order.orderStatus === 'Delivered' && (
+                            <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 font-black px-2 py-0.5 rounded border border-emerald-200" title="Delivered by">
+                              <FiCheck className="text-[9px] text-emerald-600" /> Delivered: {order.deliveredBy?.name || order.receivedAtDelivery?.receivedBy || 'Admin'}
                             </span>
-                          </div>
-                        )}
-                      </div>
-                    </td>
+                          )}
+                        </div>
+                      </td>
 
-                    {/* Customer Info */}
-                    <td className="p-4">
-                      <p className="font-bold text-gray-900">{order.customer?.name || 'Unknown'}</p>
-                      <p className="text-xs text-gray-500 font-semibold">{formatPhone(order.customer?.phone)}</p>
-                    </td>
+                      {/* Customer Info */}
+                      <td className="py-3.5 px-4">
+                        <p className="font-bold text-gray-900 text-sm whitespace-nowrap">{order.customer?.name || 'Unknown'}</p>
+                        <p className="text-xs text-gray-500 font-mono mt-0.5">{formatPhone(order.customer?.phone)}</p>
+                      </td>
 
-                    {/* Suit Count & QC Badges */}
-                    <td className="p-4 text-center">
-                      <div className="flex flex-col items-center gap-1">
-                        <span className="bg-gray-100 text-black font-black px-3 py-0.5 rounded text-xs">
-                          {order.suits?.length || 0} Suits
-                        </span>
-                        {hasPendingQC && (
-                          <span className="bg-[#DFAC43] text-[#0F172A] text-[10px] font-black px-2 py-0.5 rounded uppercase inline-flex items-center gap-1 animate-pulse">
-                            <FiClock /> Needs QC Pass
+                      {/* Suit Count & QC Badges */}
+                      <td className="py-3.5 px-4 text-center">
+                        <div className="inline-flex flex-col items-center gap-1">
+                          <span className="bg-gray-100 text-black font-bold px-2.5 py-0.5 rounded-md text-xs">
+                            {order.suits?.length || 0} Suits
                           </span>
+                          {hasPendingQC && (
+                            <span className="bg-[#DFAC43] text-[#0F172A] text-[9px] font-black px-1.5 py-0.5 rounded uppercase inline-flex items-center gap-1 animate-pulse whitespace-nowrap">
+                              <FiClock /> Needs QC Pass
+                            </span>
+                          )}
+                          {hasRework && (
+                            <span className="bg-red-100 text-red-800 text-[9px] font-black px-1.5 py-0.5 rounded uppercase inline-flex items-center gap-1 whitespace-nowrap">
+                              <FiAlertTriangle /> In Rework
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Cash Flow */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <p className="text-sm font-black text-black font-sans">Rs {Number(order.totalAmount || 0).toLocaleString()}</p>
+                        {order.balanceAmount > 0 ? (
+                          <p className="text-[11px] font-black text-amber-950 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded inline-block mt-0.5 font-sans">
+                            Balance: Rs {Number(order.balanceAmount).toLocaleString()}
+                          </p>
+                        ) : (
+                          <p className="text-[11px] font-bold text-green-700 mt-0.5">Fully Paid</p>
                         )}
-                        {hasRework && (
-                          <span className="bg-red-100 text-red-800 text-[10px] font-black px-2 py-0.5 rounded uppercase inline-flex items-center gap-1">
-                            <FiAlertTriangle /> In Rework
-                          </span>
-                        )}
+                      </td>
+
+                      {/* Live Status Updater Dropdown */}
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <select
+                          value={order.orderStatus}
+                          onChange={(e) => handleStatusChange(order, e.target.value)}
+                          className={`text-xs font-bold px-2.5 py-1.5 rounded-lg border outline-none cursor-pointer text-center ${getStatusColor(order.orderStatus)}`}
+                        >
+                          {statusOptions.map(opt => <option key={opt} value={opt} className="bg-white text-black">{opt}</option>)}
+                        </select>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <div className="flex justify-end items-center gap-1.5">
+                          {/* Quick Deliver Button */}
+                          {order.orderStatus !== 'Delivered' && (
+                            <button
+                              onClick={() => setDeliveryModalOrder(order)}
+                              className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] text-xs font-black px-2.5 py-1.5 rounded-lg transition shadow-2xs flex items-center gap-1 cursor-pointer shrink-0"
+                              title="Deliver Suit & Receive Payment"
+                            >
+                              <FiCheckCircle className="text-xs" /> <span>Deliver</span>
+                            </button>
+                          )}
+
+                          <button 
+                            onClick={() => setViewingOrder(order)}
+                            className={`p-1.5 rounded-lg transition shadow-2xs cursor-pointer ${
+                              hasPendingQC 
+                                ? 'bg-[#DFAC43] text-[#0F172A] font-bold hover:bg-white ring-1 ring-[#DFAC43]' 
+                                : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                            }`}
+                            title="View Details / QC Inspect / Assign Worker"
+                          >
+                            <FiEye className="text-sm" />
+                          </button>
+                          <button 
+                            onClick={() => navigate(`/admin/print/${order._id}`)}
+                            className="bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] p-1.5 rounded-lg transition shadow-2xs cursor-pointer"
+                            title="Print Invoice"
+                          >
+                            <FiPrinter className="text-sm" />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(order._id)}
+                            disabled={isDeleting}
+                            className="bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded-lg transition shadow-2xs cursor-pointer"
+                            title="Delete Order"
+                          >
+                            <FiTrash2 className="text-sm" />
+                          </button>
+                        </div>
+                      </td>
+
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 2. MOBILE VIEW (TABLE-TO-CARD PATTERN) */}
+          <div className="block md:hidden space-y-3">
+            {filteredOrders.map((order) => {
+              const hasPendingQC = order.suits?.some(s => s.stitchingStatus === 'Submitted for Inspection');
+              const hasRework = order.suits?.some(s => s.stitchingStatus === 'Rework Required');
+              const total = Number(order.totalAmount || 0);
+              const advance = Number(order.advancePaid || 0);
+              const balance = Number(order.balanceAmount || 0);
+
+              return (
+                <div
+                  key={order._id}
+                  className={`bg-white rounded-xl border border-gray-200 shadow-2xs p-3.5 space-y-3 transition hover:border-gray-300 ${
+                    hasPendingQC ? 'bg-amber-50/30 ring-1 ring-[#DFAC43]/40' : ''
+                  }`}
+                >
+                  {/* Header: Order #, Dates & Status Dropdown */}
+                  <div className="flex items-start justify-between gap-2 border-b border-gray-100 pb-2.5">
+                    <div>
+                      <span className="font-black text-base text-[#0F172A] block">
+                        #BT-{order.orderNumber}
+                      </span>
+                      <div className="flex items-center gap-1.5 text-[11px] text-gray-500 font-medium mt-0.5">
+                        <span>Booked: {new Date(order.bookingDate).toLocaleDateString()}</span>
+                        <span>•</span>
+                        <span className="font-bold text-amber-950">Due: {new Date(order.deliveryDate).toLocaleDateString()}</span>
                       </div>
-                    </td>
+                    </div>
 
-                    {/* Cash Flow */}
-                    <td className="p-4">
-                      <p className="text-sm font-black text-black">Rs {order.totalAmount}</p>
-                      {order.balanceAmount > 0 ? (
-                        <p className="text-[11px] font-bold text-amber-900">Balance: Rs {order.balanceAmount}</p>
-                      ) : (
-                        <p className="text-[11px] font-bold text-gray-600">Fully Paid</p>
-                      )}
-                    </td>
-
-                    {/* Live Status Updater Dropdown */}
-                    <td className="p-4 text-center">
+                    <div className="shrink-0 text-right">
                       <select
                         value={order.orderStatus}
                         onChange={(e) => handleStatusChange(order, e.target.value)}
-                        className={`text-xs font-bold px-3 py-1.5 rounded border outline-none cursor-pointer text-center ${getStatusColor(order.orderStatus)}`}
+                        className={`text-[11px] font-black px-2 py-1 rounded-md border outline-none cursor-pointer text-center ${getStatusColor(order.orderStatus)}`}
                       >
                         {statusOptions.map(opt => <option key={opt} value={opt} className="bg-white text-black">{opt}</option>)}
                       </select>
-                    </td>
+                    </div>
+                  </div>
 
-                    {/* Actions */}
-                    <td className="p-4 text-right">
-                      <div className="flex justify-end gap-1.5">
-                        {/* Quick Deliver Button */}
-                        {order.orderStatus !== 'Delivered' && (
-                          <button
-                            onClick={() => setDeliveryModalOrder(order)}
-                            className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] text-xs font-black px-2.5 py-1.5 rounded transition shadow flex items-center gap-1 cursor-pointer"
-                            title="Deliver Suit & Receive Payment"
-                          >
-                            <FiCheckCircle /> Deliver
-                          </button>
-                        )}
+                  {/* Customer & Suits Info */}
+                  <div className="flex items-center justify-between gap-2 text-xs">
+                    <div>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Customer</span>
+                      <span className="font-bold text-gray-900 text-sm">{order.customer?.name || 'Customer'}</span>
+                      <span className="text-[11px] text-gray-500 font-mono block">{formatPhone(order.customer?.phone)}</span>
+                    </div>
 
-                        <button 
-                          onClick={() => setViewingOrder(order)}
-                          className={`p-2 rounded transition shadow-sm cursor-pointer ${
-                            hasPendingQC 
-                              ? 'bg-[#DFAC43] text-[#0F172A] font-bold hover:bg-white ring-2 ring-[#DFAC43]' 
-                              : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
-                          }`}
-                          title="View Details / QC Inspect / Assign Worker"
-                        >
-                          <FiEye />
-                        </button>
-                        <button 
-                          onClick={() => navigate(`/admin/print/${order._id}`)}
-                          className="bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] p-2 rounded transition shadow-sm cursor-pointer"
-                          title="Print Invoice"
-                        >
-                          <FiPrinter />
-                        </button>
-                        <button 
-                          onClick={() => handleDelete(order._id)}
-                          disabled={isDeleting}
-                          className="bg-red-50 hover:bg-red-100 text-red-600 p-2 rounded transition shadow-sm cursor-pointer"
-                          title="Delete Order"
-                        >
-                          <FiTrash2 />
-                        </button>
-                      </div>
-                    </td>
+                    <div className="text-right space-y-1">
+                      <span className="inline-block bg-gray-100 text-gray-800 font-bold px-2 py-0.5 rounded text-xs">
+                        {order.suits?.length || 0} Suits
+                      </span>
+                      {hasPendingQC && (
+                        <span className="block bg-[#DFAC43] text-[#0F172A] text-[9px] font-black px-1.5 py-0.5 rounded uppercase">
+                          Needs QC Pass
+                        </span>
+                      )}
+                      {hasRework && (
+                        <span className="block bg-red-100 text-red-800 text-[9px] font-black px-1.5 py-0.5 rounded uppercase">
+                          In Rework
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  {/* Handlers Row (Booked by & Delivered by) */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[10px]">
+                    <span className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded border border-slate-200">
+                      <FiUser className="text-[9px] text-slate-400" /> Booked: {order.createdBy?.name || 'Admin'}
+                    </span>
+                    {order.orderStatus === 'Delivered' && (
+                      <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded border border-emerald-200">
+                        <FiCheck className="text-[9px] text-emerald-600" /> Delivered: {order.deliveredBy?.name || order.receivedAtDelivery?.receivedBy || 'Admin'}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Financials Grid */}
+                  <div className="grid grid-cols-3 gap-1.5 text-center bg-gray-50/90 p-2.5 rounded-lg border border-gray-150 text-xs">
+                    <div>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase block">Total Bill</span>
+                      <span className="font-black text-gray-900 text-[11px] font-sans">Rs {total.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase block">Advance</span>
+                      <span className="font-bold text-green-700 text-[11px] font-sans">Rs {advance.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase block">Balance</span>
+                      {balance > 0 ? (
+                        <span className="font-black text-amber-950 bg-amber-100/70 px-1 py-0.5 rounded text-[11px] font-sans block">
+                          Rs {balance.toLocaleString()}
+                        </span>
+                      ) : (
+                        <span className="font-bold text-green-700 text-[11px] block">Rs 0</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions Row */}
+                  <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100">
+                    {order.orderStatus !== 'Delivered' && (
+                      <button
+                        onClick={() => setDeliveryModalOrder(order)}
+                        className="flex-1 py-2 bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] font-black rounded-lg text-xs transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                      >
+                        <FiCheckCircle className="shrink-0" /> <span>Deliver</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => setViewingOrder(order)}
+                      className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer ${
+                        hasPendingQC 
+                          ? 'bg-[#DFAC43] text-[#0F172A] ring-1 ring-[#DFAC43]' 
+                          : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                      }`}
+                    >
+                      <FiEye className="shrink-0" /> <span>View Details</span>
+                    </button>
+
+                    <button
+                      onClick={() => navigate(`/admin/print/${order._id}`)}
+                      className="p-2 bg-gray-100 hover:bg-[#0F172A] text-gray-700 hover:text-[#DFAC43] rounded-lg transition border border-gray-200 cursor-pointer shrink-0"
+                      title="Print Invoice"
+                    >
+                      <FiPrinter className="text-xs" />
+                    </button>
+
+                    <button
+                      onClick={() => handleDelete(order._id)}
+                      disabled={isDeleting}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition text-xs border border-red-100 cursor-pointer shrink-0"
+                      title="Delete Order"
+                    >
+                      <FiTrash2 className="text-xs" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

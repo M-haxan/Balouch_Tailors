@@ -370,13 +370,13 @@ const CustomerProfile = () => {
 
       </div>
 
-      {/* 4. TAB HEADERS */}
-      <div className="border-b border-gray-200">
-        <div className="flex gap-2 sm:gap-6 overflow-x-auto pb-1">
+      {/* 4. TAB HEADERS (EQUAL SIZE GRID ON MOBILE & DESKTOP) */}
+      <div className="border-b border-gray-200 pb-2">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           {[
-            { id: 'overview', label: 'Profile Overview', icon: FiUser },
+            { id: 'overview', label: 'Overview', icon: FiUser },
             { id: 'measurements', label: `Measurements (${customer.measurements?.length || 0})`, icon: FiScissors },
-            { id: 'orders', label: `Orders History (${orders.length})`, icon: FiShoppingBag },
+            { id: 'orders', label: `Orders (${orders.length})`, icon: FiShoppingBag },
             { id: 'khata', label: 'Payments', icon: FiBook },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -385,13 +385,14 @@ const CustomerProfile = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-3 sm:py-3.5 px-3 sm:px-4 font-black text-xs sm:text-sm flex items-center gap-2 border-b-2 transition whitespace-nowrap ${isActive
-                    ? 'border-[#DFAC43] text-[#0F172A] bg-amber-50/40 rounded-t'
-                    : 'border-transparent text-gray-500 hover:text-black hover:border-gray-300'
-                  }`}
+                className={`py-2.5 sm:py-3 px-2 sm:px-4 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg border transition cursor-pointer text-center ${
+                  isActive
+                    ? 'border-[#DFAC43] text-[#0F172A] bg-amber-50 shadow-xs'
+                    : 'border-gray-200 text-gray-600 hover:text-black hover:bg-gray-50'
+                }`}
               >
-                <Icon className={isActive ? 'text-[#DFAC43]' : 'text-gray-400'} />
-                {tab.label}
+                <Icon className={`text-sm shrink-0 ${isActive ? 'text-[#DFAC43]' : 'text-gray-400'}`} />
+                <span className="truncate">{tab.label}</span>
               </button>
             );
           })}
@@ -782,9 +783,10 @@ const MeasurementsTab = ({
             </div>
           </div>
 
-          {/* Measurements Table View */}
-          <div className="border border-gray-200 rounded overflow-x-auto shadow-sm">
-            <table className="w-full text-left border-collapse text-xs min-w-[320px]">
+          {/* Measurements Display (Table on MD+, Cards Grid on Mobile) */}
+          {/* 1. DESKTOP VIEW (TABLE) */}
+          <div className="hidden md:block border border-gray-200 rounded-xl overflow-hidden shadow-2xs">
+            <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-[#0F172A] text-[#DFAC43] font-black uppercase text-[10px]">
                   <th className="p-3.5 w-16 text-center">#</th>
@@ -806,6 +808,18 @@ const MeasurementsTab = ({
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* 2. MOBILE VIEW (GRID CARDS) */}
+          <div className="block md:hidden">
+            <div className="grid grid-cols-2 gap-2">
+              {Object.keys(currentMeas.data || {}).map((field) => (
+                <div key={field} className="bg-gray-50/80 border border-gray-200 rounded-xl p-3 text-center space-y-1 shadow-2xs">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block truncate">{field}</span>
+                  <span className="text-base font-black text-gray-900 font-sans block">{currentMeas.data[field] || '-'}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Custom Notes / Fitting Instructions */}
@@ -868,83 +882,169 @@ const OrdersTab = ({ orders = [], customer, newOrderUrl }) => {
       </div>
 
       {filteredOrders.length === 0 ? (
-        <div className="text-center py-12 sm:py-16 bg-gray-50 border-2 border-dashed border-gray-200 rounded p-4">
+        <div className="text-center py-12 sm:py-16 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4">
           <FiShoppingBag className="text-4xl text-gray-400 mx-auto mb-3" />
           <p className="text-gray-600 font-bold text-sm">No orders matching selected filter.</p>
         </div>
       ) : (
-        <div className="border border-gray-200 rounded overflow-x-auto shadow-sm">
-          <table className="w-full text-left border-collapse text-xs min-w-[700px]">
-            <thead>
-              <tr className="bg-[#0F172A] text-[#DFAC43] font-black uppercase text-[10px]">
-                <th className="p-3.5 rounded-l">Order #</th>
-                <th className="p-3.5">Booking Date</th>
-                <th className="p-3.5">Delivery Date</th>
-                <th className="p-3.5">Suits & Fabric</th>
-                <th className="p-3.5">Status</th>
-                <th className="p-3.5 text-right">Total Bill</th>
-                <th className="p-3.5 text-right">Advance</th>
-                <th className="p-3.5 text-right">Balance</th>
-                <th className="p-3.5 rounded-r text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredOrders.map((order) => {
-                const bal = Number(order.balanceAmount) || 0;
-                return (
-                  <tr key={order._id} className="hover:bg-gray-50/80 transition">
-                    <td className="p-3.5 font-black text-gray-900">
-                      <span className="bg-gray-100 px-2 py-1 rounded font-sans whitespace-nowrap">
-                        #BT-{order.orderNumber}
-                      </span>
-                    </td>
-                    <td className="p-3.5 text-gray-500 font-medium whitespace-nowrap">
-                      {new Date(order.orderDate || order.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="p-3.5 text-gray-800 font-bold whitespace-nowrap">
-                      {order.deliveryDate ? (
-                        <span className="flex items-center gap-1 text-gray-900">
-                          <FiCalendar className="text-[#DFAC43]" /> {new Date(order.deliveryDate).toLocaleDateString()}
+        <div className="space-y-4">
+          
+          {/* 1. DESKTOP VIEW (TABLE) */}
+          <div className="hidden md:block border border-gray-200 rounded-xl overflow-hidden shadow-2xs">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[#0F172A] text-[#DFAC43] font-black uppercase text-[10px]">
+                  <th className="p-3.5">Order #</th>
+                  <th className="p-3.5">Booking Date</th>
+                  <th className="p-3.5">Delivery Date</th>
+                  <th className="p-3.5">Suits & Fabric</th>
+                  <th className="p-3.5">Status</th>
+                  <th className="p-3.5 text-right">Total Bill</th>
+                  <th className="p-3.5 text-right">Advance</th>
+                  <th className="p-3.5 text-right">Balance</th>
+                  <th className="p-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 font-medium">
+                {filteredOrders.map((order) => {
+                  const bal = Number(order.balanceAmount) || 0;
+                  return (
+                    <tr key={order._id} className="hover:bg-gray-50/80 transition">
+                      <td className="p-3.5 font-black text-gray-900">
+                        <span className="bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md font-sans whitespace-nowrap">
+                          #BT-{order.orderNumber}
                         </span>
-                      ) : '-'}
-                    </td>
-                    <td className="p-3.5 text-gray-600 max-w-xs truncate">
-                      {order.suits?.length || 0} suits
-                      {order.suits?.[0]?.fabricDetails && ` (${order.suits[0].fabricDetails})`}
-                    </td>
-                    <td className="p-3.5 whitespace-nowrap">
-                      <span className={`px-2.5 py-1 rounded text-[10px] font-black uppercase ${order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-800' :
+                      </td>
+                      <td className="p-3.5 text-gray-500 whitespace-nowrap">
+                        {new Date(order.orderDate || order.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="p-3.5 text-gray-800 font-bold whitespace-nowrap">
+                        {order.deliveryDate ? (
+                          <span className="flex items-center gap-1 text-gray-900">
+                            <FiCalendar className="text-[#DFAC43]" /> {new Date(order.deliveryDate).toLocaleDateString()}
+                          </span>
+                        ) : '-'}
+                      </td>
+                      <td className="p-3.5 text-gray-600 max-w-xs truncate">
+                        {order.suits?.length || 0} suits
+                        {order.suits?.[0]?.fabricDetails && ` (${order.suits[0].fabricDetails})`}
+                      </td>
+                      <td className="p-3.5 whitespace-nowrap">
+                        <span className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase ${
+                          order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-800' :
                           order.orderStatus === 'Ready' ? 'bg-amber-100 text-amber-900' :
-                            'bg-blue-50 text-blue-800'
+                          'bg-blue-50 text-blue-800'
                         }`}>
-                        {order.orderStatus || 'Pending'}
+                          {order.orderStatus || 'Pending'}
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-right font-black text-gray-900 font-sans whitespace-nowrap">
+                        Rs {order.totalAmount?.toLocaleString()}
+                      </td>
+                      <td className="p-3.5 text-right font-bold text-green-600 font-sans whitespace-nowrap">
+                        Rs {(order.advancePaid || 0).toLocaleString()}
+                      </td>
+                      <td className="p-3.5 text-right font-black font-sans whitespace-nowrap">
+                        <span className={bal > 0 ? 'text-red-600' : 'text-gray-600'}>
+                          Rs {bal.toLocaleString()}
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-right whitespace-nowrap">
+                        <Link
+                          to={`/admin/print/${order._id}`}
+                          className="inline-flex items-center gap-1 bg-gray-100 hover:bg-[#0F172A] hover:text-[#DFAC43] text-gray-800 px-3 py-1.5 rounded-lg text-xs font-bold transition border border-gray-200"
+                          title="Print / View Invoice"
+                        >
+                          <FiPrinter /> Print
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 2. MOBILE VIEW (TABLE-TO-CARD PATTERN) */}
+          <div className="block md:hidden space-y-3">
+            {filteredOrders.map((order) => {
+              const bal = Number(order.balanceAmount) || 0;
+              return (
+                <div 
+                  key={order._id} 
+                  className="bg-white rounded-xl border border-gray-200 shadow-2xs p-3.5 space-y-3 transition hover:border-gray-300"
+                >
+                  {/* Order # & Status */}
+                  <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2.5">
+                    <span className="font-black text-gray-900 text-xs bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md font-sans">
+                      #BT-{order.orderNumber}
+                    </span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                      order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-800' :
+                      order.orderStatus === 'Ready' ? 'bg-amber-100 text-amber-900' :
+                      'bg-blue-50 text-blue-800'
+                    }`}>
+                      {order.orderStatus || 'Pending'}
+                    </span>
+                  </div>
+
+                  {/* Booking & Delivery Dates */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Booked</span>
+                      <span className="font-semibold text-gray-700 mt-0.5 block">
+                        {new Date(order.orderDate || order.createdAt).toLocaleDateString()}
                       </span>
-                    </td>
-                    <td className="p-3.5 text-right font-black text-gray-900 font-sans whitespace-nowrap">
-                      Rs {order.totalAmount?.toLocaleString()}
-                    </td>
-                    <td className="p-3.5 text-right font-medium text-green-600 font-sans whitespace-nowrap">
-                      Rs {(order.advancePaid || 0).toLocaleString()}
-                    </td>
-                    <td className="p-3.5 text-right font-black font-sans whitespace-nowrap">
-                      <span className={bal > 0 ? 'text-red-600' : 'text-gray-600'}>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Delivery</span>
+                      <span className="font-bold text-gray-900 mt-0.5 flex items-center gap-1">
+                        <FiCalendar className="text-[#DFAC43] text-xs shrink-0" />
+                        {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Suits & Fabric */}
+                  <div className="text-xs bg-gray-50 p-2 rounded-lg border border-gray-150">
+                    <span className="font-bold text-gray-800">{order.suits?.length || 0} Suits</span>
+                    {order.suits?.[0]?.fabricDetails && (
+                      <span className="text-gray-500 ml-1">({order.suits[0].fabricDetails})</span>
+                    )}
+                  </div>
+
+                  {/* Financial Breakdown */}
+                  <div className="grid grid-cols-3 gap-1 text-center bg-gray-50/70 p-2 rounded-lg border border-gray-150 text-xs">
+                    <div>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase block">Total</span>
+                      <span className="font-black text-gray-900 text-xs font-sans">Rs {order.totalAmount?.toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase block">Advance</span>
+                      <span className="font-bold text-green-600 text-xs font-sans">Rs {(order.advancePaid || 0).toLocaleString()}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9px] font-bold text-gray-400 uppercase block">Balance</span>
+                      <span className={`font-black text-xs font-sans ${bal > 0 ? 'text-red-600' : 'text-gray-700'}`}>
                         Rs {bal.toLocaleString()}
                       </span>
-                    </td>
-                    <td className="p-3.5 text-right whitespace-nowrap">
-                      <Link
-                        to={`/admin/print/${order._id}`}
-                        className="inline-flex items-center gap-1 bg-gray-100 hover:bg-[#0F172A] hover:text-[#DFAC43] text-gray-800 px-3 py-1.5 rounded text-xs font-bold transition border border-gray-200"
-                        title="Print / View Invoice"
-                      >
-                        <FiPrinter /> Print
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                  </div>
+
+                  {/* Action Button */}
+                  <Link
+                    to={`/admin/print/${order._id}`}
+                    className="w-full py-2 bg-gray-100 hover:bg-[#0F172A] hover:text-[#DFAC43] text-gray-800 font-bold rounded-lg transition text-xs flex items-center justify-center gap-1.5 border border-gray-200 shadow-2xs"
+                  >
+                    <FiPrinter className="text-xs" />
+                    <span>Print / View Invoice</span>
+                  </Link>
+
+                </div>
+              );
+            })}
+          </div>
+
         </div>
       )}
 
@@ -1057,53 +1157,108 @@ const KhataLedgerTab = ({ customer, ledger = [], khataBalance = 0, openSettleMod
           </div>
 
           {ledger.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 border border-dashed border-gray-200 rounded text-xs text-gray-400">
+            <div className="text-center py-12 bg-gray-50 border border-dashed border-gray-200 rounded-xl text-xs text-gray-400">
               No khata transactions or settlements recorded yet for this customer.
             </div>
           ) : (
-            <div className="border border-gray-200 rounded overflow-x-auto shadow-sm">
-              <table className="w-full text-left border-collapse text-xs min-w-[600px]">
-                <thead>
-                  <tr className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] border-b border-gray-200">
-                    <th className="p-3.5">Date & Time</th>
-                    <th className="p-3.5">Description & Reference</th>
-                    <th className="p-3.5 text-right">Debit (+)</th>
-                    <th className="p-3.5 text-right">Credit (-)</th>
-                    <th className="p-3.5 text-right">Running Balance</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {ledger.map((entry) => (
-                    <tr key={entry._id} className="hover:bg-gray-50/80 transition font-medium">
-                      <td className="p-3.5 text-gray-500 whitespace-nowrap">
-                        {new Date(entry.date || entry.createdAt).toLocaleDateString()} {new Date(entry.date || entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="p-3.5 font-semibold text-gray-800">
-                        {entry.description}
-                        {entry.orderNumber && (
-                          <span className="ml-2 bg-[#0F172A] text-[#DFAC43] px-2 py-0.5 rounded text-[10px] font-black whitespace-nowrap">
-                            #BT-{entry.orderNumber}
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-3.5 text-right font-black text-red-600 font-sans whitespace-nowrap">
-                        {entry.type === 'debit' ? `+ Rs ${entry.amount.toLocaleString()}` : '-'}
-                      </td>
-                      <td className="p-3.5 text-right font-black text-green-600 font-sans whitespace-nowrap">
-                        {entry.type === 'credit' || entry.type === 'payment' ? `- Rs ${entry.amount.toLocaleString()}` : '-'}
-                      </td>
-                      <td className="p-3.5 text-right font-black font-sans whitespace-nowrap">
-                        <span className={`px-2.5 py-1 rounded text-xs ${entry.runningBalance > 0 ? 'text-red-700 bg-red-50' :
+            <div className="space-y-4">
+              
+              {/* 1. DESKTOP VIEW (TABLE) */}
+              <div className="hidden md:block border border-gray-200 rounded-xl overflow-hidden shadow-2xs">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] border-b border-gray-200">
+                      <th className="p-3.5">Date & Time</th>
+                      <th className="p-3.5">Description & Reference</th>
+                      <th className="p-3.5 text-right">Debit (+)</th>
+                      <th className="p-3.5 text-right">Credit (-)</th>
+                      <th className="p-3.5 text-right">Running Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {ledger.map((entry) => (
+                      <tr key={entry._id} className="hover:bg-gray-50/80 transition font-medium">
+                        <td className="p-3.5 text-gray-500 whitespace-nowrap">
+                          {new Date(entry.date || entry.createdAt).toLocaleDateString()} {new Date(entry.date || entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="p-3.5 font-semibold text-gray-800">
+                          {entry.description}
+                          {entry.orderNumber && (
+                            <span className="ml-2 bg-[#0F172A] text-[#DFAC43] px-2 py-0.5 rounded text-[10px] font-black whitespace-nowrap">
+                              #BT-{entry.orderNumber}
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-3.5 text-right font-black text-red-600 font-sans whitespace-nowrap">
+                          {entry.type === 'debit' ? `+ Rs ${entry.amount.toLocaleString()}` : '-'}
+                        </td>
+                        <td className="p-3.5 text-right font-black text-green-600 font-sans whitespace-nowrap">
+                          {entry.type === 'credit' || entry.type === 'payment' ? `- Rs ${entry.amount.toLocaleString()}` : '-'}
+                        </td>
+                        <td className="p-3.5 text-right font-black font-sans whitespace-nowrap">
+                          <span className={`px-2.5 py-1 rounded text-xs ${
+                            entry.runningBalance > 0 ? 'text-red-700 bg-red-50' :
                             entry.runningBalance < 0 ? 'text-green-700 bg-green-50' :
-                              'text-gray-700 bg-gray-100'
+                            'text-gray-700 bg-gray-100'
                           }`}>
+                            Rs {entry.runningBalance.toLocaleString()}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* 2. MOBILE VIEW (TABLE-TO-CARD PATTERN) */}
+              <div className="block md:hidden space-y-2.5">
+                {ledger.map((entry) => (
+                  <div 
+                    key={entry._id} 
+                    className="bg-white rounded-xl border border-gray-200 shadow-2xs p-3.5 space-y-2.5 transition hover:border-gray-300"
+                  >
+                    {/* Date & Ref */}
+                    <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2">
+                      <span className="text-[11px] text-gray-500 font-medium">
+                        {new Date(entry.date || entry.createdAt).toLocaleDateString()} at {new Date(entry.date || entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                      {entry.orderNumber && (
+                        <span className="bg-[#0F172A] text-[#DFAC43] px-2 py-0.5 rounded text-[10px] font-black whitespace-nowrap">
+                          #BT-{entry.orderNumber}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    <p className="font-bold text-gray-900 text-xs">{entry.description}</p>
+
+                    {/* Amounts & Balance Row */}
+                    <div className="flex items-center justify-between gap-2 bg-gray-50/80 p-2 rounded-lg border border-gray-150 text-xs">
+                      <div>
+                        <span className="text-[9px] font-bold text-gray-400 uppercase block">Amount</span>
+                        {entry.type === 'debit' ? (
+                          <span className="font-black text-red-600 text-xs font-sans">+ Rs {entry.amount.toLocaleString()}</span>
+                        ) : (
+                          <span className="font-black text-green-600 text-xs font-sans">- Rs {entry.amount.toLocaleString()}</span>
+                        )}
+                      </div>
+
+                      <div className="text-right">
+                        <span className="text-[9px] font-bold text-gray-400 uppercase block">Balance After</span>
+                        <span className={`font-black text-xs font-sans px-2 py-0.5 rounded ${
+                          entry.runningBalance > 0 ? 'text-red-700 bg-red-50' :
+                          entry.runningBalance < 0 ? 'text-green-700 bg-green-50' :
+                          'text-gray-700 bg-gray-200'
+                        }`}>
                           Rs {entry.runningBalance.toLocaleString()}
                         </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    </div>
+
+                  </div>
+                ))}
+              </div>
+
             </div>
           )}
         </div>

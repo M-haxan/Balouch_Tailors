@@ -62,59 +62,61 @@ const Catalogue = () => {
       <div className="container mx-auto px-4 max-w-7xl relative z-10">
         
         {/* SECTION HEADER */}
-        <div className="text-center mb-14">
-          <span className="text-[#D4AF37] text-xs sm:text-sm font-black tracking-[0.25em] uppercase mb-3 block">
+        <div className="text-center mb-8 sm:mb-12">
+          <span className="text-[#D4AF37] text-xs sm:text-sm font-black tracking-[0.25em] uppercase mb-2 sm:mb-3 block">
             Exclusive Stitched Collections
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-4 font-serif">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-3 sm:mb-4 font-serif">
             Design Catalogue
           </h2>
-          <div className="w-20 h-1 bg-gradient-to-r from-[#DFAC43] to-[#F5D77F] mx-auto mb-8 rounded-full"></div>
+          <div className="w-16 sm:w-20 h-1 bg-gradient-to-r from-[#DFAC43] to-[#F5D77F] mx-auto mb-6 sm:mb-8 rounded-full"></div>
 
-          {/* 3 CATEGORY SWITCHER TABS (EQUAL SIZE & SINGLE LINE) */}
-          <div className="flex justify-center items-center gap-2 sm:gap-3 p-1.5 bg-gray-200/80 backdrop-blur-sm rounded-xl max-w-2xl mx-auto border border-gray-300 shadow-inner overflow-x-auto no-scrollbar">
-            {categories.map((category) => {
-              const count = catalogueItems.filter(item => item.category === category).length;
-              const isActive = activeTab === category;
-              return (
-                <button
-                  key={category}
-                  onClick={() => {
-                    setActiveTab(category);
-                    setSliderIndex(null);
-                  }}
-                  className={`flex-1 h-12 px-3 sm:px-6 rounded-lg text-xs sm:text-sm font-black uppercase tracking-wider whitespace-nowrap transition-all duration-200 flex items-center justify-center gap-2 shrink-0 ${
-                    isActive
-                      ? 'bg-[#0F172A] text-[#DFAC43] shadow-md'
-                      : 'text-gray-700 hover:text-black hover:bg-white/70'
-                  }`}
-                >
-                  <span className="whitespace-nowrap">{category}</span>
-                  {count > 0 && (
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-bold shrink-0 ${
-                      isActive ? 'bg-[#DFAC43] text-black' : 'bg-gray-300 text-gray-700'
-                    }`}>
-                      {count}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+          {/* 3 CATEGORY SWITCHER TABS (EACH TAB IN A SEPARATE ROW ON SMALL SCREENS / SIDE-BY-SIDE ON DESKTOP) */}
+          <div className="w-full max-w-sm md:max-w-2xl mx-auto p-2 md:p-1.5 bg-gray-200/80 backdrop-blur-sm rounded-xl border border-gray-300 shadow-inner">
+            <div className="flex flex-col md:flex-row gap-2 md:gap-2">
+              {categories.map((category) => {
+                const count = catalogueItems.filter(item => item.category === category).length;
+                const isActive = activeTab === category;
+                return (
+                  <button
+                    key={category}
+                    onClick={() => {
+                      setActiveTab(category);
+                      setSliderIndex(null);
+                    }}
+                    className={`w-full md:flex-1 py-2.5 px-4 rounded-lg text-xs md:text-sm font-black uppercase tracking-wider transition-all duration-200 flex items-center justify-between md:justify-center gap-2 cursor-pointer ${
+                      isActive
+                        ? 'bg-[#0F172A] text-[#DFAC43] shadow-md ring-1 ring-[#DFAC43]/40'
+                        : 'bg-white/60 md:bg-transparent text-gray-700 hover:text-black hover:bg-white'
+                    }`}
+                  >
+                    <span>{category}</span>
+                    {count > 0 && (
+                      <span className={`text-[10px] md:text-[11px] px-2 py-0.5 rounded-full font-bold shrink-0 ${
+                        isActive ? 'bg-[#DFAC43] text-black' : 'bg-gray-300 text-gray-700'
+                      }`}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
         {/* QUICK ACTION BAR */}
         {activeData.length > 0 && (
-          <div className="flex justify-between items-center mb-6 pb-3 border-b border-gray-200 text-xs text-gray-500 font-bold">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-6 pb-3 border-b border-gray-200 text-xs text-gray-500 font-bold">
             <span className="uppercase tracking-wider">
               {activeTab} • <strong className="text-black">{activeData.length} Designs</strong> Available
             </span>
             <button
               onClick={() => setSliderIndex(0)}
-              className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-black px-3.5 py-1.5 rounded transition font-black flex items-center gap-1.5 shadow-sm text-xs"
+              className="w-full sm:w-auto bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-black px-3.5 py-1.5 rounded-lg transition font-black flex items-center justify-center gap-1.5 shadow-sm text-xs cursor-pointer"
             >
               <FiMaximize2 className="text-sm" />
-              Open Slider View
+              <span>Open Slider View</span>
             </button>
           </div>
         )}

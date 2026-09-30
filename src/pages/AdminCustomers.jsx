@@ -63,28 +63,28 @@ const AdminCustomers = () => {
   };
 
   return (
-    <div className="bg-white shadow-sm p-6 relative min-h-[80vh]">
+    <div className="bg-white shadow-sm p-3.5 sm:p-6 relative min-h-[80vh] rounded-xl">
       {/* HEADER & SEARCH */}
-      <div className="flex flex-col md:flex-row justify-between items-center border-b pb-4 mb-6 gap-4">
-        <div>
-          <h2 className="text-2xl font-black text-gray-900">Manage Customers</h2>
-          <p className="text-sm text-gray-500 mt-1">Directory of all clients, measurements, orders, and khata balances.</p>
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center border-b pb-4 mb-6 gap-4">
+        <div className="w-full xl:w-auto">
+          <h2 className="text-xl sm:text-2xl font-black text-gray-900">Manage Customers</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">Directory of all clients, measurements, orders, and khata balances.</p>
         </div>
         
-        <div className="flex w-full md:w-auto gap-3">
-          <div className="relative w-full md:w-72">
+        <div className="flex flex-col sm:flex-row w-full xl:w-auto gap-2.5">
+          <div className="relative w-full sm:w-72">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
               placeholder="Search by ID, name, phone, city..." 
-              className="w-full pl-10 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded outline-none text-sm transition"
+              className="w-full pl-10 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded outline-none text-xs sm:text-sm transition"
               value={searchTerm}
               onChange={handleSearchChange}
             />
             {searchTerm && (
               <button 
                 onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full cursor-pointer"
                 title="Clear search"
               >
                 <FiX className="text-xs" />
@@ -93,118 +93,202 @@ const AdminCustomers = () => {
           </div>
           <button 
             onClick={() => openFormModal()}
-            className="bg-[#DFAC43] text-[#0F172A] hover:bg-[#0F172A] hover:text-[#DFAC43] px-4 py-2 text-sm font-black rounded transition shadow-sm flex items-center gap-2 whitespace-nowrap"
+            className="bg-[#DFAC43] text-[#0F172A] hover:bg-[#0F172A] hover:text-[#DFAC43] px-4 py-2 text-xs sm:text-sm font-black rounded transition shadow-sm flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
           >
             <FiPlus className="text-lg" /> Add Customer
           </button>
         </div>
       </div>
 
-      {/* CUSTOMERS TABLE */}
+      {/* CUSTOMERS DISPLAY (TABLE ON MD+, CARDS ON MOBILE) */}
       {isLoading ? (
         <div className="text-center py-20 text-gray-500 font-medium">Loading customers...</div>
       ) : filteredCustomers.length === 0 ? (
         <div className="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl">
-          <p className="text-gray-500 mb-2">No customers found.</p>
+          <p className="text-gray-500 mb-2 font-bold text-sm">No customers found.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#0F172A] text-[#DFAC43] text-xs uppercase tracking-wider">
-                <th className="p-4 rounded-l-xl">ID</th>
-                <th className="p-4">Client Name</th>
-                <th className="p-4">Contact</th>
-                <th className="p-4">Khata Balance</th>
-                <th className="p-4">City / Address</th>
-                <th className="p-4 rounded-r-xl text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredCustomers.map((customer) => {
-                const bal = Number(customer.khataBalance) || 0;
-                const formattedId = customer.customerNumber ? `#C-${customer.customerNumber}` : `#C-${customer._id.slice(-4).toUpperCase()}`;
+        <div className="space-y-4">
+          
+          {/* 1. DESKTOP & TABLET VIEW (TABLE) */}
+          <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-xl">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#0F172A] text-[#DFAC43] text-xs uppercase tracking-wider">
+                  <th className="p-4">ID</th>
+                  <th className="p-4">Client Name</th>
+                  <th className="p-4">Contact</th>
+                  <th className="p-4">Khata Balance</th>
+                  <th className="p-4">City / Address</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredCustomers.map((customer) => {
+                  const bal = Number(customer.khataBalance) || 0;
+                  const formattedId = customer.customerNumber ? `#C-${customer.customerNumber}` : `#C-${customer._id.slice(-4).toUpperCase()}`;
 
-                return (
-                  <tr key={customer._id} className="hover:bg-gray-50 transition text-sm">
-                    {/* CUSTOMER ID */}
-                    <td className="p-4 font-black text-gray-900 whitespace-nowrap">
-                      <span className="bg-gray-100 border border-gray-200 text-gray-800 text-xs px-2 py-1 rounded-md font-sans">
-                        {formattedId}
-                      </span>
-                    </td>
+                  return (
+                    <tr key={customer._id} className="hover:bg-gray-50 transition text-sm">
+                      {/* CUSTOMER ID */}
+                      <td className="p-4 font-black text-gray-900 whitespace-nowrap">
+                        <span className="bg-gray-100 border border-gray-200 text-gray-800 text-xs px-2 py-1 rounded-md font-sans">
+                          {formattedId}
+                        </span>
+                      </td>
 
-                    {/* CLIENT NAME & AVATAR */}
-                    <td className="p-4 font-bold text-gray-900">
-                      <div className="flex items-center gap-3">
-                        {customer.profileImage?.url ? (
-                          <img
-                            src={customer.profileImage.url} 
-                            alt={customer.name} 
-                            className="w-9 h-9 rounded-full object-cover border border-gray-200" 
-                          />
-                        ) : (
-                          <div className="w-9 h-9 rounded-xl bg-[#0F172A] text-[#DFAC43] flex items-center justify-center text-xs font-black uppercase">
-                            {customer.name[0]}
+                      {/* CLIENT NAME & AVATAR */}
+                      <td className="p-4 font-bold text-gray-900">
+                        <div className="flex items-center gap-3">
+                          {customer.profileImage?.url ? (
+                            <img
+                              src={customer.profileImage.url} 
+                              alt={customer.name} 
+                              className="w-9 h-9 rounded-full object-cover border border-gray-200" 
+                            />
+                          ) : (
+                            <div className="w-9 h-9 rounded-xl bg-[#0F172A] text-[#DFAC43] flex items-center justify-center text-xs font-black uppercase">
+                              {customer.name[0]}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-black text-gray-900">{customer.name}</p>
                           </div>
-                        )}
-                        <div>
-                          <p className="font-black text-gray-900">{customer.name}</p>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* CONTACT & WHATSAPP */}
-                    <td className="p-4 text-gray-600 font-medium whitespace-nowrap">
-                      <div>
-                        <p className="font-semibold text-gray-900">{formatPhone(customer.phone)}</p>
-                      </div>
-                    </td>
+                      {/* CONTACT & WHATSAPP */}
+                      <td className="p-4 text-gray-600 font-medium whitespace-nowrap">
+                        <div>
+                          <p className="font-semibold text-gray-900">{formatPhone(customer.phone)}</p>
+                        </div>
+                      </td>
+                      
+                      {/* KHATA BALANCE BADGE */}
+                      <td className="p-4 whitespace-nowrap">
+                        {bal > 0 ? (
+                          <span className="inline-flex items-center gap-1 bg-red-50 border border-red-200 text-red-900 px-2.5 py-1 rounded-md text-xs font-black">
+                            <FiAlertTriangle className="text-xs text-red-600" /> Udhar: Rs {bal.toLocaleString()}
+                          </span>
+                        ) : bal < 0 ? (
+                          <span className="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-900 px-2.5 py-1 rounded-md text-xs font-black">
+                            <FiCheckCircle className="text-xs text-green-700" /> Credit: Rs {Math.abs(bal).toLocaleString()}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-xs font-bold">
+                            Settled (Rs 0)
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="p-4 text-gray-600 text-xs max-w-xs truncate">{customer.address || '-'}</td>
+                      
+                      {/* 2 CLEAN ACTION BUTTONS ONLY: VIEW PROFILE & + NEW ORDER */}
+                      <td className="p-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-2">
+                          {/* 1. View Profile Button */}
+                          <button 
+                            onClick={() => navigate(`/admin/customers/${customer._id}`)}
+                            className="px-3 py-1.5 bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] font-bold rounded-lg transition text-xs flex items-center gap-1 border border-gray-200 shadow-sm cursor-pointer"
+                          >
+                            View Profile <FiArrowRight className="text-xs" />
+                          </button>
+
+                          {/* 2. New Order Button */}
+                          <button 
+                            onClick={() => navigate(`/admin/orders/create?customerId=${customer._id}`)}
+                            className="px-3 py-1.5 bg-[#DFAC43] hover:bg-[#0F172A] text-[#0F172A] hover:text-[#DFAC43] font-black rounded-lg transition text-xs flex items-center gap-1 shadow-sm whitespace-nowrap cursor-pointer"
+                          >
+                            <FiPlus className="text-sm" /> New Order
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 2. MOBILE VIEW (TABLE-TO-CARD PATTERN) */}
+          <div className="block md:hidden space-y-3">
+            {filteredCustomers.map((customer) => {
+              const bal = Number(customer.khataBalance) || 0;
+              const formattedId = customer.customerNumber ? `#C-${customer.customerNumber}` : `#C-${customer._id.slice(-4).toUpperCase()}`;
+
+              return (
+                <div 
+                  key={customer._id} 
+                  className="bg-white rounded-xl border border-gray-200 shadow-2xs p-3.5 sm:p-4 space-y-3 transition hover:border-gray-300"
+                >
+                  {/* Top Header: ID & Khata Status */}
+                  <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2.5">
+                    <span className="bg-gray-100 border border-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded-md font-sans font-black">
+                      {formattedId}
+                    </span>
                     
-                    {/* KHATA BALANCE BADGE */}
-                    <td className="p-4 whitespace-nowrap">
-                      {bal > 0 ? (
-                        <span className="inline-flex items-center gap-1 bg-red-50 border border-red-200 text-red-900 px-2.5 py-1 rounded-md text-xs font-black">
-                          <FiAlertTriangle className="text-xs text-red-600" /> Udhar: Rs {bal.toLocaleString()}
-                        </span>
-                      ) : bal < 0 ? (
-                        <span className="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-900 px-2.5 py-1 rounded-md text-xs font-black">
-                          <FiCheckCircle className="text-xs text-green-700" /> Credit: Rs {Math.abs(bal).toLocaleString()}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-xs font-bold">
-                          Settled (Rs 0)
-                        </span>
+                    {bal > 0 ? (
+                      <span className="inline-flex items-center gap-1 bg-red-50 border border-red-200 text-red-900 px-2.5 py-0.5 rounded-md text-[11px] font-black">
+                        <FiAlertTriangle className="text-xs text-red-600" /> Udhar: Rs {bal.toLocaleString()}
+                      </span>
+                    ) : bal < 0 ? (
+                      <span className="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-900 px-2.5 py-0.5 rounded-md text-[11px] font-black">
+                        <FiCheckCircle className="text-xs text-green-700" /> Credit: Rs {Math.abs(bal).toLocaleString()}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md text-[11px] font-bold">
+                        Settled (Rs 0)
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Customer Info: Avatar, Name, Phone & Address */}
+                  <div className="flex items-start gap-3">
+                    {customer.profileImage?.url ? (
+                      <img
+                        src={customer.profileImage.url} 
+                        alt={customer.name} 
+                        className="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0" 
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-[#0F172A] text-[#DFAC43] flex items-center justify-center text-sm font-black uppercase shrink-0">
+                        {customer.name?.[0] || 'C'}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-black text-gray-900 text-sm truncate">{customer.name}</h3>
+                      <p className="text-xs text-gray-600 font-semibold font-mono mt-0.5">{formatPhone(customer.phone)}</p>
+                      {customer.address && (
+                        <p className="text-[11px] text-gray-500 truncate mt-0.5 flex items-center gap-1">
+                          <FiMapPin className="text-xs shrink-0 text-gray-400" /> {customer.address}
+                        </p>
                       )}
-                    </td>
+                    </div>
+                  </div>
 
-                    <td className="p-4 text-gray-600 text-xs max-w-xs truncate">{customer.address || '-'}</td>
-                    
-                    {/* 2 CLEAN ACTION BUTTONS ONLY: VIEW PROFILE & + NEW ORDER */}
-                    <td className="p-4 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-2">
-                        {/* 1. View Profile Button */}
-                        <button 
-                          onClick={() => navigate(`/admin/customers/${customer._id}`)}
-                          className="px-3 py-1.5 bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] font-bold rounded transition text-xs flex items-center gap-1 border border-gray-200 shadow-sm"
-                        >
-                          View Profile <FiArrowRight className="text-xs" />
-                        </button>
+                  {/* Action Buttons: View Profile & New Order */}
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
+                    <button 
+                      onClick={() => navigate(`/admin/customers/${customer._id}`)}
+                      className="w-full py-2 bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] font-bold rounded-lg transition text-xs flex items-center justify-center gap-1.5 border border-gray-200 shadow-2xs cursor-pointer"
+                    >
+                      <span>View Profile</span>
+                      <FiArrowRight className="text-xs" />
+                    </button>
 
-                        {/* 2. New Order Button */}
-                        <button 
-                          onClick={() => navigate(`/admin/orders/create?customerId=${customer._id}`)}
-                          className="px-3 py-1.5 bg-[#DFAC43] hover:bg-[#0F172A] text-[#0F172A] hover:text-[#DFAC43] font-black rounded transition text-xs flex items-center gap-1 shadow-sm whitespace-nowrap"
-                        >
-                          <FiPlus className="text-sm" />  New Order
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    <button 
+                      onClick={() => navigate(`/admin/orders/create?customerId=${customer._id}`)}
+                      className="w-full py-2 bg-[#DFAC43] hover:bg-[#0F172A] text-[#0F172A] hover:text-[#DFAC43] font-black rounded-lg transition text-xs flex items-center justify-center gap-1.5 shadow-2xs whitespace-nowrap cursor-pointer"
+                    >
+                      <FiPlus className="text-sm" /> 
+                      <span>New Order</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
         </div>
       )}
 

@@ -23,72 +23,74 @@ const AdminCatalogue = () => {
   if (isError) return <div className="text-red-500 text-center py-10 font-bold">Failed to load catalogue.</div>;
 
   return (
-    <div className="bg-white rounded shadow-sm p-4 sm:p-6 relative space-y-6">
+    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 relative space-y-6">
       {/* HEADER: Title aur Add Button */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-gray-100 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-[#0F172A] text-[#DFAC43] flex items-center justify-center font-bold">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#0F172A] text-[#DFAC43] flex items-center justify-center font-bold shrink-0 shadow-xs">
               <FiLayers className="text-lg" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-gray-900">Manage Design Catalogue</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Manage Design Catalogue</h2>
           </div>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+          <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium max-w-2xl leading-relaxed">
             Upload and organize suit/kurta/shirt design photos across the 3 categories for the slider and gallery.
           </p>
         </div>
 
         <button
           onClick={() => setIsFormOpen(true)}
-          className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 shadow-sm"
+          className="w-full sm:w-auto bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
         >
-          <FiPlus className="text-base" />
-          Add New Design / Vol
+          <FiPlus className="text-base shrink-0" />
+          <span>Add New Design / Vol</span>
         </button>
       </div>
 
       {/* CATEGORY TABS */}
-      <div className="flex items-center gap-2 sm:gap-3 p-1.5 bg-gray-100 rounded-lg max-w-md border border-gray-200">
-        {categories.map((cat) => {
-          const count = catalogueItems.filter(item => item.category === cat).length;
-          const isActive = activeTab === cat;
-          return (
-            <button
-              key={cat}
-              onClick={() => setActiveTab(cat)}
-              className={`flex-1 py-2 px-3 rounded text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
-                isActive
-                  ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
-                  : 'text-gray-600 hover:text-black hover:bg-white/70'
-              }`}
-            >
-              <span>{cat}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
-                isActive ? 'bg-[#DFAC43] text-black' : 'bg-gray-200 text-gray-700'
-              }`}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
+      <div className="w-full max-w-lg bg-gray-100 p-1 sm:p-1.5 rounded-xl border border-gray-200">
+        <div className="grid grid-cols-1 min-[480px]:grid-cols-3 gap-1 sm:gap-1.5">
+          {categories.map((cat) => {
+            const count = catalogueItems.filter(item => item.category === cat).length;
+            const isActive = activeTab === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setActiveTab(cat)}
+                className={`w-full py-2 px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-between min-[480px]:justify-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm ring-1 ring-[#DFAC43]/40'
+                    : 'text-gray-600 hover:text-black hover:bg-white/70'
+                }`}
+              >
+                <span className="truncate">{cat}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-black shrink-0 ${
+                  isActive ? 'bg-[#DFAC43] text-[#0F172A]' : 'bg-gray-200 text-gray-700'
+                }`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* GRID: Data Dikhane Ke Liye */}
       {filteredData.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded border border-dashed border-gray-300">
+        <div className="text-center py-16 bg-gray-50 rounded-xl border border-dashed border-gray-300">
           <FiLayers className="mx-auto text-4xl text-gray-400 mb-2" />
           <p className="text-gray-600 font-bold text-sm">No designs found in {activeTab}.</p>
           <p className="text-gray-400 text-xs mt-1">Click the "+ Add New Design / Vol" button above to upload pictures.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-5">
+        <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3.5 sm:gap-4 lg:gap-5">
           {filteredData.map((item, index) => {
             const volTitle = item.title?.includes('Vol') 
               ? item.title 
               : (item.title ? `${item.title}` : `Vol. ${String(index + 1).padStart(2, '0')}`);
 
             return (
-              <div key={item._id} className="bg-white rounded border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col group">
+              <div key={item._id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-2xs hover:shadow-md transition flex flex-col group">
                 <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
                   <img
                     src={item.imageUrl}
@@ -100,19 +102,20 @@ const AdminCatalogue = () => {
                   </div>
                 </div>
 
-                <div className="p-3 bg-white flex flex-col flex-grow justify-between gap-2 border-t border-gray-100">
+                <div className="p-2.5 sm:p-3 bg-white flex flex-col flex-grow justify-between gap-2 border-t border-gray-100">
                   <div>
                     <h3 className="font-bold text-xs sm:text-sm text-gray-900 truncate">{volTitle}</h3>
                     <span className="text-[10px] font-bold text-[#D4AF37] uppercase">{item.category}</span>
                   </div>
 
                   {/* ACTION BUTTONS */}
-                  <div className="flex justify-end gap-1.5 pt-2 border-t border-gray-100">
+                  <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-gray-100">
                     <button
                       onClick={() => setEditingItem(item)}
-                      className="text-gray-700 hover:text-black text-xs font-bold px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition flex items-center gap-1"
+                      className="text-gray-700 hover:text-black text-[11px] sm:text-xs font-bold py-1.5 px-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
                     >
-                      <FiEdit className="text-xs" /> Edit
+                      <FiEdit className="text-xs shrink-0" /> 
+                      <span>Edit</span>
                     </button>
                     <button
                       onClick={() => {
@@ -121,9 +124,10 @@ const AdminCatalogue = () => {
                         }
                       }}
                       disabled={isDeleting}
-                      className="text-red-600 hover:text-red-800 text-xs font-bold px-2 py-1 bg-red-50 hover:bg-red-100 rounded transition flex items-center gap-1"
+                      className="text-red-600 hover:text-red-800 text-[11px] sm:text-xs font-bold py-1.5 px-2 bg-red-50 hover:bg-red-100 rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
                     >
-                      <FiTrash2 className="text-xs" /> Del
+                      <FiTrash2 className="text-xs shrink-0" /> 
+                      <span>Del</span>
                     </button>
                   </div>
                 </div>
@@ -195,12 +199,12 @@ const AddDesignModal = ({ closeModal, categories, defaultCategory }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white p-6 rounded shadow-xl w-full max-w-md relative">
-        <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-black p-1 transition">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+      <div className="bg-white p-5 sm:p-6 rounded-xl shadow-xl w-full max-w-md relative max-h-[92vh] overflow-y-auto my-auto">
+        <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-black p-1 transition cursor-pointer">
           <FiX className="text-lg" />
         </button>
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Add New Design Image</h2>
+        <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-4">Add New Design Image</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -211,7 +215,7 @@ const AddDesignModal = ({ closeModal, categories, defaultCategory }) => {
               required 
               type="text" 
               placeholder="e.g. Vol. 01" 
-              className="w-full border border-gray-300 p-2 rounded text-sm focus:border-[#DFAC43] outline-none font-medium"
+              className="w-full border border-gray-300 p-2.5 rounded-lg text-sm focus:border-[#DFAC43] outline-none font-medium"
               value={form.title} 
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
@@ -222,7 +226,7 @@ const AddDesignModal = ({ closeModal, categories, defaultCategory }) => {
               Category *
             </label>
             <select 
-              className="w-full border border-gray-300 p-2 rounded text-sm focus:border-[#DFAC43] outline-none font-medium"
+              className="w-full border border-gray-300 p-2.5 rounded-lg text-sm focus:border-[#DFAC43] outline-none font-medium"
               value={form.category} 
               onChange={(e) => setForm({ ...form, category: e.target.value })}
             >
@@ -238,14 +242,14 @@ const AddDesignModal = ({ closeModal, categories, defaultCategory }) => {
               required 
               type="file" 
               accept="image/*" 
-              className="w-full border border-gray-300 p-2 rounded text-xs bg-gray-50 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#0F172A] file:text-white hover:file:bg-[#DFAC43] hover:file:text-black cursor-pointer"
+              className="w-full border border-gray-300 p-2 rounded-lg text-xs bg-gray-50 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-[#0F172A] file:text-white hover:file:bg-[#DFAC43] hover:file:text-black cursor-pointer"
               onChange={handleImageChange}
             />
             <p className="text-[11px] text-gray-500 mt-1 font-medium">
               Recommended: <strong className="text-gray-800">3:4 Portrait Ratio</strong> (e.g. <span className="text-[#DFAC43] font-bold">750 × 1000 px</span> or <span className="text-[#DFAC43] font-bold">600 × 800 px</span>).
             </p>
             {imagePreview && (
-              <div className="mt-2 w-20 h-24 rounded border overflow-hidden bg-gray-100">
+              <div className="mt-2 w-20 h-24 rounded-lg border overflow-hidden bg-gray-100">
                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
               </div>
             )}
@@ -254,7 +258,7 @@ const AddDesignModal = ({ closeModal, categories, defaultCategory }) => {
           <button 
             disabled={isPending} 
             type="submit" 
-            className="w-full bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] p-2.5 rounded font-bold text-sm transition mt-6"
+            className="w-full bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] p-2.5 rounded-lg font-bold text-sm transition mt-6 cursor-pointer"
           >
             {isPending ? 'Uploading to Slider...' : 'Upload & Save Design'}
           </button>
@@ -304,12 +308,12 @@ const EditDesignModal = ({ item, closeModal, categories }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white p-6 rounded shadow-xl w-full max-w-md relative">
-        <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-black p-1 transition">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+      <div className="bg-white p-5 sm:p-6 rounded-xl shadow-xl w-full max-w-md relative max-h-[92vh] overflow-y-auto my-auto">
+        <button onClick={closeModal} className="absolute top-4 right-4 text-gray-500 hover:text-black p-1 transition cursor-pointer">
           <FiX className="text-lg" />
         </button>
-        <h2 className="text-lg font-bold text-gray-900 mb-4">Edit Design</h2>
+        <h2 className="text-base sm:text-lg font-bold text-gray-900 mb-4">Edit Design</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -319,7 +323,7 @@ const EditDesignModal = ({ item, closeModal, categories }) => {
             <input 
               required 
               type="text" 
-              className="w-full border border-gray-300 p-2 rounded text-sm focus:border-[#DFAC43] outline-none font-medium"
+              className="w-full border border-gray-300 p-2.5 rounded-lg text-sm focus:border-[#DFAC43] outline-none font-medium"
               value={form.title} 
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
@@ -330,7 +334,7 @@ const EditDesignModal = ({ item, closeModal, categories }) => {
               Category *
             </label>
             <select 
-              className="w-full border border-gray-300 p-2 rounded text-sm focus:border-[#DFAC43] outline-none font-medium"
+              className="w-full border border-gray-300 p-2.5 rounded-lg text-sm focus:border-[#DFAC43] outline-none font-medium"
               value={form.category} 
               onChange={(e) => setForm({ ...form, category: e.target.value })}
             >
@@ -345,11 +349,11 @@ const EditDesignModal = ({ item, closeModal, categories }) => {
             <input 
               type="file" 
               accept="image/*" 
-              className="w-full border border-gray-300 p-2 rounded text-xs bg-gray-50 file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-bold file:bg-[#0F172A] file:text-white hover:file:bg-[#DFAC43] hover:file:text-black cursor-pointer"
+              className="w-full border border-gray-300 p-2 rounded-lg text-xs bg-gray-50 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-[#0F172A] file:text-white hover:file:bg-[#DFAC43] hover:file:text-black cursor-pointer"
               onChange={handleImageChange}
             />
             {imagePreview && (
-              <div className="mt-2 w-20 h-24 rounded border overflow-hidden bg-gray-100">
+              <div className="mt-2 w-20 h-24 rounded-lg border overflow-hidden bg-gray-100">
                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
               </div>
             )}
@@ -358,7 +362,7 @@ const EditDesignModal = ({ item, closeModal, categories }) => {
           <button 
             disabled={isPending} 
             type="submit" 
-            className="w-full bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] p-2.5 rounded font-bold text-sm transition mt-6"
+            className="w-full bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] p-2.5 rounded-lg font-bold text-sm transition mt-6 cursor-pointer"
           >
             {isPending ? 'Updating...' : 'Save Changes'}
           </button>

@@ -146,87 +146,90 @@ const AdminExpenses = () => {
     <div className="space-y-6 pb-12 font-sans">
       
       {/* 1. TOP HEADER & METRIC TILES */}
-      <div className="bg-[#0F172A] text-white rounded p-6 md:p-8 border border-gray-800 shadow-xl relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+      <div className="bg-[#0F172A] text-white rounded-xl p-4 sm:p-6 md:p-8 border border-gray-800 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5 sm:gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-[#DFAC43]"></span>
+              <span className="w-2 h-2 rounded-full bg-[#DFAC43] animate-pulse"></span>
               <span className="text-xs text-gray-400 font-medium">{shopName} Supply & Expense Control</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight">
               Shop Expenses & Material Vendors
             </h1>
-            <p className="text-xs md:text-sm text-gray-400 mt-1 max-w-xl font-medium">
+            <p className="text-xs md:text-sm text-gray-400 mt-1 max-w-xl font-medium leading-relaxed">
               Track Bukram, Kaj, Button & Thread shops, maintain itemized vendor ledgers, and manage operational utility expenses.
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2.5 w-full sm:w-auto">
+          <div className="grid grid-cols-1 min-[450px]:grid-cols-2 lg:flex lg:flex-wrap gap-2 w-full xl:w-auto shrink-0">
             <button
               onClick={() => setIsAddSupplierOpen(true)}
-              className="bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-4 py-2.5 rounded text-xs transition shadow-lg flex items-center gap-1.5"
+              className="bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-3.5 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
             >
-              <FiPlus className="text-base" /> Add Material Vendor
+              <FiPlus className="text-base shrink-0" /> 
+              <span>Add Material Vendor</span>
             </button>
             <button
               onClick={() => setIsDirectExpenseOpen(true)}
-              className="bg-[#1E293B] hover:bg-gray-800 text-white font-bold px-4 py-2.5 rounded text-xs transition border border-gray-700 flex items-center gap-1.5 cursor-pointer"
+              className="bg-[#1E293B] hover:bg-gray-800 text-white font-bold px-3.5 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm transition border border-gray-700 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
-              <FaMoneyBillWave className="text-sm text-[#DFAC43]" /> Log Shop Expense
+              <FaMoneyBillWave className="text-sm text-[#DFAC43] shrink-0" /> 
+              <span>Log Shop Expense</span>
             </button>
           </div>
         </div>
 
         {/* 4 HIGHLIGHT METRIC CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-6 pt-6 border-t border-gray-800">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-gray-800">
           
-          <div className="bg-[#1E293B]/60 p-3.5 rounded border border-gray-800">
-            <span className="text-[10px] text-gray-400 uppercase font-black block">Total Material Purchases</span>
-            <p className="text-xl font-black text-white mt-1">Rs {(supplierSummary.totalPurchasesAll || 0).toLocaleString()}</p>
-            <span className="text-[10px] text-gray-400">{suppliers.length} Registered Vendors</span>
+          <div className="bg-[#1E293B]/60 p-3 sm:p-3.5 rounded-xl border border-gray-800">
+            <span className="text-[10px] text-gray-400 uppercase font-black block truncate">Total Purchases</span>
+            <p className="text-lg sm:text-xl font-black text-white mt-1">Rs {(supplierSummary.totalPurchasesAll || 0).toLocaleString()}</p>
+            <span className="text-[10px] text-gray-400 block truncate">{suppliers.length} Registered Vendors</span>
           </div>
 
-          <div className="bg-[#1E293B]/60 p-3.5 rounded border border-gray-800">
-            <span className="text-[10px] text-gray-400 uppercase font-black block">Paid to Material Shops</span>
-            <p className="text-xl font-black text-green-400 mt-1">Rs {(supplierSummary.totalPaidAll || 0).toLocaleString()}</p>
-            <span className="text-[10px] text-gray-400">Settled Purchases</span>
+          <div className="bg-[#1E293B]/60 p-3 sm:p-3.5 rounded-xl border border-gray-800">
+            <span className="text-[10px] text-gray-400 uppercase font-black block truncate">Paid to Shops</span>
+            <p className="text-lg sm:text-xl font-black text-green-400 mt-1">Rs {(supplierSummary.totalPaidAll || 0).toLocaleString()}</p>
+            <span className="text-[10px] text-gray-400 block truncate">Settled Purchases</span>
           </div>
 
           {/* CRITICAL METRIC: Abhi Denay Hain (Material Walon Ko) */}
-          <div className="bg-amber-950/40 p-3.5 rounded border border-[#DFAC43]/40">
-            <span className="text-[10px] text-amber-300 uppercase font-black block">Remaining Payment </span>
-            <p className="text-xl font-black text-[#DFAC43] mt-1">
+          <div className="bg-amber-950/40 p-3 sm:p-3.5 rounded-xl border border-[#DFAC43]/40">
+            <span className="text-[10px] text-amber-300 uppercase font-black block truncate">Remaining Dues</span>
+            <p className="text-lg sm:text-xl font-black text-[#DFAC43] mt-1">
               Rs {(supplierSummary.totalBalancePayableAll || 0).toLocaleString()}
             </p>
-            <span className="text-[10px] text-amber-200/70 font-semibold">Vendor Outstanding Dues</span>
+            <span className="text-[10px] text-amber-200/70 font-semibold block truncate">Vendor Outstanding</span>
           </div>
 
-          <div className="bg-[#1E293B]/60 p-3.5 rounded border border-gray-800">
-            <span className="text-[10px] text-gray-400 uppercase font-black block">Direct Shop Expenses</span>
-            <p className="text-xl font-black text-gray-200 mt-1">Rs {(expenseData.totalExpenseAmount || 0).toLocaleString()}</p>
-            <span className="text-[10px] text-gray-400">Rent, Bills, Tea & Misc</span>
+          <div className="bg-[#1E293B]/60 p-3 sm:p-3.5 rounded-xl border border-gray-800">
+            <span className="text-[10px] text-gray-400 uppercase font-black block truncate">Direct Expenses</span>
+            <p className="text-lg sm:text-xl font-black text-gray-200 mt-1">Rs {(expenseData.totalExpenseAmount || 0).toLocaleString()}</p>
+            <span className="text-[10px] text-gray-400 block truncate">Rent, Bills & Misc</span>
           </div>
 
         </div>
       </div>
 
       {/* 2. TAB CONTROLS & SEARCH */}
-      <div className="bg-white rounded border border-gray-200 shadow-sm p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3.5 sm:p-4 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 sm:gap-4">
         
-        {/* Navigation Tabs */}
-        <div className="flex space-x-2 w-full md:w-auto overflow-x-auto pb-1">
+        {/* Navigation Tabs (Equal-width Grid on Mobile / Flex on Desktop) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full lg:w-auto">
           <button
             onClick={() => {
               setActiveTab('suppliers');
               setCurrentPage(1);
             }}
-            className={`px-4 py-2 rounded text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            className={`py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 text-center whitespace-nowrap cursor-pointer ${
               activeTab === 'suppliers'
-                ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm ring-1 ring-[#DFAC43]/40'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <FiShoppingBag /> Material Vendors & Shops ({suppliers.length})
+            <FiShoppingBag className="text-sm shrink-0" /> 
+            <span>Material Vendors ({suppliers.length})</span>
           </button>
           
           <button
@@ -234,23 +237,24 @@ const AdminExpenses = () => {
               setActiveTab('direct');
               setCurrentPage(1);
             }}
-            className={`px-4 py-2 rounded text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+            className={`py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 text-center whitespace-nowrap cursor-pointer ${
               activeTab === 'direct'
-                ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm ring-1 ring-[#DFAC43]/40'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <FiTool /> Operational Expenses ({expenses.length})
+            <FiTool className="text-sm shrink-0" /> 
+            <span>Shop Expenses ({expenses.length})</span>
           </button>
         </div>
 
         {/* Search Bar */}
-        <div className="relative w-full md:w-72">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="relative w-full lg:w-72">
+          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
           <input 
             type="text" 
             placeholder="Search vendor, item or category..." 
-            className="w-full pl-9 pr-4 py-2 border border-gray-200 focus:border-black rounded outline-none font-medium text-xs transition"
+            className="w-full pl-9 pr-4 py-2 border border-gray-200 focus:border-[#DFAC43] rounded-lg outline-none font-medium text-xs sm:text-sm transition shadow-2xs"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -264,21 +268,22 @@ const AdminExpenses = () => {
       
       {/* TAB 1: MATERIAL SHOPS / SUPPLIERS */}
       {activeTab === 'suppliers' && (
-        <div className="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-3.5 sm:p-5 space-y-4">
           {filteredSuppliers.length === 0 ? (
             <div className="text-center py-16 text-gray-400 text-xs font-bold space-y-3">
               <p>No material vendors registered yet.</p>
               <button
                 onClick={() => setIsAddSupplierOpen(true)}
-                className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-bold px-4 py-2 rounded text-xs transition"
+                className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-bold px-4 py-2.5 rounded-lg text-xs transition cursor-pointer"
               >
                 Register First Vendor (Bukram, Kaj, Thread)
               </button>
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1050px] text-left border-collapse text-xs">
+              {/* 1. DESKTOP VIEW (TABLE) */}
+              <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-xl">
+                <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider whitespace-nowrap">
                       <th className="p-4 rounded-tl min-w-[200px]">Shop / Vendor Name</th>
@@ -290,11 +295,11 @@ const AdminExpenses = () => {
                       <th className="p-4 rounded-tr text-right min-w-[250px]">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 font-medium">
                     {filteredSuppliers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((supplier) => {
                       const payable = Number(supplier.balancePayable) || 0;
                       return (
-                        <tr key={supplier._id} className="hover:bg-gray-50/80 transition font-medium">
+                        <tr key={supplier._id} className="hover:bg-gray-50/80 transition">
                           
                           {/* Shop Name & Address */}
                           <td className="p-4">
@@ -320,24 +325,24 @@ const AdminExpenses = () => {
                           </td>
 
                           {/* Total Purchases */}
-                          <td className="p-4 text-right font-bold text-gray-800 whitespace-nowrap">
+                          <td className="p-4 text-right font-bold text-gray-800 whitespace-nowrap font-sans">
                             Rs {(supplier.totalPurchases || 0).toLocaleString()}
                           </td>
 
                           {/* Total Paid */}
-                          <td className="p-4 text-right font-bold text-green-700 whitespace-nowrap">
+                          <td className="p-4 text-right font-bold text-green-700 whitespace-nowrap font-sans">
                             Rs {(supplier.totalPaid || 0).toLocaleString()}
                           </td>
 
                           {/* Total Dues (Payable) */}
                           <td className="p-4 text-right whitespace-nowrap">
                             {payable > 0 ? (
-                              <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-[#DFAC43]/40 text-amber-950 px-2.5 py-1 rounded text-xs font-black whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1.5 bg-amber-50 border border-[#DFAC43]/40 text-amber-950 px-2.5 py-1 rounded-md text-xs font-black whitespace-nowrap font-sans">
                                 <FiAlertTriangle className="text-xs text-[#DFAC43] shrink-0" />
                                 Rs {payable.toLocaleString()}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-600 px-2.5 py-1 rounded text-xs font-bold whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-xs font-bold whitespace-nowrap">
                                 <FiCheckCircle className="text-xs text-green-600 shrink-0" /> Settled (Rs 0)
                               </span>
                             )}
@@ -350,26 +355,26 @@ const AdminExpenses = () => {
                               {/* + Purchase Goods Button */}
                               <button
                                 onClick={() => openPurchaseModal(supplier)}
-                                className="bg-[#DFAC43] hover:bg-black hover:text-[#DFAC43] text-[#0F172A] font-black px-2.5 py-1.5 rounded text-xs transition shadow-sm flex items-center gap-1 shrink-0 cursor-pointer"
+                                className="bg-[#DFAC43] hover:bg-black hover:text-[#DFAC43] text-[#0F172A] font-black px-2.5 py-1.5 rounded-lg text-xs transition shadow-2xs flex items-center gap-1 shrink-0 cursor-pointer"
                                 title="Purchase Material Entry"
                               >
-                                <FiPlus className="shrink-0" /> Purchase Goods
+                                <FiPlus className="shrink-0" /> <span>Purchase</span>
                               </button>
 
                               {/* Account Book Button */}
                               <button
                                 onClick={() => openLedgerModal(supplier)}
-                                className="bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] font-bold px-2.5 py-1.5 rounded text-xs transition flex items-center gap-1 border border-gray-700 shrink-0 cursor-pointer"
+                                className="bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] font-bold px-2.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1 border border-gray-700 shrink-0 cursor-pointer shadow-2xs"
                                 title="View Vendor Statement & Pay"
                               >
-                                <FiBook className="shrink-0" /> Account Book
+                                <FiBook className="shrink-0" /> <span>Khata</span>
                               </button>
 
                               {/* Delete */}
                               <button
                                 onClick={() => handleDeleteSupplier(supplier._id)}
                                 disabled={deletingSupplier}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded transition text-sm shrink-0 cursor-pointer"
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition text-sm shrink-0 cursor-pointer border border-transparent hover:border-red-200"
                                 title="Delete Vendor"
                               >
                                 <FiTrash2 />
@@ -382,6 +387,90 @@ const AdminExpenses = () => {
                     })}
                   </tbody>
                 </table>
+              </div>
+
+              {/* 2. MOBILE VIEW (TABLE-TO-CARD PATTERN) */}
+              <div className="block md:hidden space-y-3">
+                {filteredSuppliers.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((supplier) => {
+                  const payable = Number(supplier.balancePayable) || 0;
+                  return (
+                    <div 
+                      key={supplier._id} 
+                      className="bg-white rounded-xl border border-gray-200 shadow-2xs p-3.5 space-y-3 transition hover:border-gray-300"
+                    >
+                      {/* Header: Shop Name & Category Badge */}
+                      <div className="flex items-start justify-between gap-2 border-b border-gray-100 pb-2.5">
+                        <div className="min-w-0">
+                          <h4 className="font-black text-gray-900 text-sm truncate">{supplier.shopName}</h4>
+                          <p className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5 truncate">
+                            <FiMapPin className="text-gray-400 shrink-0 text-xs" /> {supplier.address || 'Local Market'}
+                          </p>
+                        </div>
+                        <span className="bg-slate-100 text-gray-800 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase border border-gray-200 shrink-0">
+                          {supplier.category}
+                        </span>
+                      </div>
+
+                      {/* Contact Person & Phone */}
+                      <div className="flex items-center justify-between gap-2 text-xs">
+                        <div>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Malik / Contact</span>
+                          <span className="font-bold text-gray-800">{supplier.name}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Phone</span>
+                          <span className="font-semibold text-gray-700 font-mono">{formatPhone(supplier.phone)}</span>
+                        </div>
+                      </div>
+
+                      {/* Financials Grid */}
+                      <div className="grid grid-cols-3 gap-1 text-center bg-gray-50/80 p-2 rounded-lg border border-gray-150 text-xs">
+                        <div>
+                          <span className="text-[9px] font-bold text-gray-400 uppercase block">Purchased</span>
+                          <span className="font-bold text-gray-800 text-[11px] font-sans">Rs {(supplier.totalPurchases || 0).toLocaleString()}</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] font-bold text-gray-400 uppercase block">Paid</span>
+                          <span className="font-bold text-green-700 text-[11px] font-sans">Rs {(supplier.totalPaid || 0).toLocaleString()}</span>
+                        </div>
+                        <div>
+                          <span className="text-[9px] font-bold text-gray-400 uppercase block">Dues</span>
+                          {payable > 0 ? (
+                            <span className="font-black text-amber-950 text-[11px] font-sans">Rs {payable.toLocaleString()}</span>
+                          ) : (
+                            <span className="font-bold text-green-700 text-[11px]">Rs 0</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-1.5 pt-2 border-t border-gray-100">
+                        <button
+                          onClick={() => openPurchaseModal(supplier)}
+                          className="flex-1 py-2 bg-[#DFAC43] hover:bg-black hover:text-[#DFAC43] text-[#0F172A] font-black rounded-lg text-xs transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <FiPlus className="shrink-0" /> <span>Purchase</span>
+                        </button>
+
+                        <button
+                          onClick={() => openLedgerModal(supplier)}
+                          className="flex-1 py-2 bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] font-bold rounded-lg text-xs transition flex items-center justify-center gap-1 border border-gray-700 cursor-pointer shadow-2xs"
+                        >
+                          <FiBook className="shrink-0" /> <span>Khata Book</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDeleteSupplier(supplier._id)}
+                          disabled={deletingSupplier}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition text-xs border border-red-100 cursor-pointer shrink-0"
+                          title="Delete Vendor"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               <Pagination
@@ -397,21 +486,22 @@ const AdminExpenses = () => {
 
       {/* TAB 2: DIRECT OPERATIONAL SHOP EXPENSES */}
       {activeTab === 'direct' && (
-        <div className="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-3.5 sm:p-5 space-y-4">
           {filteredExpenses.length === 0 ? (
             <div className="text-center py-16 text-gray-400 text-xs font-bold space-y-3">
               <p>No operational expenses recorded.</p>
               <button
                 onClick={() => setIsDirectExpenseOpen(true)}
-                className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-bold px-4 py-2 rounded text-xs transition"
+                className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-bold px-4 py-2.5 rounded-lg text-xs transition cursor-pointer"
               >
                 + Log Rent, Utility or Maintenance Expense
               </button>
             </div>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] text-left border-collapse text-xs">
+              {/* 1. DESKTOP VIEW (TABLE) */}
+              <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-xl">
+                <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider whitespace-nowrap">
                       <th className="p-4 rounded-tl min-w-[200px]">Expense Detail</th>
@@ -423,9 +513,9 @@ const AdminExpenses = () => {
                       <th className="p-4 rounded-tr text-right min-w-[80px]">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-gray-100 font-medium">
                     {filteredExpenses.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((exp) => (
-                      <tr key={exp._id} className="hover:bg-gray-50/80 transition font-medium">
+                      <tr key={exp._id} className="hover:bg-gray-50/80 transition">
                         <td className="p-4">
                           <p className="font-black text-gray-900 text-sm">{exp.title}</p>
                           {exp.notes && <p className="text-[11px] text-gray-500 mt-0.5">{exp.notes}</p>}
@@ -451,7 +541,7 @@ const AdminExpenses = () => {
                           <button
                             onClick={() => handleDeleteExpense(exp._id)}
                             disabled={deletingExpense}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded transition text-sm cursor-pointer"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition text-sm cursor-pointer"
                             title="Delete Expense"
                           >
                             <FiTrash2 />
@@ -461,6 +551,46 @@ const AdminExpenses = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* 2. MOBILE VIEW (TABLE-TO-CARD PATTERN) */}
+              <div className="block md:hidden space-y-3">
+                {filteredExpenses.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((exp) => (
+                  <div 
+                    key={exp._id} 
+                    className="bg-white rounded-xl border border-gray-200 shadow-2xs p-3.5 space-y-2.5 transition hover:border-gray-300"
+                  >
+                    <div className="flex items-start justify-between gap-2 border-b border-gray-100 pb-2">
+                      <div>
+                        <h4 className="font-black text-gray-900 text-sm">{exp.title}</h4>
+                        <span className="text-[11px] text-gray-500 font-bold block mt-0.5">{new Date(exp.date).toLocaleDateString()}</span>
+                      </div>
+                      <span className="bg-slate-100 text-gray-800 px-2 py-0.5 rounded-md text-[10px] font-bold border border-gray-200 shrink-0">
+                        {exp.category}
+                      </span>
+                    </div>
+
+                    {exp.notes && <p className="text-xs text-gray-600 bg-gray-50 p-2 rounded-lg border border-gray-150">{exp.notes}</p>}
+
+                    <div className="flex items-center justify-between gap-2 pt-1 text-xs">
+                      <div>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase block">Paid To / Method</span>
+                        <span className="font-bold text-gray-800">{exp.paidTo || '-'} ({exp.paymentMethod || 'Cash'})</span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="font-black text-sm text-gray-900 font-sans">Rs {(exp.amount || 0).toLocaleString()}</span>
+                        <button
+                          onClick={() => handleDeleteExpense(exp._id)}
+                          disabled={deletingExpense}
+                          className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition text-xs border border-red-100 cursor-pointer"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
 
               <Pagination
@@ -1409,58 +1539,113 @@ const SupplierLedgerModal = ({ supplier, closeModal }) => {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[550px] text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-gray-100 text-gray-700 uppercase text-[10px] font-black border-b">
-                    <th className="p-2.5">Date</th>
-                    <th className="p-2.5">Type & Details</th>
-                    <th className="p-2.5 text-right">Bill (+)</th>
-                    <th className="p-2.5 text-right">Paid (-)</th>
-                    <th className="p-2.5 text-right">Baqi Balance</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredEntries.slice((ledgerPage - 1) * LEDGER_PAGE_SIZE, ledgerPage * LEDGER_PAGE_SIZE).map((entry) => {
-                    const isPurchase = entry.type === 'purchase';
-                    const isPaid = entry.paymentStatus === 'Paid';
-                    return (
-                      <tr key={entry._id} className="hover:bg-gray-50/80 font-medium">
-                        <td className="p-2.5 text-gray-600 font-mono text-[11px] whitespace-nowrap">
-                          {new Date(entry.date).toLocaleDateString()}
-                        </td>
-                        <td className="p-2.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${
-                              isPurchase ? 'bg-amber-100 text-amber-900' : 'bg-green-100 text-green-900'
+            <>
+              {/* Desktop Table View */}
+              <div className="hidden sm:block overflow-x-auto border border-gray-200 rounded-lg">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-700 uppercase text-[10px] font-black border-b">
+                      <th className="p-2.5">Date</th>
+                      <th className="p-2.5">Type & Details</th>
+                      <th className="p-2.5 text-right">Bill (+)</th>
+                      <th className="p-2.5 text-right">Paid (-)</th>
+                      <th className="p-2.5 text-right">Baqi Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredEntries.slice((ledgerPage - 1) * LEDGER_PAGE_SIZE, ledgerPage * LEDGER_PAGE_SIZE).map((entry) => {
+                      const isPurchase = entry.type === 'purchase';
+                      const isPaid = entry.paymentStatus === 'Paid';
+                      return (
+                        <tr key={entry._id} className="hover:bg-gray-50/80 font-medium">
+                          <td className="p-2.5 text-gray-600 font-mono text-[11px] whitespace-nowrap">
+                            {new Date(entry.date).toLocaleDateString()}
+                          </td>
+                          <td className="p-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${
+                                isPurchase ? 'bg-amber-100 text-amber-900' : 'bg-green-100 text-green-900'
+                              }`}>
+                                {isPurchase ? 'Purchase' : 'Payment'}
+                              </span>
+                              <span className="font-bold text-gray-900">
+                                {isPurchase ? entry.itemDetails : `Cash Settlement (${entry.paymentMethod || 'Cash'})`}
+                              </span>
+                            </div>
+                            {entry.notes && <span className="block text-[10px] text-gray-400 font-normal pl-1 mt-0.5">{entry.notes}</span>}
+                          </td>
+                          <td className="p-2.5 text-right font-bold text-gray-800 font-sans whitespace-nowrap">
+                            {isPurchase ? `Rs ${entry.amount.toLocaleString()}` : '-'}
+                          </td>
+                          <td className="p-2.5 text-right font-bold text-green-700 font-sans whitespace-nowrap">
+                            {!isPurchase ? `Rs ${entry.amount.toLocaleString()}` : (isPaid ? `Rs ${entry.amount.toLocaleString()}` : '-')}
+                          </td>
+                          <td className="p-2.5 text-right font-black font-sans text-xs whitespace-nowrap">
+                            <span className={`px-2 py-0.5 rounded ${
+                              entry.runningBalance > 0 ? 'bg-amber-50 text-[#DFAC43] border border-[#DFAC43]/30' : 'bg-green-50 text-green-700'
                             }`}>
-                              {isPurchase ? 'Purchase' : 'Payment'}
+                              Rs {entry.runningBalance.toLocaleString()}
                             </span>
-                            <span className="font-bold text-gray-900">
-                              {isPurchase ? entry.itemDetails : `Cash Settlement (${entry.paymentMethod || 'Cash'})`}
-                            </span>
-                          </div>
-                          {entry.notes && <span className="block text-[10px] text-gray-400 font-normal pl-1 mt-0.5">{entry.notes}</span>}
-                        </td>
-                        <td className="p-2.5 text-right font-bold text-gray-800 font-sans whitespace-nowrap">
-                          {isPurchase ? `Rs ${entry.amount.toLocaleString()}` : '-'}
-                        </td>
-                        <td className="p-2.5 text-right font-bold text-green-700 font-sans whitespace-nowrap">
-                          {!isPurchase ? `Rs ${entry.amount.toLocaleString()}` : (isPaid ? `Rs ${entry.amount.toLocaleString()}` : '-')}
-                        </td>
-                        <td className="p-2.5 text-right font-black font-sans text-xs whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded ${
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Table-to-Card View */}
+              <div className="block sm:hidden space-y-2.5">
+                {filteredEntries.slice((ledgerPage - 1) * LEDGER_PAGE_SIZE, ledgerPage * LEDGER_PAGE_SIZE).map((entry) => {
+                  const isPurchase = entry.type === 'purchase';
+                  const isPaid = entry.paymentStatus === 'Paid';
+                  return (
+                    <div key={entry._id} className="bg-white rounded-lg border border-gray-200 p-3 space-y-2 shadow-2xs">
+                      <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase shrink-0 ${
+                            isPurchase ? 'bg-amber-100 text-amber-900' : 'bg-green-100 text-green-900'
+                          }`}>
+                            {isPurchase ? 'Purchase' : 'Payment'}
+                          </span>
+                          <span className="font-bold text-gray-900 text-xs truncate">
+                            {isPurchase ? entry.itemDetails : `Settlement (${entry.paymentMethod || 'Cash'})`}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-gray-500 font-mono shrink-0">
+                          {new Date(entry.date).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      {entry.notes && (
+                        <p className="text-[10px] text-gray-500 bg-gray-50 p-1.5 rounded border border-gray-150">
+                          {entry.notes}
+                        </p>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+                        <div>
+                          <span className="text-[9px] text-gray-400 font-bold uppercase block">
+                            {isPurchase ? 'Bill Amount' : 'Paid Amount'}
+                          </span>
+                          <span className={`font-black font-sans ${isPurchase ? 'text-gray-900' : 'text-green-700'}`}>
+                            Rs {entry.amount.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[9px] text-gray-400 font-bold uppercase block">Baqi Balance</span>
+                          <span className={`inline-block px-1.5 py-0.5 rounded font-black font-sans text-xs ${
                             entry.runningBalance > 0 ? 'bg-amber-50 text-[#DFAC43] border border-[#DFAC43]/30' : 'bg-green-50 text-green-700'
                           }`}>
                             Rs {entry.runningBalance.toLocaleString()}
                           </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
 
           {filteredEntries.length > 0 && (

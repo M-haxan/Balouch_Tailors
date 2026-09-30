@@ -119,26 +119,26 @@ const AdminWorkers = () => {
     <div className="bg-white shadow-sm p-6 relative min-h-[80vh]">
       
       {/* HEADER & SEARCH */}
-      <div className="flex flex-col md:flex-row justify-between items-center border-b pb-4 mb-6 gap-4">
-        <div>
-          <h2 className="text-2xl font-black text-gray-900">Manage Karigar (Workers)</h2>
-          <p className="text-sm text-gray-500 mt-1">Add, update, and manage tailor wages, specialization and advance logs.</p>
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center border-b pb-4 mb-6 gap-4">
+        <div className="w-full xl:w-auto">
+          <h2 className="text-xl sm:text-2xl font-black text-gray-900">Manage Karigar (Workers)</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">Add, update, and manage tailor wages, specialization and advance logs.</p>
         </div>
         
-        <div className="flex w-full md:w-auto gap-3">
-          <div className="relative w-full md:w-64">
+        <div className="flex flex-col sm:flex-row w-full xl:w-auto gap-2.5">
+          <div className="relative w-full sm:w-64">
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
               placeholder="Search by phone, name, skill..." 
-              className="w-full pl-10 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded-lg outline-none transition text-sm"
+              className="w-full pl-10 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded-lg outline-none transition text-xs sm:text-sm"
               value={searchTerm}
               onChange={handleSearchChange}
             />
             {searchTerm && (
               <button 
                 onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full cursor-pointer"
                 title="Clear search"
               >
                 <FiX className="text-xs" />
@@ -147,14 +147,14 @@ const AdminWorkers = () => {
           </div>
           <button 
             onClick={() => openFormModal()}
-            className="bg-[#DFAC43] text-[#0F172A] hover:bg-[#0F172A] hover:text-[#DFAC43] px-4 py-2 text-sm font-black rounded transition shadow-sm flex items-center gap-2 whitespace-nowrap"
+            className="bg-[#DFAC43] text-[#0F172A] hover:bg-[#0F172A] hover:text-[#DFAC43] px-4 py-2 text-xs sm:text-sm font-black rounded transition shadow-sm flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
           >
             <FiPlus className="text-lg" /> Add Worker
           </button>
         </div>
       </div>
 
-      {/* WORKERS TABLE */}
+      {/* WORKERS LIST (TABLE ON MD+, CARDS ON MOBILE) */}
       {isLoading ? (
         <div className="text-center py-20 text-gray-500 font-medium">Loading workers...</div>
       ) : filteredWorkers.length === 0 ? (
@@ -162,150 +162,180 @@ const AdminWorkers = () => {
           <p className="text-gray-500 mb-2">No workers found.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded border border-gray-200 shadow-2xs bg-white">
-          <table className="w-full min-w-[1150px] text-left border-collapse">
-            <thead>
-              <tr className="bg-[#0F172A] text-[#DFAC43] text-xs uppercase tracking-wider whitespace-nowrap">
-                <th className="p-4 min-w-[240px] rounded-tl">Karigar Name</th>
-                <th className="p-4 min-w-[150px]">Phone Number</th>
-                <th className="p-4 min-w-[160px]">Stitching Wage</th>
-                <th className="p-4 min-w-[150px]">Advance Taken</th>
-                <th className="p-4 min-w-[180px]">Specialization</th>
-                <th className="p-4 min-w-[180px]">Address</th>
-                <th className="p-4 min-w-[320px] rounded-tr text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {paginatedWorkers.map((worker) => (
-                <tr key={worker._id} className="hover:bg-gray-50/80 transition text-sm font-medium">
-                  
-                  {/* Karigar Name & Avatar */}
-                  <td className="p-4 font-bold text-gray-900 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      {worker.profileImage?.url ? (
-                        <img
-                          src={worker.profileImage.url} 
-                          alt={worker.name} 
-                          className="w-10 h-10 rounded-full object-cover border border-gray-200 shadow-xs shrink-0" 
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full bg-[#0F172A] text-[#DFAC43] flex items-center justify-center text-sm font-black uppercase shadow-xs shrink-0">
-                          {worker.name ? worker.name[0] : 'W'}
-                        </div>
-                      )}
-                      <div>
-                        <span className="font-bold text-gray-900 block">{worker.name}</span>
-                        {!worker.isActive ? (
-                          <span className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0.5 rounded font-bold inline-block mt-0.5">
-                            Inactive
-                          </span>
+        <div className="space-y-4">
+          
+          {/* 1. DESKTOP & TABLET VIEW (TABLE) */}
+          <div className="hidden md:block overflow-x-auto rounded border border-gray-200 shadow-2xs bg-white">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#0F172A] text-[#DFAC43] text-xs uppercase tracking-wider whitespace-nowrap">
+                  <th className="p-3.5 sm:p-4 rounded-tl">Karigar Name</th>
+                  <th className="p-3.5 sm:p-4">Phone</th>
+                  <th className="p-3.5 sm:p-4">Specialization</th>
+                  <th className="p-3.5 sm:p-4">Advance Taken</th>
+                  <th className="p-3.5 sm:p-4 rounded-tr text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {paginatedWorkers.map((worker) => (
+                  <tr key={worker._id} className="hover:bg-gray-50/80 transition text-sm font-medium">
+                    
+                    {/* Karigar Name & Avatar */}
+                    <td className="p-3.5 sm:p-4 font-bold text-gray-900">
+                      <div className="flex items-center gap-2.5 sm:gap-3">
+                        {worker.profileImage?.url ? (
+                          <img
+                            src={worker.profileImage.url} 
+                            alt={worker.name} 
+                            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border border-gray-200 shadow-xs shrink-0" 
+                          />
                         ) : (
-                          <span className="bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 rounded font-bold inline-block mt-0.5">
-                            Active
-                          </span>
+                          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#0F172A] text-[#DFAC43] flex items-center justify-center text-xs sm:text-sm font-black uppercase shadow-xs shrink-0">
+                            {worker.name ? worker.name[0] : 'W'}
+                          </div>
                         )}
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                            <span className="font-bold text-gray-900 text-sm">{worker.name}</span>
+                            {!worker.isActive ? (
+                              <span className="bg-red-100 text-red-700 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">
+                                Disabled
+                              </span>
+                            ) : (
+                              <span className="bg-green-100 text-green-800 text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">
+                                Active
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </td>
+                    </td>
 
-                  {/* Phone Number */}
-                  <td className="p-4 text-gray-700 whitespace-nowrap">
-                    <div className="flex items-center gap-1.5">
-                      <FiPhone className="text-gray-400 text-xs shrink-0" />
-                      <span className="font-mono font-bold text-gray-800">{formatPhone(worker.phone)}</span>
-                    </div>
-                  </td>
+                    {/* Phone */}
+                    <td className="p-3.5 sm:p-4 text-gray-700 whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <FiPhone className="text-gray-400 text-xs shrink-0" />
+                        <span className="font-mono font-bold text-gray-800 text-xs sm:text-sm">{formatPhone(worker.phone)}</span>
+                      </div>
+                    </td>
 
-                  {/* Stitching Wage */}
-                  <td className="p-4 text-gray-900 font-extrabold whitespace-nowrap">
-                    Rs {worker.perSuitWage} <span className="text-xs text-gray-400 font-medium">/ suit</span>
-                  </td>
-
-                  {/* Advance Taken */}
-                  <td className="p-4 text-red-600 font-extrabold whitespace-nowrap">
-                    Rs {(worker.advanceAmount || 0).toLocaleString()}
-                  </td>
-
-                  {/* Specialization & Permissions */}
-                  <td className="p-4 whitespace-nowrap">
-                    <div>
-                      <span className="bg-slate-100 text-gray-800 text-xs px-2.5 py-1 rounded border border-gray-200 font-bold uppercase tracking-wider block w-fit">
+                    {/* Specialization */}
+                    <td className="p-3.5 sm:p-4 whitespace-nowrap">
+                      <span className="bg-slate-100 text-gray-800 text-xs px-2.5 py-1 rounded border border-gray-200 font-bold uppercase tracking-wider inline-block">
                         {worker.specialization || 'Complete Suit Stitcher'}
                       </span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {worker.canCreateOrder && (
-                          <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black px-1.5 py-0.2 rounded" title="Allowed to Book / Create Orders">
-                            📝 Book Order
-                          </span>
-                        )}
-                        {worker.canDeliverOrder && (
-                          <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-black px-1.5 py-0.2 rounded" title="Allowed to Deliver Orders & Receive Cash">
-                            🚚 Deliver Order
-                          </span>
-                        )}
+                    </td>
+
+                    {/* Advance Taken */}
+                    <td className="p-3.5 sm:p-4 text-red-600 font-black whitespace-nowrap text-sm">
+                      Rs {(worker.advanceAmount || 0).toLocaleString()}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="p-3.5 sm:p-4 text-right whitespace-nowrap">
+                      <div className="flex justify-end gap-1.5 items-center">
+                        {/* View & Edit Profile Button */}
+                        <button 
+                          onClick={() => openProfileModal(worker, false)} 
+                          className="bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] font-bold px-2.5 py-1.5 rounded text-xs transition border border-gray-300 flex items-center gap-1 cursor-pointer shadow-xs"
+                          title="View Full Profile"
+                        >
+                          <FiUser className="text-xs shrink-0" /> Profile
+                        </button>
+
+                        {/* Advance Manage button */}
+                        <button 
+                          onClick={() => openAdvanceModal(worker)} 
+                          className="bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold px-2.5 py-1.5 rounded text-xs transition border border-amber-200 cursor-pointer"
+                          title="Manage Advance Amount"
+                        >
+                          ± Advance
+                        </button>
                       </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 2. MOBILE VIEW (TABLE-TO-CARD PATTERN) */}
+          <div className="block md:hidden space-y-3">
+            {paginatedWorkers.map((worker) => (
+              <div 
+                key={worker._id} 
+                className="bg-white rounded border border-gray-200 shadow-2xs p-4 space-y-3 transition hover:border-gray-300"
+              >
+                {/* Card Header: Avatar, Name & Status */}
+                <div className="flex items-center justify-between gap-3 border-b border-gray-100 pb-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    {worker.profileImage?.url ? (
+                      <img
+                        src={worker.profileImage.url} 
+                        alt={worker.name} 
+                        className="w-11 h-11 rounded-full object-cover border border-gray-200 shadow-xs shrink-0" 
+                      />
+                    ) : (
+                      <div className="w-11 h-11 rounded bg-[#0F172A] text-[#DFAC43] flex items-center justify-center text-sm font-black uppercase shadow-xs shrink-0">
+                        {worker.name ? worker.name[0] : 'W'}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <h4 className="font-black text-gray-900 text-base truncate">{worker.name}</h4>
+                      <p className="text-xs text-gray-500 font-mono flex items-center gap-1 mt-0.5">
+                        <FiPhone className="text-gray-400 text-[10px]" /> {formatPhone(worker.phone)}
+                      </p>
                     </div>
-                  </td>
+                  </div>
 
-                  {/* Address */}
-                  <td className="p-4 text-gray-600 text-xs max-w-xs truncate">
-                    {worker.address || '-'}
-                  </td>
+                  {!worker.isActive ? (
+                    <span className="bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded font-black uppercase shrink-0 border border-red-200">
+                      Disabled
+                    </span>
+                  ) : (
+                    <span className="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded font-black uppercase shrink-0 border border-green-200">
+                      Active
+                    </span>
+                  )}
+                </div>
 
-                  {/* Actions */}
-                  <td className="p-4 text-right whitespace-nowrap">
-                    <div className="flex justify-end gap-1.5 items-center whitespace-nowrap">
-                      {/* View & Edit Profile Button */}
-                      <button 
-                        onClick={() => openProfileModal(worker, false)} 
-                        className="bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] font-bold px-2.5 py-1.5 rounded text-xs transition border border-gray-300 flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
-                        title="View Full Profile"
-                      >
-                        <FiUser className="text-xs shrink-0" /> Profile
-                      </button>
+                {/* Card Info Grid */}
+                <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50/70 p-2.5 rounded border border-gray-150">
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Specialization</span>
+                    <span className="font-bold text-gray-800 text-[11px] block truncate mt-0.5">
+                      {worker.specialization || 'General Stitcher'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Advance Taken</span>
+                    <span className="font-black text-red-600 text-xs block mt-0.5 font-sans">
+                      Rs {(worker.advanceAmount || 0).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
 
-                      {/* Ledger & Salary button */}
-                      <button 
-                        onClick={() => openLedgerModal(worker)} 
-                        className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black px-2.5 py-1.5 rounded text-xs transition border border-[#0F172A] flex items-center gap-1.5 whitespace-nowrap cursor-pointer shadow-xs"
-                        title="Ledger & Salary Manager"
-                      >
-                        <FiBook className="text-xs shrink-0" /> Ledger
-                      </button>
+                {/* Card Action Buttons */}
+                <div className="flex gap-2 pt-1">
+                  <button 
+                    onClick={() => openProfileModal(worker, false)} 
+                    className="flex-1 bg-[#0F172A] hover:bg-gray-800 text-[#DFAC43] font-black py-2 rounded text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <FiUser className="text-xs" /> Profile
+                  </button>
+                  <button 
+                    onClick={() => openAdvanceModal(worker)} 
+                    className="flex-1 bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold py-2 rounded text-xs transition border border-amber-200 flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    ± Advance
+                  </button>
+                </div>
 
-                      {/* Advance Manage button */}
-                      <button 
-                        onClick={() => openAdvanceModal(worker)} 
-                        className="bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold px-2 py-1.5 rounded text-xs transition border border-amber-200 whitespace-nowrap cursor-pointer"
-                        title="Manage Advance Amount"
-                      >
-                        ± Advance
-                      </button>
+              </div>
+            ))}
+          </div>
 
-                      {/* Quick Edit button */}
-                      <button 
-                        onClick={() => openProfileModal(worker, true)} 
-                        className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition text-sm cursor-pointer" 
-                        title="Edit Worker Profile"
-                      >
-                        <FiEdit />
-                      </button>
-
-                      {/* Delete button */}
-                      <button 
-                        onClick={() => handleDelete(worker._id)} 
-                        disabled={isDeleting} 
-                        className="p-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition text-sm cursor-pointer" 
-                        title="Delete Worker"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* PAGINATION */}
           <Pagination 
             currentPage={currentPage}
             totalItems={filteredWorkers.length}
@@ -463,11 +493,11 @@ const WorkerProfileModal = ({ worker: initialWorker, initialEdit = false, closeM
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded shadow-2xl w-full max-w-2xl relative flex flex-col max-h-[92vh] overflow-hidden border border-gray-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded shadow-2xl w-full max-w-2xl relative flex flex-col max-h-[94vh] sm:max-h-[90vh] my-auto overflow-hidden">
         
         {/* MODAL HEADER */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-5 border-b border-gray-800 bg-[#0F172A] text-white gap-3">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3.5 sm:p-5 border-b border-gray-800 bg-[#0F172A] text-white gap-2.5 sm:gap-3 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[#DFAC43] text-[#0F172A] flex items-center justify-center text-lg font-black shrink-0">
               <FiUser />
@@ -476,7 +506,7 @@ const WorkerProfileModal = ({ worker: initialWorker, initialEdit = false, closeM
               <h2 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
                 {worker.name}
               </h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-[11px] sm:text-xs text-gray-400">
                 Karigar Profile & Settings Management
               </p>
             </div>
@@ -528,11 +558,11 @@ const WorkerProfileModal = ({ worker: initialWorker, initialEdit = false, closeM
         </div>
 
         {/* MODAL BODY */}
-        <div className="overflow-y-auto p-5 sm:p-6 flex-1 space-y-6">
+        <div className="overflow-y-auto p-4 sm:p-6 flex-1 space-y-4 sm:space-y-6 overscroll-contain">
           
           {!isEditing ? (
             /* VIEW PROFILE MODE */
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               
               {/* Profile Card Banner */}
               <div className="bg-gradient-to-r from-gray-50 to-slate-50 p-5 rounded border border-gray-200 flex flex-col sm:flex-row items-center sm:items-start gap-5">
@@ -835,7 +865,7 @@ const WorkerProfileModal = ({ worker: initialWorker, initialEdit = false, closeM
 
                 {/* Special Portal Permissions */}
                 <div className="pt-2 border-t border-gray-200 space-y-2">
-                  <p className="text-xs font-black text-gray-900">Extra Worker Portal Access (اختیارات):</p>
+                  <p className="text-xs font-black text-gray-900">Extra Worker Portal Access:</p>
                   
                   <div className="flex items-start gap-2">
                     <input 
@@ -847,7 +877,7 @@ const WorkerProfileModal = ({ worker: initialWorker, initialEdit = false, closeM
                       onChange={handleInputChange} 
                     />
                     <label htmlFor="profileCanCreateOrder" className="text-xs text-gray-800 cursor-pointer">
-                      <strong className="block text-gray-900">Allow Order Booking / Creation (نیا آرڈر بک کرنے کی اجازت)</strong>
+                      <strong className="block text-gray-900">Allow Order Booking / Creation </strong>
                       <span className="text-[11px] text-gray-500">Worker can book customer orders directly from their dashboard.</span>
                     </label>
                   </div>
@@ -862,7 +892,7 @@ const WorkerProfileModal = ({ worker: initialWorker, initialEdit = false, closeM
                       onChange={handleInputChange} 
                     />
                     <label htmlFor="profileCanDeliverOrder" className="text-xs text-gray-800 cursor-pointer">
-                      <strong className="block text-gray-900">Allow Order Delivery & Cash Collection (آرڈر ڈیلیوری و کیش کاؤنٹر کی اجازت)</strong>
+                      <strong className="block text-gray-900">Allow Order Delivery & Cash Collection </strong>
                       <span className="text-[11px] text-gray-500">Worker can deliver completed suits, enter received cash, and print Receiving Slips.</span>
                     </label>
                   </div>
@@ -875,7 +905,7 @@ const WorkerProfileModal = ({ worker: initialWorker, initialEdit = false, closeM
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="p-4 sm:p-5 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
+        <div className="p-3.5 sm:p-5 border-t border-gray-100 bg-gray-50 flex justify-between items-center shrink-0">
           {!isEditing ? (
             <>
               <button 

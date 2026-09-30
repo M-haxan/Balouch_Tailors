@@ -104,32 +104,34 @@ const AdminSettings = () => {
   return (
     <div className="space-y-6">
       
-      {/* TOP HEADER & HORIZONTAL TABS ROW */}
-      <div className="bg-white rounded shadow-sm border border-gray-200/90 p-5 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-100">
+      {/* TOP HEADER & RESPONSIVE TABS ROW */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200/90 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 sm:pb-5 border-b border-gray-100">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2.5">
-              <FiSettings className="text-[#DFAC43]" /> System Settings
+            <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
+              <FiSettings className="text-[#DFAC43] shrink-0 text-lg sm:text-2xl" /> System Settings
             </h2>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
+            <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium leading-relaxed">
               Manage garment categories, rates, measurement templates & shop branding preferences.
             </p>
           </div>
         </div>
 
-        {/* Horizontal Navigation Tabs */}
-        <div className="flex items-center gap-2.5 pt-4 overflow-x-auto no-scrollbar">
+        {/* Navigation Tabs (Columns on Small Screens / Grid on Tablet & Desktop) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-4 w-full">
           <button 
             onClick={() => setActiveTab('rates')}
-            className={`flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer ${
+            className={`w-full flex items-center justify-between sm:justify-start gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-all cursor-pointer ${
               activeTab === 'rates' 
-                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md scale-[1.01]' 
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-black border border-gray-200'
             }`}
           >
-            <FaMoneyBillWave className="text-base shrink-0" />
-            <span>Tailoring Rates & Add-ons</span>
-            <span className={`text-[11px] px-2 py-0.5 rounded font-bold ml-1 ${
+            <div className="flex items-center gap-2 min-w-0">
+              <FaMoneyBillWave className="text-base shrink-0" />
+              <span className="truncate">Tailoring Rates & Add-ons</span>
+            </div>
+            <span className={`text-[11px] px-2 py-0.5 rounded font-bold shrink-0 ${
               activeTab === 'rates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-700'
             }`}>
               {tailoringList.length}
@@ -138,15 +140,17 @@ const AdminSettings = () => {
           
           <button 
             onClick={() => setActiveTab('templates')}
-            className={`flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer ${
+            className={`w-full flex items-center justify-between sm:justify-start gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-all cursor-pointer ${
               activeTab === 'templates' 
-                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md scale-[1.01]' 
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-black border border-gray-200'
             }`}
           >
-            <FiSliders className="text-base shrink-0" />
-            <span>Measurement Templates</span>
-            <span className={`text-[11px] px-2 py-0.5 rounded font-bold ml-1 ${
+            <div className="flex items-center gap-2 min-w-0">
+              <FiSliders className="text-base shrink-0" />
+              <span className="truncate">Measurement Templates</span>
+            </div>
+            <span className={`text-[11px] px-2 py-0.5 rounded font-bold shrink-0 ${
               activeTab === 'templates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-700'
             }`}>
               {templates.length}
@@ -155,20 +159,20 @@ const AdminSettings = () => {
           
           <button 
             onClick={() => setActiveTab('general')}
-            className={`flex items-center gap-2.5 px-4 sm:px-5 py-3 rounded text-xs sm:text-sm font-black transition-all whitespace-nowrap cursor-pointer ${
+            className={`w-full flex items-center justify-center sm:justify-start gap-2.5 px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-all cursor-pointer ${
               activeTab === 'general' 
-                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md scale-[1.01]' 
+                ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-black border border-gray-200'
             }`}
           >
             <FiSettings className="text-base shrink-0" />
-            <span>Shop Branding & Info</span>
+            <span className="truncate">Shop Branding & Info</span>
           </button>
         </div>
       </div>
 
       {/* FULL-WIDTH CONTENT CARD */}
-      <div className="bg-white rounded shadow-sm border border-gray-200/90 p-5 sm:p-7 md:p-8 min-w-0">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200/90 p-4 sm:p-6 md:p-8 min-w-0">
         
         {/* ============================================================== */}
         {/* TAB 1: TAILORING RATES & CUSTOMIZATIONS                       */}
@@ -177,10 +181,10 @@ const AdminSettings = () => {
           <div className="space-y-6">
             
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-gray-100 pb-4 sm:pb-5">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2">
-                  <FiScissors className="text-[#DFAC43]" /> Rates & Customization Settings
+                <h3 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
+                  <FiScissors className="text-[#DFAC43] shrink-0 text-base sm:text-xl" /> Rates & Customization Settings
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
                   Garment Categories aur Customization add-on rates ko table mein manage karein.
@@ -190,7 +194,7 @@ const AdminSettings = () => {
               <div className="flex items-center gap-2 shrink-0">
                 <button 
                   onClick={() => openPricingModal(null, rateSection === 'customizations' ? 'customization' : 'service')}
-                  className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-sm whitespace-nowrap"
+                  className="w-full sm:w-auto bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap cursor-pointer"
                 >
                   <FiPlus className="text-base shrink-0" />
                   <span>{rateSection === 'services' ? 'Add Category' : 'Add Customization'}</span>
@@ -199,19 +203,19 @@ const AdminSettings = () => {
             </div>
 
             {/* Sub-Tabs: 1. Garment Categories vs 2. Customizations */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-gray-50 p-2.5 rounded border border-gray-200">
-              <div className="flex flex-wrap sm:flex-nowrap gap-2">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+              <div className="grid grid-cols-2 sm:flex sm:flex-nowrap gap-2 w-full lg:w-auto">
                 <button
                   onClick={() => setRateSection('services')}
-                  className={`px-3.5 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer ${
                     rateSection === 'services'
                       ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                       : 'text-gray-600 hover:bg-gray-200'
                   }`}
                 >
                   <FiLayers className="text-sm shrink-0" />
-                  <span>Garment Categories</span>
-                  <span className={`text-[11px] px-1.5 py-0.2 rounded font-bold shrink-0 ${
+                  <span className="truncate">Categories</span>
+                  <span className={`text-[11px] px-1.5 py-0.5 rounded font-bold shrink-0 ${
                     rateSection === 'services' ? 'bg-[#DFAC43] text-black' : 'bg-gray-200 text-gray-700'
                   }`}>
                     {garmentServices.length}
@@ -220,15 +224,15 @@ const AdminSettings = () => {
 
                 <button
                   onClick={() => setRateSection('customizations')}
-                  className={`px-3.5 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer ${
                     rateSection === 'customizations'
                       ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                       : 'text-gray-600 hover:bg-gray-200'
                   }`}
                 >
                   <FiTag className="text-sm shrink-0" />
-                  <span>Customizations</span>
-                  <span className={`text-[11px] px-1.5 py-0.2 rounded font-bold shrink-0 ${
+                  <span className="truncate">Customizations</span>
+                  <span className={`text-[11px] px-1.5 py-0.5 rounded font-bold shrink-0 ${
                     rateSection === 'customizations' ? 'bg-[#DFAC43] text-black' : 'bg-gray-200 text-gray-700'
                   }`}>
                     {customizations.length}
@@ -244,7 +248,7 @@ const AdminSettings = () => {
                   placeholder="Search rates..."
                   value={pricingSearch}
                   onChange={(e) => setPricingSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 rounded bg-white border border-gray-200 text-xs font-medium outline-none focus:border-[#DFAC43]"
+                  className="w-full pl-8 pr-3 py-2 rounded-lg bg-white border border-gray-200 text-xs font-medium outline-none focus:border-[#DFAC43]"
                 />
               </div>
             </div>
@@ -412,16 +416,16 @@ const AdminSettings = () => {
         {/* ============================================================== */}
         {activeTab === 'templates' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center border-b pb-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-gray-100 pb-4 mb-5">
               <div>
-                <h3 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2">
-                  <FiSliders className="text-[#DFAC43]" /> Measurement Templates
+                <h3 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
+                  <FiSliders className="text-[#DFAC43] shrink-0 text-base sm:text-xl" /> Measurement Templates
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">Manage dynamic input fields for tailoring categories.</p>
+                <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">Manage dynamic input fields for tailoring categories.</p>
               </div>
               <button 
                 onClick={() => openTemplateModal()}
-                className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition flex items-center gap-2 shadow-sm"
+                className="w-full sm:w-auto bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap cursor-pointer shrink-0"
               >
                 <FiPlus className="text-base" /> Add New Template
               </button>
@@ -824,10 +828,10 @@ const ShopGeneralSettings = () => {
     <div className="space-y-6">
       {/* HEADER */}
       <div className="border-b border-gray-100 pb-4">
-        <h3 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2">
-          <FiSettings className="text-[#DFAC43]" /> Shop Branding & Contact Info
+        <h3 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 flex items-center gap-2">
+          <FiSettings className="text-[#DFAC43] shrink-0 text-base sm:text-xl" /> Shop Branding & Contact Info
         </h3>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
+        <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium leading-relaxed">
           These details dynamically appear across your Website Header, Navbar, Preloader, and all printable Invoices, Delivery Slips, and Ledger Statements.
         </p>
       </div>

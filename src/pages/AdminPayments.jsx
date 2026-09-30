@@ -142,8 +142,8 @@ const AdminPayments = () => {
     <div className="space-y-6 pb-12 font-sans">
       
       {/* 1. EXECUTIVE HEADER */}
-      <section className="bg-[#0F172A] text-white rounded p-5 md:p-7 border border-gray-800 shadow-xl relative overflow-hidden">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-5">
+      <section className="bg-[#0F172A] text-white rounded-xl p-4 sm:p-6 md:p-7 border border-gray-800 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-5">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="w-2 h-2 rounded-full bg-[#DFAC43] animate-pulse"></span>
@@ -151,18 +151,19 @@ const AdminPayments = () => {
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-2">
-              <FiCreditCard className="text-[#DFAC43]" /> Order Payments & Invoices Ledger
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-black text-white tracking-tight flex items-start sm:items-center gap-2 sm:gap-2.5 leading-snug sm:leading-tight">
+              <FiCreditCard className="text-[#DFAC43] shrink-0 text-lg sm:text-2xl mt-0.5 sm:mt-0" /> 
+              <span>Order Payments & Invoices Ledger</span>
             </h1>
-            <p className="text-xs md:text-sm text-gray-400 mt-1 max-w-xl font-medium">
+            <p className="text-xs md:text-sm text-gray-400 mt-1 max-w-xl font-medium leading-relaxed">
               Track invoice payments, today's cash collections, partially paid orders, and outstanding customer balances.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="w-full sm:w-auto shrink-0">
             <button
               onClick={() => navigate('/admin/orders/create')}
-              className="bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-4 py-2.5 rounded-xl text-xs transition shadow-md whitespace-nowrap"
+              className="w-full sm:w-auto bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-4 py-2.5 rounded-lg text-xs sm:text-sm transition shadow-md whitespace-nowrap flex items-center justify-center gap-1.5 cursor-pointer"
             >
               + Create New Order
             </button>
@@ -171,70 +172,70 @@ const AdminPayments = () => {
       </section>
 
       {/* 2. SUMMARY KPI CARDS (5 CARDS) */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+      <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
         
         {/* Card 1: Today's Collection */}
-        <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
+        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Today's Cash</span>
-            <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs"><FaMoneyBillWave /></span>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider truncate">Today's Cash</span>
+            <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs shrink-0"><FaMoneyBillWave /></span>
           </div>
-          <p className="text-xl font-black text-[#0F172A] font-sans">Rs {todayCollection.toLocaleString()}</p>
-          <span className="text-[10px] text-green-700 font-bold block">Cash Collected Today</span>
+          <p className="text-lg sm:text-xl font-black text-[#0F172A] font-sans">Rs {todayCollection.toLocaleString()}</p>
+          <span className="text-[10px] text-green-700 font-bold block truncate">Cash Collected Today</span>
         </div>
 
         {/* Card 2: Partially Paid Orders */}
-        <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-amber-300 transition">
+        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-amber-300 transition">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Partially Paid</span>
-            <span className="p-1.5 bg-amber-50 text-amber-900 rounded-lg text-xs"><FiClock /></span>
+            <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider truncate">Partially Paid</span>
+            <span className="p-1.5 bg-amber-50 text-amber-900 rounded-lg text-xs shrink-0"><FiClock /></span>
           </div>
-          <p className="text-xl font-black text-[#DFAC43] font-sans">
+          <p className="text-lg sm:text-xl font-black text-[#DFAC43] font-sans">
             {partialPaidCount} <span className="text-xs text-gray-500 font-bold">orders</span>
           </p>
-          <span className="text-[10px] text-gray-500 font-bold block">Rs {partialPaidBalance.toLocaleString()} remaining</span>
+          <span className="text-[10px] text-gray-500 font-bold block truncate">Rs {partialPaidBalance.toLocaleString()} remaining</span>
         </div>
 
         {/* Card 3: Total Outstanding Balance (Udhar) */}
-        <div className="bg-[#0F172A] text-white p-4 rounded border border-gray-800 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
+        <div className="bg-[#0F172A] text-white p-3.5 sm:p-4 rounded-xl border border-gray-800 shadow-xs space-y-1 hover:border-[#DFAC43] transition col-span-2 sm:col-span-1">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider">Outstanding Udhar</span>
-            <span className="p-1.5 bg-[#DFAC43]/10 text-[#DFAC43] rounded-lg text-xs"><FiAlertCircle /></span>
+            <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider truncate">Outstanding Udhar</span>
+            <span className="p-1.5 bg-[#DFAC43]/10 text-[#DFAC43] rounded-lg text-xs shrink-0"><FiAlertCircle /></span>
           </div>
-          <p className="text-xl font-black text-[#DFAC43] font-sans">Rs {totalOutstandingBalance.toLocaleString()}</p>
-          <span className="text-[10px] text-gray-400 font-medium block">Total Receivables</span>
+          <p className="text-lg sm:text-xl font-black text-[#DFAC43] font-sans">Rs {totalOutstandingBalance.toLocaleString()}</p>
+          <span className="text-[10px] text-gray-400 font-medium block truncate">Total Receivables</span>
         </div>
 
         {/* Card 4: Fully Paid Orders */}
-        <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-green-300 transition">
+        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-green-300 transition">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Paid Orders</span>
-            <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs"><FiCheckCircle /></span>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider truncate">Paid Orders</span>
+            <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs shrink-0"><FiCheckCircle /></span>
           </div>
-          <p className="text-xl font-black text-green-700 font-sans">{fullyPaidCount}</p>
-          <span className="text-[10px] text-gray-500 font-bold block">Zero Balance Due</span>
+          <p className="text-lg sm:text-xl font-black text-green-700 font-sans">{fullyPaidCount}</p>
+          <span className="text-[10px] text-gray-500 font-bold block truncate">Zero Balance Due</span>
         </div>
 
         {/* Card 5: Unpaid Orders (Zero Advance) */}
-        <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-red-300 transition">
+        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-red-300 transition">
           <div className="flex justify-between items-start">
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Unpaid Orders</span>
-            <span className="p-1.5 bg-red-50 text-red-700 rounded-lg text-xs"><FiAlertCircle /></span>
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider truncate">Unpaid Orders</span>
+            <span className="p-1.5 bg-red-50 text-red-700 rounded-lg text-xs shrink-0"><FiAlertCircle /></span>
           </div>
-          <p className="text-xl font-black text-red-600 font-sans">{unpaidCount}</p>
-          <span className="text-[10px] text-gray-500 font-bold block">Full Payment Pending</span>
+          <p className="text-lg sm:text-xl font-black text-red-600 font-sans">{unpaidCount}</p>
+          <span className="text-[10px] text-gray-500 font-bold block truncate">Full Payment Pending</span>
         </div>
 
       </section>
 
       {/* 3. SEARCH, FILTERS & TABLE */}
-      <section className="bg-white rounded border border-gray-200 shadow-sm overflow-hidden p-5 sm:p-6 space-y-4">
+      <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-3.5 sm:p-5 md:p-6 space-y-4">
         
         {/* Search & Filter Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 pb-3 border-b border-gray-100">
+        <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 pb-3 border-b border-gray-100">
           
           {/* Search Box */}
-          <div className="relative flex-1 max-w-md">
+          <div className="relative flex-1 w-full lg:max-w-md">
             <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
             <input
               type="text"
@@ -244,18 +245,18 @@ const AdminPayments = () => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 focus:border-[#DFAC43] rounded text-xs font-medium outline-none transition"
+              className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 focus:border-[#DFAC43] rounded-lg text-xs font-medium outline-none transition"
             />
           </div>
 
-          {/* Filter Pills */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-gray-50 p-1 rounded border border-gray-200 text-xs font-bold">
+          {/* Filter Pills (Equal-width Grid on Mobile / Flex on Desktop) */}
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 bg-gray-50 p-1 rounded-lg border border-gray-200 text-xs font-bold w-full lg:w-auto">
             <button
               onClick={() => {
                 setStatusFilter('all');
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded transition ${
+              className={`py-1.5 px-3 rounded-md transition text-center whitespace-nowrap cursor-pointer ${
                 statusFilter === 'all' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                   : 'text-gray-600 hover:bg-gray-200'
@@ -268,7 +269,7 @@ const AdminPayments = () => {
                 setStatusFilter('partial');
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded transition ${
+              className={`py-1.5 px-3 rounded-md transition text-center whitespace-nowrap cursor-pointer ${
                 statusFilter === 'partial' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                   : 'text-gray-600 hover:bg-gray-200'
@@ -281,7 +282,7 @@ const AdminPayments = () => {
                 setStatusFilter('paid');
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded transition ${
+              className={`py-1.5 px-3 rounded-md transition text-center whitespace-nowrap cursor-pointer ${
                 statusFilter === 'paid' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                   : 'text-gray-600 hover:bg-gray-200'
@@ -294,7 +295,7 @@ const AdminPayments = () => {
                 setStatusFilter('unpaid');
                 setCurrentPage(1);
               }}
-              className={`px-3 py-1.5 rounded transition ${
+              className={`py-1.5 px-3 rounded-md transition text-center whitespace-nowrap cursor-pointer ${
                 statusFilter === 'unpaid' 
                   ? 'bg-[#0F172A] text-[#DFAC43] font-black shadow-xs' 
                   : 'text-gray-600 hover:bg-gray-200'
@@ -306,133 +307,240 @@ const AdminPayments = () => {
 
         </div>
 
-        {/* Invoices Table */}
+        {/* Invoices List Content */}
         {filteredOrders.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded p-6">
+          <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-xl p-6">
             <FiCreditCard className="text-3xl text-gray-300 mx-auto mb-2" />
             <p className="text-gray-600 text-xs font-bold">No orders found matching the filter.</p>
           </div>
         ) : (
-          <div className="border border-gray-200 rounded overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead className="bg-gray-100 text-gray-700 font-black uppercase text-[10px] border-b border-gray-200">
-                  <tr>
-                    <th className="py-3 px-4 w-28">Invoice #</th>
-                    <th className="py-3 px-4">Customer</th>
-                    <th className="py-3 px-4">Booking Date</th>
-                    <th className="py-3 px-4 text-right">Total Bill</th>
-                    <th className="py-3 px-4 text-right">Advance Paid</th>
-                    <th className="py-3 px-4 text-right">Remaining Balance</th>
-                    <th className="py-3 px-4 text-center">Payment Status</th>
-                    <th className="py-3 px-4 text-center w-36">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 font-medium">
-                  {filteredOrders.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((ord) => {
-                    const total = Number(ord.totalAmount) || 0;
-                    const advance = Number(ord.advancePaid) || 0;
-                    const balance = Number(ord.balanceAmount) || 0;
-                    const isPaid = balance === 0;
-                    const isPartial = balance > 0 && advance > 0;
-                    const isUnpaid = balance > 0 && advance === 0;
+          <div className="space-y-4">
+            
+            {/* 1. DESKTOP VIEW (TABLE) */}
+            <div className="hidden md:block border border-gray-200 rounded-xl overflow-hidden shadow-xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-[#0F172A] text-[#DFAC43] font-black uppercase text-[10px] tracking-wider border-b border-gray-200">
+                    <tr>
+                      <th className="py-3.5 px-4 w-28">Invoice #</th>
+                      <th className="py-3.5 px-4 min-w-[160px]">Customer</th>
+                      <th className="py-3.5 px-4 min-w-[110px]">Booking Date</th>
+                      <th className="py-3.5 px-4 text-right min-w-[100px]">Total Bill</th>
+                      <th className="py-3.5 px-4 text-right min-w-[110px]">Advance Paid</th>
+                      <th className="py-3.5 px-4 text-right min-w-[130px]">Remaining Balance</th>
+                      <th className="py-3.5 px-4 text-center min-w-[110px]">Payment Status</th>
+                      <th className="py-3.5 px-4 text-center min-w-[120px]">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 font-medium">
+                    {filteredOrders.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((ord) => {
+                      const total = Number(ord.totalAmount) || 0;
+                      const advance = Number(ord.advancePaid) || 0;
+                      const balance = Number(ord.balanceAmount) || 0;
+                      const isPaid = balance === 0;
+                      const isPartial = balance > 0 && advance > 0;
+                      const isUnpaid = balance > 0 && advance === 0;
 
-                    return (
-                      <tr key={ord._id} className="hover:bg-gray-50/80 transition">
-                        
-                        {/* Invoice # */}
-                        <td className="py-3 px-4 font-black text-[#0F172A]">
-                          #BT-{ord.orderNumber}
-                        </td>
+                      return (
+                        <tr key={ord._id} className="hover:bg-gray-50/80 transition">
+                          
+                          {/* Invoice # */}
+                          <td className="py-3.5 px-4 font-black text-[#0F172A]">
+                            #BT-{ord.orderNumber}
+                          </td>
 
-                        {/* Customer */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center gap-2">
-                            <div>
-                              <span className="font-bold text-gray-900 block">
-                                {ord.customer?.name || 'Customer'}
-                              </span>
-                              <span className="text-[10px] text-gray-500">
-                                {formatPhone(ord.customer?.phone)}
-                              </span>
+                          {/* Customer */}
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-2">
+                              <div>
+                                <span className="font-bold text-gray-900 block">
+                                  {ord.customer?.name || 'Customer'}
+                                </span>
+                                <span className="text-[10px] text-gray-500 font-mono">
+                                  {formatPhone(ord.customer?.phone)}
+                                </span>
+                              </div>
+                              {ord.customer?.phone && (
+                                <button
+                                  onClick={() => handleOpenWhatsApp(ord.customer)}
+                                  title="Chat on WhatsApp"
+                                  className="p-1 text-green-600 hover:text-green-700 bg-green-50 rounded transition cursor-pointer"
+                                >
+                                  <FiPhone className="text-xs" />
+                                </button>
+                              )}
                             </div>
-                            {ord.customer?.phone && (
-                              <button
-                                onClick={() => handleOpenWhatsApp(ord.customer)}
-                                title="Chat on WhatsApp"
-                                className="p-1 text-green-600 hover:text-green-700 bg-green-50 rounded transition"
-                              >
-                                <FiPhone className="text-xs" />
-                              </button>
-                            )}
-                          </div>
-                        </td>
+                          </td>
 
-                        {/* Booking Date */}
-                        <td className="py-3 px-4 text-gray-700 whitespace-nowrap">
+                          {/* Booking Date */}
+                          <td className="py-3.5 px-4 text-gray-700 whitespace-nowrap">
+                            {new Date(ord.bookingDate || ord.createdAt).toLocaleDateString()}
+                          </td>
+
+                          {/* Total Bill */}
+                          <td className="py-3.5 px-4 text-right font-black font-sans text-gray-900">
+                            Rs {total.toLocaleString()}
+                          </td>
+
+                          {/* Advance Paid */}
+                          <td className="py-3.5 px-4 text-right font-bold font-sans text-green-700">
+                            Rs {advance.toLocaleString()}
+                          </td>
+
+                          {/* Remaining Balance */}
+                          <td className="py-3.5 px-4 text-right font-black font-sans">
+                            {balance > 0 ? (
+                              <span className="text-amber-950 bg-amber-50 border border-[#DFAC43]/40 px-2 py-0.5 rounded text-xs">
+                                Rs {balance.toLocaleString()}
+                              </span>
+                            ) : (
+                              <span className="text-green-700 font-bold">Rs 0</span>
+                            )}
+                          </td>
+
+                          {/* Payment Status Badge */}
+                          <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                            <span className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase ${
+                              isPaid 
+                                ? 'bg-green-100 text-green-800 border border-green-200' 
+                                : isPartial 
+                                ? 'bg-amber-100 text-amber-900 border border-amber-200' 
+                                : 'bg-red-100 text-red-800 border border-red-200'
+                            }`}>
+                              {isPaid ? 'Fully Paid' : isPartial ? 'Partially Paid' : 'Unpaid'}
+                            </span>
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-3.5 px-4 text-center">
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                onClick={() => navigate(`/admin/print/${ord._id}`)}
+                                title="Print Order Slip"
+                                className="p-1.5 bg-gray-100 hover:bg-[#0F172A] text-gray-700 hover:text-[#DFAC43] rounded-lg transition cursor-pointer"
+                              >
+                                <FiPrinter className="text-xs" />
+                              </button>
+
+                              {balance > 0 && (
+                                <button
+                                  onClick={() => handleOpenSettle(ord)}
+                                  title="Settle / Receive Payment"
+                                  className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-2.5 py-1 rounded-lg text-[10px] font-black transition whitespace-nowrap shadow-xs cursor-pointer"
+                                >
+                                  Settle
+                                </button>
+                              )}
+                            </div>
+                          </td>
+
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* 2. MOBILE VIEW (TABLE-TO-CARD PATTERN) */}
+            <div className="block md:hidden space-y-3">
+              {filteredOrders.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((ord) => {
+                const total = Number(ord.totalAmount) || 0;
+                const advance = Number(ord.advancePaid) || 0;
+                const balance = Number(ord.balanceAmount) || 0;
+                const isPaid = balance === 0;
+                const isPartial = balance > 0 && advance > 0;
+                const isUnpaid = balance > 0 && advance === 0;
+
+                return (
+                  <div
+                    key={ord._id}
+                    className="bg-white rounded-xl border border-gray-200 shadow-2xs p-3.5 space-y-3 transition hover:border-gray-300"
+                  >
+                    {/* Header: Invoice # and Payment Status Badge */}
+                    <div className="flex items-start justify-between gap-2 border-b border-gray-100 pb-2.5">
+                      <div>
+                        <span className="font-black text-sm text-[#0F172A] block">
+                          #BT-{ord.orderNumber}
+                        </span>
+                        <span className="text-[11px] text-gray-500 font-bold block mt-0.5">
                           {new Date(ord.bookingDate || ord.createdAt).toLocaleDateString()}
-                        </td>
+                        </span>
+                      </div>
 
-                        {/* Total Bill */}
-                        <td className="py-3 px-4 text-right font-black font-sans text-gray-900">
-                          Rs {total.toLocaleString()}
-                        </td>
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase shrink-0 ${
+                        isPaid 
+                          ? 'bg-green-100 text-green-800 border border-green-200' 
+                          : isPartial 
+                          ? 'bg-amber-100 text-amber-900 border border-amber-200' 
+                          : 'bg-red-100 text-red-800 border border-red-200'
+                      }`}>
+                        {isPaid ? 'Fully Paid' : isPartial ? 'Partially Paid' : 'Unpaid'}
+                      </span>
+                    </div>
 
-                        {/* Advance Paid */}
-                        <td className="py-3 px-4 text-right font-bold font-sans text-green-700">
-                          Rs {advance.toLocaleString()}
-                        </td>
+                    {/* Customer Row */}
+                    <div className="flex items-center justify-between gap-2 text-xs">
+                      <div>
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Customer</span>
+                        <span className="font-bold text-gray-900 text-xs sm:text-sm">{ord.customer?.name || 'Customer'}</span>
+                        <span className="text-[11px] text-gray-500 font-mono block">{formatPhone(ord.customer?.phone)}</span>
+                      </div>
 
-                        {/* Remaining Balance */}
-                        <td className="py-3 px-4 text-right font-black font-sans">
-                          {balance > 0 ? (
-                            <span className="text-red-700">Rs {balance.toLocaleString()}</span>
-                          ) : (
-                            <span className="text-green-700 font-bold">Rs 0</span>
-                          )}
-                        </td>
+                      {ord.customer?.phone && (
+                        <button
+                          onClick={() => handleOpenWhatsApp(ord.customer)}
+                          title="Chat on WhatsApp"
+                          className="p-2 text-green-700 bg-green-50 hover:bg-green-100 rounded-lg transition text-xs flex items-center gap-1 font-bold border border-green-200 cursor-pointer"
+                        >
+                          <FiPhone className="text-xs" /> WhatsApp
+                        </button>
+                      )}
+                    </div>
 
-                        {/* Payment Status Badge */}
-                        <td className="py-3 px-4 text-center whitespace-nowrap">
-                          <span className={`px-2.5 py-0.5 rounded text-[10px] font-black uppercase ${
-                            isPaid 
-                              ? 'bg-green-100 text-green-800 border border-green-200' 
-                              : isPartial 
-                              ? 'bg-amber-100 text-amber-900 border border-amber-200' 
-                              : 'bg-red-100 text-red-800 border border-red-200'
-                          }`}>
-                            {isPaid ? 'Fully Paid' : isPartial ? 'Partially Paid' : 'Unpaid'}
+                    {/* 3-Column Financials Grid */}
+                    <div className="grid grid-cols-3 gap-1.5 text-center bg-gray-50/90 p-2.5 rounded-lg border border-gray-150 text-xs">
+                      <div>
+                        <span className="text-[9px] font-bold text-gray-400 uppercase block">Total Bill</span>
+                        <span className="font-black text-gray-900 text-[11px] font-sans">Rs {total.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-bold text-gray-400 uppercase block">Advance</span>
+                        <span className="font-bold text-green-700 text-[11px] font-sans">Rs {advance.toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-bold text-gray-400 uppercase block">Balance</span>
+                        {balance > 0 ? (
+                          <span className="font-black text-amber-950 bg-amber-100/70 px-1 py-0.5 rounded text-[11px] font-sans block">
+                            Rs {balance.toLocaleString()}
                           </span>
-                        </td>
+                        ) : (
+                          <span className="font-bold text-green-700 text-[11px] block">Rs 0</span>
+                        )}
+                      </div>
+                    </div>
 
-                        {/* Actions */}
-                        <td className="py-3 px-4 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button
-                              onClick={() => navigate(`/admin/print/${ord._id}`)}
-                              title="Print Order Slip"
-                              className="p-1.5 bg-gray-100 hover:bg-[#0F172A] text-gray-700 hover:text-[#DFAC43] rounded transition"
-                            >
-                              <FiPrinter className="text-xs" />
-                            </button>
+                    {/* Actions Row */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                      <button
+                        onClick={() => navigate(`/admin/print/${ord._id}`)}
+                        className="flex-1 py-2 bg-gray-100 hover:bg-[#0F172A] text-gray-700 hover:text-[#DFAC43] font-bold rounded-lg text-xs transition flex items-center justify-center gap-1.5 border border-gray-200 cursor-pointer"
+                      >
+                        <FiPrinter className="text-xs" /> <span>Print Slip</span>
+                      </button>
 
-                            {balance > 0 && (
-                              <button
-                                onClick={() => handleOpenSettle(ord)}
-                                title="Settle / Receive Payment"
-                                className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-2 py-1 rounded text-[10px] font-black transition whitespace-nowrap shadow-xs"
-                              >
-                                Settle
-                              </button>
-                            )}
-                          </div>
-                        </td>
-
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                      {balance > 0 && (
+                        <button
+                          onClick={() => handleOpenSettle(ord)}
+                          className="flex-1 py-2 bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] font-black rounded-lg text-xs transition shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <FiCreditCard className="text-xs" /> <span>Settle Payment</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             <Pagination
