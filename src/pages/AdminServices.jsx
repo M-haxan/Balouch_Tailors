@@ -33,9 +33,7 @@ const AdminServices = () => {
   };
 
   const handleDelete = (id, title) => {
-    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
-      deleteOffer(id);
-    }
+    deleteOffer(id);
   };
 
   const filteredOffers = offersList.filter(offer => 

@@ -36,8 +36,10 @@ import {
   FiPrinter
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 const AdminWorkers = () => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const PAGE_SIZE = 10;
@@ -110,9 +112,7 @@ const AdminWorkers = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Kya aap waqai is Karigar ko hamesha ke liye delete karna chahte hain?')) {
-      deleteWorker(id);
-    }
+    deleteWorker(id);
   };
 
   return (
@@ -121,8 +121,8 @@ const AdminWorkers = () => {
       {/* HEADER & SEARCH */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center border-b pb-4 mb-6 gap-4">
         <div className="w-full xl:w-auto">
-          <h2 className="text-xl sm:text-2xl font-black text-gray-900">Manage Karigar (Workers)</h2>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">Add, update, and manage tailor wages, specialization and advance logs.</p>
+          <h2 className="text-xl sm:text-2xl font-black text-gray-900">{t('workers.title')}</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">{t('workers.subtitle')}</p>
         </div>
         
         <div className="flex flex-col sm:flex-row w-full xl:w-auto gap-2.5">
@@ -130,7 +130,7 @@ const AdminWorkers = () => {
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Search by phone, name, skill..." 
+              placeholder={t('workers.searchWorker')} 
               className="w-full pl-10 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded-lg outline-none transition text-xs sm:text-sm"
               value={searchTerm}
               onChange={handleSearchChange}
@@ -139,7 +139,7 @@ const AdminWorkers = () => {
               <button 
                 onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full cursor-pointer"
-                title="Clear search"
+                title={t('common.clear')}
               >
                 <FiX className="text-xs" />
               </button>
@@ -149,17 +149,17 @@ const AdminWorkers = () => {
             onClick={() => openFormModal()}
             className="bg-[#DFAC43] text-[#0F172A] hover:bg-[#0F172A] hover:text-[#DFAC43] px-4 py-2 text-xs sm:text-sm font-black rounded transition shadow-sm flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
           >
-            <FiPlus className="text-lg" /> Add Worker
+            <FiPlus className="text-lg" /> {t('workers.addWorker')}
           </button>
         </div>
       </div>
 
       {/* WORKERS LIST (TABLE ON MD+, CARDS ON MOBILE) */}
       {isLoading ? (
-        <div className="text-center py-20 text-gray-500 font-medium">Loading workers...</div>
+        <div className="text-center py-20 text-gray-500 font-medium">{t('common.loading')}</div>
       ) : filteredWorkers.length === 0 ? (
         <div className="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl">
-          <p className="text-gray-500 mb-2">No workers found.</p>
+          <p className="text-gray-500 mb-2">{t('workers.noWorkersFound')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -169,11 +169,11 @@ const AdminWorkers = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#0F172A] text-[#DFAC43] text-xs uppercase tracking-wider whitespace-nowrap">
-                  <th className="p-3.5 sm:p-4 rounded-tl">Karigar Name</th>
-                  <th className="p-3.5 sm:p-4">Phone</th>
-                  <th className="p-3.5 sm:p-4">Specialization</th>
-                  <th className="p-3.5 sm:p-4">Advance Taken</th>
-                  <th className="p-3.5 sm:p-4 rounded-tr text-right">Actions</th>
+                  <th className="p-3.5 sm:p-4 rounded-tl">{t('workers.workerName')}</th>
+                  <th className="p-3.5 sm:p-4">{t('common.phone')}</th>
+                  <th className="p-3.5 sm:p-4">{t('workers.specialization')}</th>
+                  <th className="p-3.5 sm:p-4">{t('workers.advanceTaken')}</th>
+                  <th className="p-3.5 sm:p-4 rounded-tr text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -240,7 +240,7 @@ const AdminWorkers = () => {
                           className="bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] font-bold px-2.5 py-1.5 rounded text-xs transition border border-gray-300 flex items-center gap-1 cursor-pointer shadow-xs"
                           title="View Full Profile"
                         >
-                          <FiUser className="text-xs shrink-0" /> Profile
+                          <FiUser className="text-xs shrink-0" /> {t('common.details')}
                         </button>
 
                         {/* Advance Manage button */}
@@ -249,7 +249,7 @@ const AdminWorkers = () => {
                           className="bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold px-2.5 py-1.5 rounded text-xs transition border border-amber-200 cursor-pointer"
                           title="Manage Advance Amount"
                         >
-                          ± Advance
+                          ± {t('workers.advanceTaken')}
                         </button>
                       </div>
                     </td>
@@ -1267,7 +1267,7 @@ const WorkerAdvanceModal = ({ worker, closeModal }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!amount || Number(amount) <= 0) {
-      toast.error('Valid amount enter karein');
+      toast.error('Please enter a valid amount');
       return;
     }
 
@@ -1396,7 +1396,7 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
   const handleCalculate = (e) => {
     e.preventDefault();
     if (!startDate || !endDate) {
-      toast.error('Dono dates select karein');
+      toast.error('Please select both start and end dates');
       return;
     }
     calculateSalaryMutation.mutate({
@@ -1413,37 +1413,33 @@ const WorkerLedgerModal = ({ worker, closeModal }) => {
   const handlePaySalary = () => {
     if (!calcResult) return;
     if (calcResult.suits.length === 0 && calcResult.advances.length === 0) {
-      toast.error('Is date range mein koi pending suit ya advance nahi hai!');
+      toast.error('No pending stitched suits or advance records found in this date range!');
       return;
     }
-    if (window.confirm(`Kya aap is range (${new Date(startDate).toLocaleDateString()} se ${new Date(endDate).toLocaleDateString()}) ki salary Rs ${calcResult.netPaid} pay kar ke ledger settle karna chahte hain?`)) {
-      paySalaryMutation.mutate({
-        id: worker._id,
-        data: {
-          startDate,
-          endDate,
-          notes: paymentNotes
-        }
-      }, {
-        onSuccess: () => {
-          setCalcResult(null);
-          setPaymentNotes('');
-          refetchLedger();
-          refetchDetails();
-        }
-      });
-    }
+    paySalaryMutation.mutate({
+      id: worker._id,
+      data: {
+        startDate,
+        endDate,
+        notes: paymentNotes
+      }
+    }, {
+      onSuccess: () => {
+        setCalcResult(null);
+        setPaymentNotes('');
+        refetchLedger();
+        refetchDetails();
+      }
+    });
   };
 
   const handleDeleteEntry = (ledgerId) => {
-    if (window.confirm('Kya aap waqai is entry ko delete karna chahte hain? Is se worker ka advance balance ya stitching record theek ho jayega.')) {
-      deleteLedgerMutation.mutate(ledgerId, {
-        onSuccess: () => {
-          refetchLedger();
-          refetchDetails();
-        }
-      });
-    }
+    deleteLedgerMutation.mutate(ledgerId, {
+      onSuccess: () => {
+        refetchLedger();
+        refetchDetails();
+      }
+    });
   };
 
   const { assignedSuits = [], stitchedSuits = [] } = detailsData || {};

@@ -21,10 +21,12 @@ import {
   FiExternalLink
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import Pagination from '../components/Pagination';
 import { formatPhone } from '../utils/formatters';
 
 const AdminCustomers = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,8 +69,8 @@ const AdminCustomers = () => {
       {/* HEADER & SEARCH */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center border-b pb-4 mb-6 gap-4">
         <div className="w-full xl:w-auto">
-          <h2 className="text-xl sm:text-2xl font-black text-gray-900">Manage Customers</h2>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">Directory of all clients, measurements, orders, and khata balances.</p>
+          <h2 className="text-xl sm:text-2xl font-black text-gray-900">{t('customers.title')}</h2>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">{t('customers.subtitle')}</p>
         </div>
         
         <div className="flex flex-col sm:flex-row w-full xl:w-auto gap-2.5">
@@ -76,7 +78,7 @@ const AdminCustomers = () => {
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Search by ID, name, phone, city..." 
+              placeholder={t('customers.searchCustomer')} 
               className="w-full pl-10 pr-8 py-2 border-2 border-gray-100 focus:border-black rounded outline-none text-xs sm:text-sm transition"
               value={searchTerm}
               onChange={handleSearchChange}
@@ -85,7 +87,7 @@ const AdminCustomers = () => {
               <button 
                 onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full cursor-pointer"
-                title="Clear search"
+                title={t('common.clear')}
               >
                 <FiX className="text-xs" />
               </button>
@@ -95,17 +97,17 @@ const AdminCustomers = () => {
             onClick={() => openFormModal()}
             className="bg-[#DFAC43] text-[#0F172A] hover:bg-[#0F172A] hover:text-[#DFAC43] px-4 py-2 text-xs sm:text-sm font-black rounded transition shadow-sm flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
           >
-            <FiPlus className="text-lg" /> Add Customer
+            <FiPlus className="text-lg" /> {t('customers.addNewCustomer')}
           </button>
         </div>
       </div>
 
       {/* CUSTOMERS DISPLAY (TABLE ON MD+, CARDS ON MOBILE) */}
       {isLoading ? (
-        <div className="text-center py-20 text-gray-500 font-medium">Loading customers...</div>
+        <div className="text-center py-20 text-gray-500 font-medium">{t('common.loading')}</div>
       ) : filteredCustomers.length === 0 ? (
         <div className="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl">
-          <p className="text-gray-500 mb-2 font-bold text-sm">No customers found.</p>
+          <p className="text-gray-500 mb-2 font-bold text-sm">{t('customers.noCustomersFound')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -116,11 +118,11 @@ const AdminCustomers = () => {
               <thead>
                 <tr className="bg-[#0F172A] text-[#DFAC43] text-xs uppercase tracking-wider">
                   <th className="p-4">ID</th>
-                  <th className="p-4">Client Name</th>
-                  <th className="p-4">Contact</th>
-                  <th className="p-4">Khata Balance</th>
-                  <th className="p-4">City / Address</th>
-                  <th className="p-4 text-right">Actions</th>
+                  <th className="p-4">{t('customers.customerName')}</th>
+                  <th className="p-4">{t('customers.phone')}</th>
+                  <th className="p-4">{t('customers.balanceDue')}</th>
+                  <th className="p-4">{t('customers.address')}</th>
+                  <th className="p-4 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -168,7 +170,7 @@ const AdminCustomers = () => {
                       <td className="p-4 whitespace-nowrap">
                         {bal > 0 ? (
                           <span className="inline-flex items-center gap-1 bg-red-50 border border-red-200 text-red-900 px-2.5 py-1 rounded-md text-xs font-black">
-                            <FiAlertTriangle className="text-xs text-red-600" /> Udhar: Rs {bal.toLocaleString()}
+                            <FiAlertTriangle className="text-xs text-red-600" /> {t('customers.balanceDue')}: Rs {bal.toLocaleString()}
                           </span>
                         ) : bal < 0 ? (
                           <span className="inline-flex items-center gap-1 bg-green-50 border border-green-200 text-green-900 px-2.5 py-1 rounded-md text-xs font-black">
@@ -191,7 +193,7 @@ const AdminCustomers = () => {
                             onClick={() => navigate(`/admin/customers/${customer._id}`)}
                             className="px-3 py-1.5 bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] font-bold rounded-lg transition text-xs flex items-center gap-1 border border-gray-200 shadow-sm cursor-pointer"
                           >
-                            View Profile <FiArrowRight className="text-xs" />
+                            {t('customers.viewProfile')} <FiArrowRight className="text-xs rtl:rotate-180" />
                           </button>
 
                           {/* 2. New Order Button */}
@@ -199,7 +201,7 @@ const AdminCustomers = () => {
                             onClick={() => navigate(`/admin/orders/create?customerId=${customer._id}`)}
                             className="px-3 py-1.5 bg-[#DFAC43] hover:bg-[#0F172A] text-[#0F172A] hover:text-[#DFAC43] font-black rounded-lg transition text-xs flex items-center gap-1 shadow-sm whitespace-nowrap cursor-pointer"
                           >
-                            <FiPlus className="text-sm" /> New Order
+                            <FiPlus className="text-sm" /> {t('admin.createOrder')}
                           </button>
                         </div>
                       </td>

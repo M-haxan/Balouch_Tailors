@@ -38,8 +38,10 @@ import {
 } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 const AdminSettings = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('rates'); // 'rates' | 'templates' | 'general'
   const [rateSection, setRateSection] = useState('services'); // 'services' (Garment Categories) | 'customizations' (Add-ons)
   
@@ -64,9 +66,7 @@ const AdminSettings = () => {
   };
 
   const handleDeleteTemplate = (id) => {
-    if (window.confirm('Are you sure you want to delete this template?')) {
-      deleteTemplate(id);
-    }
+    deleteTemplate(id);
   };
 
   // Handlers for Tailoring Services
@@ -83,9 +83,7 @@ const AdminSettings = () => {
   };
 
   const handleDeletePricing = (id) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      deleteTailoring(id);
-    }
+    deleteTailoring(id);
   };
 
   // Filter lists by itemType:
@@ -109,10 +107,10 @@ const AdminSettings = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 sm:pb-5 border-b border-gray-100">
           <div>
             <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-              <FiSettings className="text-[#DFAC43] shrink-0 text-lg sm:text-2xl" /> System Settings
+              <FiSettings className="text-[#DFAC43] shrink-0 text-lg sm:text-2xl" /> {t('settings.title')}
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium leading-relaxed">
-              Manage garment categories, rates, measurement templates & shop branding preferences.
+              {t('settings.subtitle')}
             </p>
           </div>
         </div>
@@ -129,7 +127,7 @@ const AdminSettings = () => {
           >
             <div className="flex items-center gap-2 min-w-0">
               <FaMoneyBillWave className="text-base shrink-0" />
-              <span className="truncate">Tailoring Rates & Add-ons</span>
+              <span className="truncate">{t('pricing.title')}</span>
             </div>
             <span className={`text-[11px] px-2 py-0.5 rounded font-bold shrink-0 ${
               activeTab === 'rates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-700'
@@ -148,7 +146,7 @@ const AdminSettings = () => {
           >
             <div className="flex items-center gap-2 min-w-0">
               <FiSliders className="text-base shrink-0" />
-              <span className="truncate">Measurement Templates</span>
+              <span className="truncate">{t('measurements.title')}</span>
             </div>
             <span className={`text-[11px] px-2 py-0.5 rounded font-bold shrink-0 ${
               activeTab === 'templates' ? 'bg-[#DFAC43]/20 text-[#DFAC43]' : 'bg-gray-200 text-gray-700'
@@ -166,7 +164,7 @@ const AdminSettings = () => {
             }`}
           >
             <FiSettings className="text-base shrink-0" />
-            <span className="truncate">Shop Branding & Info</span>
+            <span className="truncate">{t('settings.shopDetails')}</span>
           </button>
         </div>
       </div>
@@ -187,7 +185,7 @@ const AdminSettings = () => {
                   <FiScissors className="text-[#DFAC43] shrink-0 text-base sm:text-xl" /> Rates & Customization Settings
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
-                  Garment Categories aur Customization add-on rates ko table mein manage karein.
+                  Manage garment categories, base stitching rates, and customization add-on prices in the table below.
                 </p>
               </div>
 
@@ -337,7 +335,7 @@ const AdminSettings = () => {
                 <div className="flex items-center gap-2 bg-amber-50/70 border border-amber-200/80 p-3 rounded text-xs text-amber-900 font-medium">
                   <FiInfo className="text-base text-amber-700 shrink-0" />
                   <span>
-                    <strong>Customizations & Add-ons:</strong> Yahan Jali Kanta, Double Silai, Fancy Button ke add-on rates define karein.
+                    <strong>Customizations & Add-ons:</strong> Define add-on charges for special finishes such as Jali Kanta, Double Stitching, Fancy Buttons, etc.
                   </span>
                 </div>
 

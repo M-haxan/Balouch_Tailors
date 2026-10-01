@@ -35,6 +35,7 @@ import {
 import { FaMoneyBillWave } from 'react-icons/fa';
 import defaultLogo from '../assets/BT_Logo.png';
 import { useGetShopSettings } from '../hooks/useShopSettings';
+import { useTranslation } from 'react-i18next';
 import Preloader from '../components/Preloader';
 import Pagination from '../components/Pagination';
 
@@ -63,6 +64,7 @@ const EXPENSE_CATEGORIES = [
 ];
 
 const AdminExpenses = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('suppliers'); // 'suppliers' | 'direct' | 'all'
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -131,15 +133,11 @@ const AdminExpenses = () => {
   };
 
   const handleDeleteSupplier = (id) => {
-    if (window.confirm('Are you sure you want to delete this supplier and all their ledger history?')) {
-      deleteSupplier(id);
-    }
+    deleteSupplier(id);
   };
 
   const handleDeleteExpense = (id) => {
-    if (window.confirm('Are you sure you want to delete this expense entry?')) {
-      deleteExpense(id);
-    }
+    deleteExpense(id);
   };
 
   return (
@@ -154,10 +152,10 @@ const AdminExpenses = () => {
               <span className="text-xs text-gray-400 font-medium">{shopName} Supply & Expense Control</span>
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight">
-              Shop Expenses & Material Vendors
+              {t('expenses.title')}
             </h1>
             <p className="text-xs md:text-sm text-gray-400 mt-1 max-w-xl font-medium leading-relaxed">
-              Track Bukram, Kaj, Button & Thread shops, maintain itemized vendor ledgers, and manage operational utility expenses.
+              {t('expenses.subtitle')}
             </p>
           </div>
 
@@ -167,14 +165,14 @@ const AdminExpenses = () => {
               className="bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-3.5 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
             >
               <FiPlus className="text-base shrink-0" /> 
-              <span>Add Material Vendor</span>
+              <span>+ {t('expenses.addExpense')}</span>
             </button>
             <button
               onClick={() => setIsDirectExpenseOpen(true)}
               className="bg-[#1E293B] hover:bg-gray-800 text-white font-bold px-3.5 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm transition border border-gray-700 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <FaMoneyBillWave className="text-sm text-[#DFAC43] shrink-0" /> 
-              <span>Log Shop Expense</span>
+              <span>{t('expenses.todayExpenses')}</span>
             </button>
           </div>
         </div>

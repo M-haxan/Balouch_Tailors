@@ -33,6 +33,7 @@ import {
   FiTruck
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 import { 
   useGetWorkers, 
   useAssignWorker, 
@@ -44,6 +45,7 @@ import {
 import Pagination from '../components/Pagination';
 
 const Allorders = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Filters & Server Pagination State
@@ -99,10 +101,10 @@ const Allorders = () => {
 
   // Tabs Definition
   const tabs = [
-    { id: 'All', label: 'All Orders', count: counts.all ?? pagination.totalRecords, icon: FiBox },
-    { id: 'Active', label: 'Active Orders', count: counts.active, icon: FiScissors },
-    { id: 'Delivered', label: 'Delivered Orders', count: counts.delivered, icon: FiTruck },
-    { id: 'PendingQC', label: 'Waiting QC', count: totalPendingQC, icon: FiClock, isAlert: totalPendingQC > 0 }
+    { id: 'All', label: t('common.all'), count: counts.all ?? pagination.totalRecords, icon: FiBox },
+    { id: 'Active', label: t('dashboard.activeOrders'), count: counts.active, icon: FiScissors },
+    { id: 'Delivered', label: t('orders.delivered'), count: counts.delivered, icon: FiTruck },
+    { id: 'PendingQC', label: t('orders.qcInspection'), count: totalPendingQC, icon: FiClock, isAlert: totalPendingQC > 0 }
   ];
 
   // Handlers
@@ -115,9 +117,7 @@ const Allorders = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Kya aap waqai is order ko hamesha ke liye delete karna chahte hain?')) {
-      deleteOrder(id);
-    }
+    deleteOrder(id);
   };
 
   // Badge Color Logic
@@ -139,9 +139,9 @@ const Allorders = () => {
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center border-b border-gray-100 pb-5 mb-4 gap-4">
         <div className="w-full xl:w-auto">
           <h2 className="text-xl sm:text-2xl font-black text-black flex items-center gap-2">
-            <FiBox className="text-[#D4AF37] shrink-0" /> <span>All Orders Directory</span>
+            <FiBox className="text-[#D4AF37] shrink-0" /> <span>{t('orders.title')}</span>
           </h2>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">Manage tailoring jobs, statuses, QC approvals, and cash flow.</p>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">{t('orders.subtitle')}</p>
         </div>
 
         {/* Controls: Status Dropdown & Search Bar */}
@@ -154,10 +154,10 @@ const Allorders = () => {
               onChange={(e) => handleStatusFilterChange(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 border-2 border-gray-100 focus:border-black rounded-lg outline-none font-bold text-xs sm:text-sm bg-white appearance-none cursor-pointer shadow-2xs"
             >
-              <option value="All">All Statuses</option>
-              <option value="Active">Active (In-Progress / Pending)</option>
-              <option value="Delivered">Delivered</option>
-              <option value="PendingQC">Waiting QC Approval ({totalPendingQC})</option>
+              <option value="All">{t('orders.filterByStatus')}</option>
+              <option value="Active">{t('dashboard.activeOrders')}</option>
+              <option value="Delivered">{t('orders.delivered')}</option>
+              <option value="PendingQC">{t('orders.qcInspection')} ({totalPendingQC})</option>
               {statusOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
             </select>
           </div>
@@ -167,7 +167,7 @@ const Allorders = () => {
             <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input 
               type="text" 
-              placeholder="Search Suit ID, Order #, Name..." 
+              placeholder={t('orders.searchPlaceholder')} 
               value={searchTerm}
               onChange={handleSearchChange}
               className="w-full pl-9 pr-8 py-2.5 border-2 border-gray-100 focus:border-black rounded-lg outline-none text-xs sm:text-sm font-medium transition shadow-2xs"
@@ -176,7 +176,7 @@ const Allorders = () => {
               <button 
                 onClick={() => { setSearchTerm(''); setCurrentPage(1); }}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black p-0.5 rounded-full cursor-pointer"
-                title="Clear search"
+                title={t('common.clear')}
               >
                 <FiX className="text-xs" />
               </button>
@@ -187,34 +187,34 @@ const Allorders = () => {
 
       {/* QUICK STATUS TABS (RESPONSIVE GRID WITHOUT TEXT TRUNCATION) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 pb-4 mb-4 border-b border-gray-100">
-        {tabs.map((t) => {
-          const Icon = t.icon;
-          const isActive = statusFilter === t.id;
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = statusFilter === tab.id;
           return (
             <button
-              key={t.id}
-              onClick={() => handleStatusFilterChange(t.id)}
+              key={tab.id}
+              onClick={() => handleStatusFilterChange(tab.id)}
               className={`w-full px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between sm:justify-center gap-1.5 cursor-pointer shadow-2xs ${
                 isActive
                   ? 'bg-[#0F172A] text-white shadow-md'
-                  : t.isAlert
+                  : tab.isAlert
                   ? 'bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               <div className="flex items-center gap-1.5 whitespace-nowrap min-w-0">
-                <Icon className={`shrink-0 text-xs sm:text-sm ${isActive ? 'text-[#DFAC43]' : t.isAlert ? 'text-amber-600' : 'text-gray-500'}`} />
-                <span className="whitespace-nowrap">{t.label}</span>
+                <Icon className={`shrink-0 text-xs sm:text-sm ${isActive ? 'text-[#DFAC43]' : tab.isAlert ? 'text-amber-600' : 'text-gray-500'}`} />
+                <span className="whitespace-nowrap">{tab.label}</span>
               </div>
-              {t.count !== undefined && (
+              {tab.count !== undefined && (
                 <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
                   isActive 
                     ? 'bg-[#DFAC43] text-[#0F172A]' 
-                    : t.isAlert
+                    : tab.isAlert
                     ? 'bg-amber-400 text-black'
                     : 'bg-white text-gray-700 shadow-2xs'
                 }`}>
-                  {t.count}
+                  {tab.count}
                 </span>
               )}
             </button>
@@ -224,10 +224,10 @@ const Allorders = () => {
 
       {/* ORDERS TABLE */}
       {isLoading ? (
-        <div className="text-center py-20 text-gray-500 font-bold">Fetching latest orders...</div>
+        <div className="text-center py-20 text-gray-500 font-bold">{t('common.loading')}</div>
       ) : filteredOrders.length === 0 ? (
         <div className="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl">
-          <p className="text-gray-500 font-medium">Koi order nahi mila.</p>
+          <p className="text-gray-500 font-medium">{t('orders.noOrdersFound')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -236,12 +236,12 @@ const Allorders = () => {
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider border-b border-gray-200">
-                  <th className="py-3.5 px-4 rounded-tl min-w-[200px]">Order ID & Date</th>
-                  <th className="py-3.5 px-4 min-w-[160px]">Customer Details</th>
-                  <th className="py-3.5 px-4 text-center min-w-[130px]">Suits & QC Status</th>
-                  <th className="py-3.5 px-4 min-w-[130px]">Financials</th>
-                  <th className="py-3.5 px-4 text-center min-w-[130px]">Status</th>
-                  <th className="py-3.5 px-4 rounded-tr text-right min-w-[180px]">Actions</th>
+                  <th className="py-3.5 px-4 rounded-tl min-w-[200px]">{t('orders.orderNo')}</th>
+                  <th className="py-3.5 px-4 min-w-[160px]">{t('orders.customer')}</th>
+                  <th className="py-3.5 px-4 text-center min-w-[130px]">{t('orders.garments')}</th>
+                  <th className="py-3.5 px-4 min-w-[130px]">{t('orders.totalBill')}</th>
+                  <th className="py-3.5 px-4 text-center min-w-[130px]">{t('orders.status')}</th>
+                  <th className="py-3.5 px-4 rounded-tr text-right min-w-[180px]">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 font-medium">
@@ -591,7 +591,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
   const handleAssignWorker = (suitId) => {
     const selected = workerDrafts[suitId];
     if (selected === undefined) {
-      toast.info('Pehle worker ya Self-Stitch select karein.');
+      toast.info('Please select a worker or Self-Stitch first.');
       return;
     }
 
@@ -617,9 +617,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
   };
 
   const handleApprove = (suitId) => {
-    if (window.confirm('Kya yeh suit quality pass hai? Approve karne par karigar ke ledger mein wage credit ho jayegi.')) {
-      approveSuit({ orderId: order._id, suitId });
-    }
+    approveSuit({ orderId: order._id, suitId });
   };
 
   const handleOpenReworkModal = (suit) => {
@@ -629,7 +627,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
 
   const handleSubmitRework = () => {
     if (!reworkNotes.trim()) {
-      toast.error('Baraye meherbani alteration / rework ki wajah likhein.');
+      toast.error('Please specify the reason for alteration / rework.');
       return;
     }
     rejectSuit({ 

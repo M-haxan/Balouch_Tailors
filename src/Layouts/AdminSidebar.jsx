@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { FiShoppingBag, FiCreditCard, FiLogOut, FiUsers, FiTrendingUp, FiLayers, FiBox } from 'react-icons/fi';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import { CgProfile } from "react-icons/cg";
@@ -7,6 +8,7 @@ import { IoMdSettings } from "react-icons/io";
 import useAuthStore from '../Store/authStore';
 
 const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) => {
+  const { t } = useTranslation();
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
 
@@ -47,51 +49,51 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
         <nav className="flex flex-col pr-4">
           <NavLink to="/admin/dashboard" className={getLinkStyle} onClick={onCloseMobile}>
             <FiTrendingUp className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Dashboard</span>}
+            {!collapsed && <span>{t('admin.dashboard')}</span>}
           </NavLink>
           <NavLink to="/admin/catalogue" className={getLinkStyle} onClick={onCloseMobile}>
             <FiShoppingBag className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Catalogue</span>}
+            {!collapsed && <span>{t('nav.catalogue')}</span>}
           </NavLink>
           <NavLink to="/admin/services" className={getLinkStyle} onClick={onCloseMobile}>
             <FiLayers className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Services & Offers</span>}
+            {!collapsed && <span>{t('nav.services')}</span>}
           </NavLink>
           <NavLink to="/admin/pricing" className={getLinkStyle} onClick={onCloseMobile}>
             <FiCreditCard className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Pricing</span>}
+            {!collapsed && <span>{t('nav.pricing')}</span>}
           </NavLink>
           <NavLink to="/admin/customers" className={getLinkStyle} onClick={onCloseMobile}>
             <CgProfile className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Customers</span>}
+            {!collapsed && <span>{t('admin.customers')}</span>}
           </NavLink>
           <NavLink to="/admin/workers" className={getLinkStyle} onClick={onCloseMobile}>
             <FiUsers className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Workers</span>}
+            {!collapsed && <span>{t('admin.workers')}</span>}
           </NavLink>
           <NavLink to="/admin/expenses" className={getLinkStyle} onClick={onCloseMobile}>
             <FiCreditCard className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Expenses</span>}
+            {!collapsed && <span>{t('admin.expenses')}</span>}
           </NavLink>
           <NavLink to="/admin/financial-reports" className={getLinkStyle} onClick={onCloseMobile}>
             <FaMoneyBillWave className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Financial Reports</span>}
+            {!collapsed && <span>{t('admin.reports')}</span>}
           </NavLink>
           <NavLink to="/admin/payments" className={getLinkStyle} onClick={onCloseMobile}>
             <FiCreditCard className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Payments</span>}
+            {!collapsed && <span>{t('admin.payments')}</span>}
           </NavLink>
           <NavLink to="/admin/orders/create" className={getLinkStyle} onClick={onCloseMobile}>
             <FiShoppingBag className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Orders</span>}
+            {!collapsed && <span>{t('admin.createOrder')}</span>}
           </NavLink>
           <NavLink to="/admin/allorders" className={getLinkStyle} onClick={onCloseMobile}>
             <FiBox className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>All Orders</span>}
+            {!collapsed && <span>{t('admin.allOrders')}</span>}
           </NavLink>
            <NavLink to="/admin/settings" className={getLinkStyle} onClick={onCloseMobile}>
             <IoMdSettings className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>Settings</span>}
+            {!collapsed && <span>{t('admin.settings')}</span>}
           </NavLink>
 
         </nav>
@@ -101,10 +103,10 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
       <div className="absolute bottom-0 left-0 w-full p-4 border-t bg-white">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center text-left gap-3 px-3 py-2 rounded hover:bg-red-50 hover:text-red-600 text-sm font-medium text-gray-700 transition-colors"
+          className="w-full flex items-center text-left gap-3 px-3 py-2 rounded hover:bg-red-50 hover:text-red-600 text-sm font-medium text-gray-700 transition-colors cursor-pointer"
         >
           <FiLogOut className={`w-5 h-5 ${collapsed ? 'mx-auto' : ''}`} />
-          {!collapsed && <span>Logout</span>}
+          {!collapsed && <span>{t('admin.logout')}</span>}
         </button>
       </div>
     </aside>

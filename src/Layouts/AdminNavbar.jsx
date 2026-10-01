@@ -4,6 +4,7 @@ import defaultLogo from '../assets/BT_Logo.png';
 import { FiMenu, FiX, FiUser } from 'react-icons/fi';
 import { useGetShopSettings } from '../hooks/useShopSettings';
 import { useGetAdminProfile } from '../hooks/useAuth';
+import LanguageToggle from '../components/LanguageToggle';
 
 const AdminNavbar = ({ onToggle, collapsed, mobileOpen }) => {
   const { data: shopSettings } = useGetShopSettings();
@@ -38,8 +39,9 @@ const AdminNavbar = ({ onToggle, collapsed, mobileOpen }) => {
             </Link>
           </div>
 
-          {/* Right: Admin Profile */}
-          <div className="flex items-center shrink-0">
+          {/* Right: Language Switcher & Admin Profile */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <LanguageToggle />
             <Link
               to="/admin/profile"
               className="flex items-center gap-2 p-1 sm:px-3 sm:py-2 rounded-lg hover:bg-gray-100 border border-gray-200 transition-colors shrink-0"

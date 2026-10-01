@@ -18,8 +18,10 @@ import {
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { validatePassword } from '../utils/validators';
+import { useTranslation } from 'react-i18next';
 
 const AdminProfile = () => {
+  const { t } = useTranslation();
   const authUser = useAuthStore((state) => state.user);
   const { data: profile, isLoading, isError } = useGetAdminProfile();
   const { mutate: updateProfile, isPending } = useUpdateAdminProfile();
@@ -102,11 +104,11 @@ const AdminProfile = () => {
               <FiUser className="text-xl" />
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-              Admin Profile & Account
+              {t('profile.title')}
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium">
-            Manage your personal administrator credentials, email, and password security.
+            {t('profile.subtitle')}
           </p>
         </div>
 
@@ -115,7 +117,7 @@ const AdminProfile = () => {
           className="bg-gray-100 hover:bg-[#0F172A] text-gray-700 hover:text-[#DFAC43] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center gap-2 border border-gray-200 shadow-sm"
         >
           <FiSettings className="text-base" />
-          <span>Shop Branding Settings</span>
+          <span>{t('admin.settings')}</span>
         </Link>
       </div>
 

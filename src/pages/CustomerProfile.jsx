@@ -136,13 +136,11 @@ const CustomerProfile = () => {
   };
 
   const handleDeleteProfile = () => {
-    if (window.confirm(`Are you sure you want to permanently delete customer "${customer.name}"? This will remove their profile and records.`)) {
-      deleteCustomer(customer._id, {
-        onSuccess: () => {
-          navigate('/admin/customers');
-        }
-      });
-    }
+    deleteCustomer(customer._id, {
+      onSuccess: () => {
+        navigate('/admin/customers');
+      }
+    });
   };
 
   return (
@@ -698,13 +696,11 @@ const MeasurementsTab = ({
   const currentMeas = measurements.find(m => m.category && m.category.toLowerCase() === activeCategory.toLowerCase());
 
   const handleDeleteCategory = (catName) => {
-    if (window.confirm(`Are you sure you want to delete measurements for "${catName}"? This cannot be undone.`)) {
-      deleteMeasurementCategory({ id: customer._id, category: catName }, {
-        onSuccess: () => {
-          setSelectedCategory('');
-        }
-      });
-    }
+    deleteMeasurementCategory({ id: customer._id, category: catName }, {
+      onSuccess: () => {
+        setSelectedCategory('');
+      }
+    });
   };
 
   return (
@@ -1821,12 +1817,12 @@ const MeasurementFormModal = ({ customer, config, closeModal }) => {
 
   const handleAddCategory = () => {
     if (!selectedTemplate) {
-      toast.warning("Pehle koi template select karein.");
+      toast.warning("Please select a template first.");
       return;
     }
 
     if (categoriesList.some(c => c.category.toLowerCase() === selectedTemplate.toLowerCase())) {
-      toast.warning("Yeh category form mein pehle se shamil hai!");
+      toast.warning("This category is already added in the form!");
       return;
     }
 
@@ -1860,7 +1856,7 @@ const MeasurementFormModal = ({ customer, config, closeModal }) => {
     e.preventDefault();
 
     if (categoriesList.length === 0) {
-      toast.warning("Kam az kam ek measurement category add karein.");
+      toast.warning("Please add at least one measurement category.");
       return;
     }
 

@@ -381,7 +381,7 @@ const CreateOrder = () => {
       };
       return updated;
     });
-    toast.success(`Suit #${sourceIndex + 1} ki specifications Suit #${targetIndex + 1} me copy ho gayi hain!`);
+    toast.success(`Copied specifications from Suit #${sourceIndex + 1} to Suit #${targetIndex + 1}!`);
   };
 
   const handleRemoveSuit = (index) => {
@@ -543,7 +543,7 @@ const CreateOrder = () => {
               <span className="font-black text-sm text-[#0F172A]">#BT-{savedOrder.orderNumber}</span>
             </div>
             <p className="text-[10px] font-black text-gray-600 uppercase mb-2">
-              Assigned Suit IDs (Suit par likhne ke liye IDs):
+              Assigned Suit IDs (Tagging on fabric):
             </p>
             <div className="space-y-1.5">
               {savedOrder.suits && savedOrder.suits.map((s, idx) => (
@@ -753,7 +753,7 @@ const CreateOrder = () => {
                             type="button"
                             onClick={() => handleCopySpecs(index, index - 1)}
                             className="bg-amber-100 hover:bg-[#DFAC43] hover:text-[#0F172A] text-amber-900 border border-amber-300 text-[11px] font-black px-2.5 py-1 rounded transition flex items-center gap-1 cursor-pointer shadow-2xs"
-                            title={`Suit #${index} ke tamam styles, tags, add-ons aur instructions is suit me copy karein`}
+                            title={`Copy all styles, tags, add-ons, and instructions from Suit #${index} to this suit`}
                           >
                             <FiCopy /> Same as Suit #{index}
                           </button>

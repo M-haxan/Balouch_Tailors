@@ -36,6 +36,7 @@ import {
 import Preloader from '../components/Preloader';
 import Pagination from '../components/Pagination';
 import DeliveryReceiptModal from '../components/DeliveryReceiptModal';
+import LanguageToggle from '../components/LanguageToggle';
 
 const WorkerDashboard = () => {
   const navigate = useNavigate();
@@ -110,16 +111,14 @@ const WorkerDashboard = () => {
   };
 
   const handleSubmitForQC = (orderId, suitId) => {
-    if (window.confirm('Kya aapne yeh suit mukammal sil liya hai aur Admin Inspection ke liye submit karna chahte hain?')) {
-      submitForQC({ orderId, suitId }, {
-        onSuccess: () => {
-          refetch();
-          if (selectedSuitForSpecs && selectedSuitForSpecs.suitId === suitId) {
-            setSelectedSuitForSpecs(null);
-          }
+    submitForQC({ orderId, suitId }, {
+      onSuccess: () => {
+        refetch();
+        if (selectedSuitForSpecs && selectedSuitForSpecs.suitId === suitId) {
+          setSelectedSuitForSpecs(null);
         }
-      });
-    }
+      }
+    });
   };
 
   if (isLoading) {
@@ -183,6 +182,7 @@ const WorkerDashboard = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <LanguageToggle className="bg-gray-900 border-gray-800" />
           {/* If worker is allowed to create orders, show Book Order button */}
           {canCreateOrder && (
             <button
@@ -392,9 +392,9 @@ const WorkerDashboard = () => {
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiBox className="text-4xl text-gray-300 mx-auto mb-2" />
                   <p className="text-gray-400 font-bold text-sm">
-                    {searchTerm ? 'Is search ke mutabiq koi assigned suit nahi mila.' : 'Abhi koi pending suit assign nahi hai.'}
+                    {searchTerm ? 'No assigned suits matched your search.' : 'No pending suits assigned currently.'}
                   </p>
-                  <p className="text-xs text-gray-400 mt-0.5">Admin se assignments ke liye rabta karein.</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Contact admin for new stitching assignments.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto bg-white border border-gray-200 rounded shadow-xs">
@@ -437,7 +437,7 @@ const WorkerDashboard = () => {
                                 onClick={() => setSelectedSuitForSpecs(item)}
                                 className="bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] text-xs font-black px-3 py-1.5 rounded transition flex items-center gap-1 border border-gray-200 cursor-pointer"
                               >
-                                <FiFileText /> Naap & Specs
+                                <FiFileText /> Measurements & Specs
                               </button>
                               <button
                                 type="button"
@@ -469,7 +469,7 @@ const WorkerDashboard = () => {
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiClock className="text-4xl text-amber-400 mx-auto mb-2" />
                   <p className="text-gray-500 font-bold text-sm">
-                    {searchTerm ? 'Is search ke mutabiq koi suit QC me nahi hai.' : 'Abhi koi suit Admin Inspection mein nahi hai.'}
+                    {searchTerm ? 'No suits under QC matched your search.' : 'No suits currently under Admin Inspection.'}
                   </p>
                 </div>
               ) : (
@@ -514,7 +514,7 @@ const WorkerDashboard = () => {
                               onClick={() => setSelectedSuitForSpecs(item)}
                               className="bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] text-xs font-black px-3 py-1.5 rounded transition flex items-center gap-1 border border-gray-200 cursor-pointer mx-auto"
                             >
-                              <FiFileText /> Naap & Specs
+                              <FiFileText /> Measurements & Specs
                             </button>
                           </td>
                         </tr>
@@ -536,7 +536,7 @@ const WorkerDashboard = () => {
               currentSuits.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiCheckCircle className="text-4xl text-green-500 mx-auto mb-2" />
-                  <p className="text-gray-500 font-bold text-sm">Koi alteration ya rework pending nahi hai!</p>
+                  <p className="text-gray-500 font-bold text-sm">No alterations or rework pending!</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto bg-white border border-gray-200 rounded shadow-xs">
@@ -565,7 +565,7 @@ const WorkerDashboard = () => {
                             {item.wearerName}
                           </td>
                           <td className="p-3 text-red-900 font-bold bg-red-50/50">
-                            {item.reworkNotes || 'Silayi theek karein aur dobara submit karein.'}
+                            {item.reworkNotes || 'Please correct stitching and re-submit for QC.'}
                           </td>
                           <td className="p-3 text-center whitespace-nowrap">
                             <div className="flex items-center justify-center gap-2">
@@ -574,7 +574,7 @@ const WorkerDashboard = () => {
                                 onClick={() => setSelectedSuitForSpecs(item)}
                                 className="bg-gray-100 hover:bg-[#0F172A] text-gray-800 hover:text-[#DFAC43] text-xs font-black px-3 py-1.5 rounded transition flex items-center gap-1 border border-gray-200 cursor-pointer"
                               >
-                                <FiFileText /> Naap
+                                <FiFileText /> Measurements
                               </button>
                               <button
                                 type="button"
@@ -605,7 +605,7 @@ const WorkerDashboard = () => {
               currentSuits.length === 0 ? (
                 <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                   <FiCheckCircle className="text-4xl text-gray-300 mx-auto mb-2" />
-                  <p className="text-gray-400 font-bold text-sm">Abhi tak koi suit approved nahi hua.</p>
+                  <p className="text-gray-400 font-bold text-sm">No suits approved yet.</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto bg-white border border-gray-200 rounded shadow-xs">
@@ -808,9 +808,9 @@ const WorkerDashboard = () => {
                   <div className="text-center py-16 bg-white border border-gray-200 rounded shadow-sm">
                     <FiCheckCircle className="text-4xl text-green-500 mx-auto mb-2" />
                     <p className="text-gray-700 font-bold text-sm">
-                      {deliverySearchTerm ? 'Is search ke mutabiq koi undelivered order nahi mila.' : 'Koi pending delivery order nahi hai.'}
+                      {deliverySearchTerm ? 'No undelivered orders matched your search.' : 'No pending delivery orders.'}
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">Tamam orders deliver ho chuke hain ya koi pending order nahi hai.</p>
+                    <p className="text-xs text-gray-400 mt-0.5">All orders have been delivered or no pending orders exist.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto bg-white border border-gray-200 rounded shadow-xs">
@@ -1297,7 +1297,7 @@ const SuitSpecsModal = ({ suit: initialSuit, allSuits = [], worker, closeModal, 
               <div className="space-y-3">
                 {(!measurements || measurements.length === 0) ? (
                   <div className="text-center py-4 bg-gray-50 border border-gray-200 rounded text-gray-400 italic text-xs">
-                    Is suit / wearer ke liye koi naap save nahi hai.
+                    No measurements saved for this suit / wearer.
                   </div>
                 ) : (
                   measurements.map((meas, mIdx) => {
@@ -1703,19 +1703,19 @@ const WorkerOrderDeliveryModal = ({ order, worker, closeModal, onDelivered }) =>
               {diff > 0 && (
                 <p className="flex items-center gap-1.5">
                   <FiAlertTriangle className="text-red-600 shrink-0 text-sm" />
-                  <span>Rs {diff.toLocaleString()} baqiya balance customer ke khata mein darj hoga.</span>
+                  <span>Rs {diff.toLocaleString()} remaining balance will be recorded to customer ledger.</span>
                 </p>
               )}
               {diff < 0 && (
                 <p className="flex items-center gap-1.5">
                   <FiCheck className="text-green-600 shrink-0 text-sm" />
-                  <span>Rs {Math.abs(diff).toLocaleString()} extra payment customer ke advance mein jama hogi.</span>
+                  <span>Rs {Math.abs(diff).toLocaleString()} extra payment will be credited to customer advance balance.</span>
                 </p>
               )}
               {diff === 0 && (
                 <p className="flex items-center gap-1.5">
                   <FiCheckCircle className="text-emerald-600 shrink-0 text-sm" />
-                  <span>Full payment received! Nill balance (Khata mukamal clear).</span>
+                  <span>Full payment received! Zero balance (Account fully cleared).</span>
                 </p>
               )}
             </div>

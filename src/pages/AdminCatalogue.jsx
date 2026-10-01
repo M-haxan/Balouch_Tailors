@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGetCatalogue, useDeleteCatalogue, useAddCatalogue, useUpdateCatalogue } from '../hooks/useCatalogue';
 import Preloader from '../components/Preloader';
 import { FiX, FiPlus, FiEdit, FiTrash2, FiMaximize2, FiLayers } from 'react-icons/fi';
 
 const AdminCatalogue = () => {
+  const { t } = useTranslation();
   // Tabs aur Form ki state
   const [activeTab, setActiveTab] = useState('Shalwar Qameez');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -31,10 +33,10 @@ const AdminCatalogue = () => {
             <div className="w-9 h-9 rounded-xl bg-[#0F172A] text-[#DFAC43] flex items-center justify-center font-bold shrink-0 shadow-xs">
               <FiLayers className="text-lg" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">Manage Design Catalogue</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">{t('catalogue.title')}</h2>
           </div>
           <p className="text-xs sm:text-sm text-gray-500 mt-1 font-medium max-w-2xl leading-relaxed">
-            Upload and organize suit/kurta/shirt design photos across the 3 categories for the slider and gallery.
+            {t('catalogue.subtitle')}
           </p>
         </div>
 
@@ -43,7 +45,7 @@ const AdminCatalogue = () => {
           className="w-full sm:w-auto bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
         >
           <FiPlus className="text-base shrink-0" />
-          <span>Add New Design / Vol</span>
+          <span>{t('catalogue.addDesign')}</span>
         </button>
       </div>
 
@@ -118,11 +120,7 @@ const AdminCatalogue = () => {
                       <span>Edit</span>
                     </button>
                     <button
-                      onClick={() => {
-                        if (window.confirm(`Are you sure you want to delete ${volTitle}?`)) {
-                          deleteItem(item._id);
-                        }
-                      }}
+                      onClick={() => deleteItem(item._id)}
                       disabled={isDeleting}
                       className="text-red-600 hover:text-red-800 text-[11px] sm:text-xs font-bold py-1.5 px-2 bg-red-50 hover:bg-red-100 rounded-lg transition flex items-center justify-center gap-1 cursor-pointer"
                     >

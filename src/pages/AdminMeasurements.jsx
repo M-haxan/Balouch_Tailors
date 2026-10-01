@@ -107,12 +107,12 @@ const AdminMeasurements = () => {
                   </div>
                 </div>
 
-                {/* CARD BODY: NAAP DETAILS (Sirf tabhi khulega jab click hoga) */}
+                {/* CARD BODY: MEASUREMENTS DETAILS (Expands when clicked) */}
                 {isExpanded && (
                   <div className="border-t border-gray-100 bg-gray-50/50 p-5 rounded-b-xl animate-fade-in">
                     {!hasMeasurements ? (
                       <div className="text-center py-4 text-sm font-bold text-red-500">
-                        Is customer ka koi naap system mein save nahi hai. Please customer section mein ja kar add karein.
+                        No measurements saved for this customer. Please add measurements in the Customers section.
                       </div>
                     ) : (
                       <div className="space-y-6">

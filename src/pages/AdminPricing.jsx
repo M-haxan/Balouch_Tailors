@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGetPricing, useAddPricing, useUpdatePricing, useDeletePricing } from '../hooks/usePricing';
 import Preloader from '../components/Preloader';
 import { FiEdit, FiTrash2, FiX } from 'react-icons/fi';
 
 const AdminPricing = () => {
+  const { t } = useTranslation();
   const { data: pricingList = [], isLoading, isError } = useGetPricing();
   const { mutate: deletePricing, isPending: isDeleting } = useDeletePricing();
 
@@ -17,9 +19,7 @@ const AdminPricing = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this pricing card?')) {
-      deletePricing(id);
-    }
+    deletePricing(id);
   };
 
   if (isLoading) return <div className="flex justify-center py-20"><Preloader /></div>;
@@ -30,14 +30,14 @@ const AdminPricing = () => {
       {/* Header Section */}
       <div className="flex justify-between items-center border-b pb-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Manage Pricing</h2>
-          <p className="text-sm text-gray-500 mt-1">Set tailoring rates for your services.</p>
+          <h2 className="text-2xl font-bold text-gray-800">{t('pricing.title')}</h2>
+          <p className="text-sm text-gray-500 mt-1">{t('pricing.subtitle')}</p>
         </div>
         <button
           onClick={() => openModal()}
-          className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] px-4 py-2 rounded text-sm font-bold transition shadow-sm"
+          className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] px-4 py-2 rounded text-sm font-bold transition shadow-sm cursor-pointer"
         >
-          + Add New Pricing
+          {t('pricing.addRate')}
         </button>
       </div>
 
