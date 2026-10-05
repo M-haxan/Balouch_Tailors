@@ -77,6 +77,7 @@ const CreateOrder = () => {
     }
   }, [searchParams]);
 
+  const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [deliveryDate, setDeliveryDate] = useState('');
   const [advancePaid, setAdvancePaid] = useState('');
   const [savedOrder, setSavedOrder] = useState(null);
@@ -480,6 +481,7 @@ const CreateOrder = () => {
     formData.append('totalAmount', totalAmount);
     formData.append('advancePaid', Number(advancePaid) || 0);
     formData.append('balanceAmount', balanceAmount);
+    formData.append('bookingDate', bookingDate);
     formData.append('deliveryDate', deliveryDate);
     formData.append('previousKhataAdjusted', JSON.stringify(khataAdjustment));
 
@@ -573,6 +575,8 @@ const CreateOrder = () => {
                 setSuits([createInitialSuit(garmentServices[0])]);
                 setDiscountPercent('');
                 setAdvancePaid('');
+                setBookingDate(new Date().toISOString().split('T')[0]);
+                setDeliveryDate('');
                 setCustomerId('');
               }}
               className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold h-10 sm:h-11 rounded transition text-xs sm:text-sm cursor-pointer"
@@ -1233,19 +1237,40 @@ const CreateOrder = () => {
               
               {/* Delivery Date & Discount Inputs */}
               <div className="space-y-3 sm:space-y-4">
-                <div>
-                  <label className="block text-[11px] font-bold text-gray-300 mb-1">
-                    Delivery Due Date *
-                  </label>
-                  <div className="relative">
-                    <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input 
-                      required 
-                      type="date" 
-                      value={deliveryDate} 
-                      onChange={(e) => setDeliveryDate(e.target.value)} 
-                      className="w-full h-10 pl-9 pr-3 bg-gray-900 border border-gray-700 focus:border-[#DFAC43] text-white rounded outline-none font-medium text-xs sm:text-sm" 
-                    />
+                {/* Booking Date & Delivery Due Date Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Booking Date */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-300 mb-1">
+                      Booking Date (بکنگ کی تاریخ) *
+                    </label>
+                    <div className="relative">
+                      <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input 
+                        required 
+                        type="date" 
+                        value={bookingDate} 
+                        onChange={(e) => setBookingDate(e.target.value)} 
+                        className="w-full h-10 pl-9 pr-3 bg-gray-900 border border-gray-700 focus:border-[#DFAC43] text-white rounded outline-none font-medium text-xs sm:text-sm cursor-pointer" 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Delivery Due Date */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-gray-300 mb-1">
+                      Delivery Due Date (ڈیلیوری کی تاریخ) *
+                    </label>
+                    <div className="relative">
+                      <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input 
+                        required 
+                        type="date" 
+                        value={deliveryDate} 
+                        onChange={(e) => setDeliveryDate(e.target.value)} 
+                        className="w-full h-10 pl-9 pr-3 bg-gray-900 border border-gray-700 focus:border-[#DFAC43] text-white rounded outline-none font-medium text-xs sm:text-sm cursor-pointer" 
+                      />
+                    </div>
                   </div>
                 </div>
 

@@ -209,7 +209,7 @@ const Register = () => {
 
           {/* Quick link to login */}
           <div className="pt-4 mt-4 text-center border-t border-gray-100">
-            <Link to="/login" className="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-black font-semibold transition">
+            <Link to="/admin/login" className="inline-flex items-center gap-1.5 text-xs text-gray-600 hover:text-black font-semibold transition">
               <FiArrowLeft className="text-xs" /> Back to Sign In
             </Link>
           </div>

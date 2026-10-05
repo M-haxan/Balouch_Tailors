@@ -164,7 +164,7 @@ export const useResetPasswordMutation = () => {
     },
     onSuccess: (data) => {
       toast.success(data?.message || 'Password reset successfully! Please login with your new password.');
-      navigate('/login');
+      navigate('/admin/login');
     },
     onError: (error) => {
       const msg = error.response?.data?.message || error.message || 'Failed to reset password';

@@ -24,16 +24,38 @@ const PAGE_SIZE = 10;
 
 const AdminPayments = () => {
   const navigate = useNavigate();
-  const { data: orders = [], isLoading } = useGetOrders();
-  const { mutate: deliverOrder, isPending: isDelivering } = useDeliverOrder();
-  const { data: shopSettings } = useGetShopSettings();
-  const shopName = shopSettings?.shopName || 'Balouch Tailors';
-
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'partial' | 'paid' | 'unpaid'
   const [currentPage, setCurrentPage] = useState(1);
   const [settleModalOrder, setSettleModalOrder] = useState(null);
   const [settleAmount, setSettleAmount] = useState('');
+
+  const { data: ordersResponse, isLoading } = useGetOrders({
+    page: currentPage,
+    limit: PAGE_SIZE,
+    search: searchQuery,
+  });
+
+  const { mutate: deliverOrder, isPending: isDelivering } = useDeliverOrder();
+  const { data: shopSettings } = useGetShopSettings();
+  const shopName = shopSettings?.shopName || 'Balouch Tailors';
+
+  const orders = ordersResponse?.data || (Array.isArray(ordersResponse) ? ordersResponse : []);
+  const pagination = ordersResponse?.pagination || {
+    totalRecords: orders.length,
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: PAGE_SIZE
+  };
+
+  const {
+    todayCashCollected = 0,
+    totalOutstandingBalance = 0,
+    partialPaidCount = 0,
+    partialPaidBalance = 0,
+    fullyPaidCount = 0,
+    unpaidCount = 0
+  } = ordersResponse?.financialStats || {};
 
   if (isLoading) {
     return (
@@ -43,43 +65,7 @@ const AdminPayments = () => {
     );
   }
 
-  // --- FINANCIAL CALCULATIONS ---
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  let todayCollection = 0;
-  let totalOutstandingBalance = 0;
-  let partialPaidCount = 0;
-  let partialPaidBalance = 0;
-  let fullyPaidCount = 0;
-  let unpaidCount = 0;
-
-  orders.forEach(ord => {
-    const total = Number(ord.totalAmount) || 0;
-    const advance = Number(ord.advancePaid) || 0;
-    const balance = Number(ord.balanceAmount) || 0;
-
-    // Check if booked or paid today
-    const bookingDate = new Date(ord.bookingDate || ord.createdAt);
-    bookingDate.setHours(0, 0, 0, 0);
-    if (bookingDate.getTime() === today.getTime()) {
-      todayCollection += advance;
-    }
-
-    if (balance > 0) {
-      totalOutstandingBalance += balance;
-      if (advance > 0) {
-        partialPaidCount++;
-        partialPaidBalance += balance;
-      } else {
-        unpaidCount++;
-      }
-    } else {
-      fullyPaidCount++;
-    }
-  });
-
-  // Filter Orders List
+  // Filter Orders for table view if status filter is active
   const filteredOrders = orders.filter(ord => {
     const total = Number(ord.totalAmount) || 0;
     const advance = Number(ord.advancePaid) || 0;
@@ -93,17 +79,8 @@ const AdminPayments = () => {
     if (statusFilter === 'partial' && !isPartial) return false;
     if (statusFilter === 'unpaid' && !isUnpaid) return false;
 
-    // Search query match
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const orderNum = (ord.orderNumber || '').toString().toLowerCase();
-      const custName = (ord.customer?.name || '').toLowerCase();
-      const custPhone = (ord.customer?.phone || '').toLowerCase();
-      return orderNum.includes(q) || custName.includes(q) || custPhone.includes(q);
-    }
-
     return true;
-  }).sort((a, b) => new Date(b.createdAt || b.bookingDate) - new Date(a.createdAt || a.bookingDate));
+  });
 
   // Quick Settle Handler
   const handleOpenSettle = (order) => {
@@ -180,7 +157,7 @@ const AdminPayments = () => {
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider truncate">Today's Cash</span>
             <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs shrink-0"><FaMoneyBillWave /></span>
           </div>
-          <p className="text-lg sm:text-xl font-black text-[#0F172A] font-sans">Rs {todayCollection.toLocaleString()}</p>
+          <p className="text-lg sm:text-xl font-black text-[#0F172A] font-sans">Rs {todayCashCollected.toLocaleString()}</p>
           <span className="text-[10px] text-green-700 font-bold block truncate">Cash Collected Today</span>
         </div>
 
@@ -262,7 +239,7 @@ const AdminPayments = () => {
                   : 'text-gray-600 hover:bg-gray-200'
               }`}
             >
-              All ({orders.length})
+              All ({pagination.totalRecords || orders.length})
             </button>
             <button
               onClick={() => {

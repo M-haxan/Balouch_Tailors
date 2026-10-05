@@ -21,10 +21,10 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
   const sidebarWidth = collapsed ? 'md:w-20' : 'md:w-64';
 
   const getLinkStyle = ({ isActive }) => {
-    const baseStyle = "flex items-center px-6 py-3 my-1 text-sm font-semibold rounded-r transition-colors";
+    const baseStyle = "flex items-center px-3.5 sm:px-5 py-2.5 my-0.5 text-xs sm:text-sm font-semibold rounded-r transition-colors tracking-tight";
     const activeStyle = "bg-amber-50 text-black font-black border-l-4 border-[#DFAC43]";
     const inactiveStyle = "text-gray-600 hover:bg-gray-100 hover:text-black border-l-4 border-transparent";
-    const collapsedStyle = collapsed ? 'justify-center px-3' : '';
+    const collapsedStyle = collapsed ? 'justify-center px-2' : '';
     return `${baseStyle} ${isActive ? activeStyle : inactiveStyle} ${collapsedStyle}`;
   };
 
@@ -53,15 +53,15 @@ const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) 
           </NavLink>
           <NavLink to="/admin/catalogue" className={getLinkStyle} onClick={onCloseMobile}>
             <FiShoppingBag className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>{t('nav.catalogue')}</span>}
+            {!collapsed && <span>{t('admin.catalogue')}</span>}
           </NavLink>
           <NavLink to="/admin/services" className={getLinkStyle} onClick={onCloseMobile}>
             <FiLayers className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>{t('nav.services')}</span>}
+            {!collapsed && <span>{t('admin.services')}</span>}
           </NavLink>
           <NavLink to="/admin/pricing" className={getLinkStyle} onClick={onCloseMobile}>
             <FiCreditCard className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />
-            {!collapsed && <span>{t('nav.pricing')}</span>}
+            {!collapsed && <span>{t('admin.rates')}</span>}
           </NavLink>
           <NavLink to="/admin/customers" className={getLinkStyle} onClick={onCloseMobile}>
             <CgProfile className={`w-5 h-5 ${collapsed ? 'mx-auto' : 'mr-3'}`} />

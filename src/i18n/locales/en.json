@@ -40,6 +40,14 @@
     "createdOn": "Created On",
     "updatedOn": "Updated On"
   },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "catalogue": "Catalogue",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "visitUs": "Visit Us"
+  },
   "admin": {
     "dashboard": "Dashboard",
     "allOrders": "All Orders",
@@ -51,6 +59,7 @@
     "payments": "Invoices & Payments",
     "catalogue": "Design Catalogue",
     "rates": "Rates & Pricing",
+    "pricing": "Rates & Pricing",
     "services": "Services",
     "settings": "Shop Settings",
     "profile": "Profile & Security",
@@ -256,7 +265,7 @@
     "noItems": "No design styles found in catalogue."
   },
   "pricing": {
-    "title": "Tailoring Pricing & Rates",
+    "title": "Tailoring Rates",
     "subtitle": "Manage base stitching rates, custom styling surcharges, and urgent delivery fees",
     "addRate": "+ Add New Rate",
     "serviceName": "Service / Garment Name",
@@ -268,7 +277,7 @@
   "settings": {
     "title": "Shop & System Settings",
     "subtitle": "Configure workshop branding, business contact information, invoice receipts, and defaults",
-    "shopDetails": "Shop Profile & Contact Info",
+    "shopDetails": "Shop Profile",
     "shopName": "Shop / Business Name",
     "tagline": "Business Tagline / Slogan",
     "phone": "Primary Contact Phone",
@@ -291,7 +300,7 @@
     "updatePassword": "Update Password"
   },
   "measurements": {
-    "title": "Measurements (پیمائش)",
+    "title": "Measurement Presets",
     "length": "Length (لمبائی)",
     "shoulder": "Shoulder / Teera (تیرا)",
     "sleeves": "Sleeves / Bazu (بازو)",

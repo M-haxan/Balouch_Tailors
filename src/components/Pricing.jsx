@@ -1,10 +1,8 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { AiOutlineCheck } from 'react-icons/ai';
 import { useGetPricing } from '../hooks/usePricing';
 
 const Pricing = () => {
-    const { t } = useTranslation();
     // Fetching From DB 
     const { data: pricingList = [], isLoading, isError } = useGetPricing();
 
@@ -18,34 +16,34 @@ const Pricing = () => {
 
             <div className="container mx-auto px-4 relative z-10 max-w-6xl">
                 <div className="text-center mb-10 sm:mb-16">
-                    <h2 className="text-xs sm:text-sm font-bold tracking-widest text-[#D4AF37] uppercase mb-2 sm:mb-3">{t('pricing.tagline')}</h2>
-                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-6 font-serif">{t('pricing.heading')}</h3>
+                    <h2 className="text-xs sm:text-sm font-bold tracking-widest text-[#D4AF37] uppercase mb-2 sm:mb-3">Tailoring Rates</h2>
+                    <h3 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-6 font-serif">Pricing List</h3>
                     <div className="w-16 sm:w-24 h-1 bg-gradient-to-r from-[#DFAC43] to-[#F5D77F] mx-auto rounded-full"></div>
                 </div>
 
                 <div className="max-w-4xl mx-auto bg-white shadow-xl sm:shadow-2xl rounded-xl overflow-hidden border border-gray-100 transform hover:-translate-y-1 transition-transform duration-500">
                     <div className="bg-[#0F172A] text-[#DFAC43] px-4 sm:px-8 py-3.5 sm:py-5 flex justify-between items-center">
-                        <h4 className="text-xs sm:text-base md:text-lg font-black uppercase tracking-wider">{t('pricing.serviceDesc')}</h4>
-                        <h4 className="text-xs sm:text-base md:text-lg font-black uppercase tracking-wider">{t('pricing.rate')}</h4>
+                        <h4 className="text-xs sm:text-base md:text-lg font-black uppercase tracking-wider">Service Description</h4>
+                        <h4 className="text-xs sm:text-base md:text-lg font-black uppercase tracking-wider">Rate (Rs)</h4>
                     </div>
                     
                     <div className="divide-y divide-gray-100">
                         {/* Loading aur Error Status */}
                         {isLoading && (
                             <div className="px-4 sm:px-8 py-10 text-center text-gray-500 font-medium text-xs sm:text-sm">
-                                {t('pricing.loading')}
+                                Loading pricing details...
                             </div>
                         )}
                         
                         {isError && (
                             <div className="px-4 sm:px-8 py-10 text-center text-red-500 font-medium text-xs sm:text-sm">
-                                {t('pricing.failed')}
+                                Failed to load pricing. Please try again.
                             </div>
                         )}
 
                         {!isLoading && !isError && pricingList.length === 0 && (
                             <div className="px-4 sm:px-8 py-10 text-center text-gray-400 text-xs sm:text-sm">
-                                {t('pricing.noItems')}
+                                No pricing details available yet.
                             </div>
                         )}
 
@@ -83,7 +81,7 @@ const Pricing = () => {
                         ))}
                     </div>
                     <div className="bg-gray-50 px-4 sm:px-8 py-3.5 sm:py-4 text-center text-[10px] sm:text-xs text-gray-500 font-medium border-t border-gray-100">
-                        {t('pricing.notice')}
+                        * Prices are subject to change based on specific customer requirements and fabric complexities.
                     </div>
                 </div>
             </div>

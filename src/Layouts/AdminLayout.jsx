@@ -47,7 +47,7 @@ const AdminLayout = () => {
         )}
 
         {/* Main Content Area (Jahan forms aur tables aayenge) */}
-        <main className="flex-1 p-3.5 sm:p-5 lg:p-7 overflow-y-auto h-[calc(100vh-5rem)] no-scrollbar">
+        <main className="flex-1 p-3 sm:p-4 md:p-5 overflow-y-auto h-[calc(100vh-5rem)]">
           {/* Outlet ka matlab hai yahan andar wale routes (pages) render honge */}
           <Outlet /> 
         </main>

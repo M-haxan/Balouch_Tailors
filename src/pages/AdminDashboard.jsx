@@ -302,21 +302,21 @@ const AdminDashboard = () => {
           </button>
         </div>
 
-        {/* Segmented Delivery Tabs */}
-        <div className="flex items-center gap-1.5 sm:gap-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200 overflow-x-auto no-scrollbar flex-nowrap sm:flex-wrap">
+        {/* Segmented Delivery Tabs (Responsive Grid on Small Screens / Flex on Desktop) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap items-center gap-1.5 sm:gap-2 bg-gray-50 p-1.5 sm:p-2 rounded-lg border border-gray-200 w-full">
           
           {/* Tab 1: Today's Deliveries */}
           <button
             onClick={() => handleDeliveryFilterChange('today')}
-            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
               deliveryFilter === 'today'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                 : todayOrders.length > 0
                 ? 'bg-amber-100 text-amber-950 hover:bg-amber-200'
-                : 'text-gray-600 hover:bg-gray-200'
+                : 'text-gray-600 hover:bg-gray-200 bg-white sm:bg-transparent'
             }`}
           >
-            <span>{t('dashboard.todayDeliveries')}</span>
+            <span className="whitespace-nowrap">{t('dashboard.todayDeliveries')}</span>
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
               todayOrders.length > 0 ? 'bg-[#DFAC43] text-[#0F172A]' : 'bg-gray-200 text-gray-700'
             }`}>
@@ -327,13 +327,13 @@ const AdminDashboard = () => {
           {/* Tab 2: Upcoming in 3 Days */}
           <button
             onClick={() => handleDeliveryFilterChange('in3days')}
-            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
               deliveryFilter === 'in3days'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
-                : 'text-gray-600 hover:bg-gray-200'
+                : 'text-gray-600 hover:bg-gray-200 bg-white sm:bg-transparent'
             }`}
           >
-            <span>{t('dashboard.in3Days')}</span>
+            <span className="whitespace-nowrap">{t('dashboard.in3Days')}</span>
             <span className="text-[10px] px-1.5 py-0.2 bg-gray-200 text-gray-800 rounded-full font-bold">
               {in3DaysOrders.length}
             </span>
@@ -342,13 +342,13 @@ const AdminDashboard = () => {
           {/* Tab 3: Next Week Deliveries */}
           <button
             onClick={() => handleDeliveryFilterChange('nextWeek')}
-            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
               deliveryFilter === 'nextWeek'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
-                : 'text-gray-600 hover:bg-gray-200'
+                : 'text-gray-600 hover:bg-gray-200 bg-white sm:bg-transparent'
             }`}
           >
-            <span>{t('dashboard.nextWeek')}</span>
+            <span className="whitespace-nowrap">{t('dashboard.nextWeek')}</span>
             <span className="text-[10px] px-1.5 py-0.2 bg-gray-200 text-gray-800 rounded-full font-bold">
               {nextWeekOrders.length}
             </span>
@@ -358,14 +358,16 @@ const AdminDashboard = () => {
           {overdueOrders.length > 0 && (
             <button
               onClick={() => handleDeliveryFilterChange('overdue')}
-              className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+              className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
                 deliveryFilter === 'overdue'
                   ? 'bg-red-700 text-white shadow-sm'
                   : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200'
               }`}
             >
-              <FiAlertCircle />
-              <span>{t('dashboard.overdue')}</span>
+              <div className="flex items-center gap-1">
+                <FiAlertCircle />
+                <span className="whitespace-nowrap">{t('dashboard.overdue')}</span>
+              </div>
               <span className="text-[10px] px-1.5 py-0.2 bg-red-200 text-red-900 rounded-full font-black">
                 {overdueOrders.length}
               </span>
@@ -375,13 +377,13 @@ const AdminDashboard = () => {
           {/* Tab 5: All Active Orders */}
           <button
             onClick={() => handleDeliveryFilterChange('all')}
-            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-xs font-black transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
               deliveryFilter === 'all'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
-                : 'text-gray-600 hover:bg-gray-200'
+                : 'text-gray-600 hover:bg-gray-200 bg-white sm:bg-transparent'
             }`}
           >
-            <span>{t('dashboard.allOrders')}</span>
+            <span className="whitespace-nowrap">{t('dashboard.allOrders')}</span>
             <span className="text-[10px] px-1.5 py-0.2 bg-gray-200 text-gray-800 rounded-full font-bold">
               {activeOrders.length}
             </span>

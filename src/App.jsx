@@ -1,8 +1,5 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -36,8 +33,6 @@ import AdminExpenses from './pages/AdminExpenses';
 import AdminFinancialReports from './pages/AdminFinancialReports';
 import AdminPayments from './pages/AdminPayments';
 
-const queryClient = new QueryClient();
-
 function Home() {
   return (
     <>
@@ -58,14 +53,11 @@ function App() {
     location.pathname.startsWith('/worker') || 
     location.pathname.startsWith('/track') ||
     location.pathname === '/login' ||
-    location.pathname === '/register' ||
     location.pathname === '/admin-register' ||
-    location.pathname === '/secret-register' ||
     location.pathname.startsWith('/reset-password');
 
   return (
-    <QueryClientProvider client={queryClient}>
-      
+    <>
       {/* 1. Header sirf tab dikhayega jab admin route NAHI hoga */}
       {!hideHeaderAndFooter && <Header />}
       
@@ -83,20 +75,18 @@ function App() {
           <Route path="/track/suit/:suitId" element={<PublicSuitTrack />} />
 
           {/* Admin Login & Authentication */}
-          <Route path="/login" element={<Login />} />
           <Route path="/admin/login" element={<Login />} />
+          {/* <Route path="/login" element={<Navigate to="/admin/login" replace />} /> */}
           
-          {/* Hidden Admin Direct Registration Routes */}
-          <Route path="/register" element={<Register />} />
+          {/* Admin Registration Route */}
           <Route path="/admin-register" element={<Register />} />
-          <Route path="/secret-register" element={<Register />} />
 
           {/* Password Reset Confirmation */}
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* Worker Login */}
           <Route path="/worker/login" element={<WorkerLogin />} />
-          <Route path="/worker-login" element={<Navigate to="/worker/login" replace />} />
+          {/* <Route path="/worker-login" element={<Navigate to="/worker/login" replace />} /> */}
 
           {/* Worker Protected Routes */}
           <Route path="/worker/dashboard" element={<WorkerDashboard />} />
@@ -106,7 +96,7 @@ function App() {
 
           {/* Admin Protected Routes */}
           <Route element={<AdminLayout />}>
-            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+            {/* <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} /> */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/catalogue" element={<AdminCatalogue />} />
             <Route path="/admin/services" element={<AdminServices />} />
@@ -128,23 +118,9 @@ function App() {
         </Routes>
       </main>
        
-      {/* 2. MAIN FIX YAHAN HAI: Footer ko Routes ke bahar nikala aur Condition lagayi */}
+      {/* 2. Footer sirf tab dikhayega jab admin route NAHI hoga */}
       {!hideHeaderAndFooter && <Footer />}
-
-      {/* Toast Notifications */}
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-    </QueryClientProvider>
+    </>
   );
 }
 
