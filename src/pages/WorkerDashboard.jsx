@@ -158,7 +158,7 @@ const WorkerDashboard = () => {
     <div className="min-h-screen bg-gray-50 pb-12 font-sans">
       
       {/* MOBILE-FRIENDLY HEADER */}
-      <header className="bg-black text-[#D4AF37] sticky top-0 z-40 px-4 sm:px-6 py-3.5 shadow-md flex flex-wrap justify-between items-center gap-3">
+      <header className="bg-black text-[#D4AF37] sticky top-0 z-40 px-4 sm:px-6 lg:px-8 py-3.5 shadow-md flex flex-wrap justify-between items-center gap-3">
         <div className="flex items-center gap-3">
           {worker.profileImage?.url ? (
             <img 
@@ -204,7 +204,7 @@ const WorkerDashboard = () => {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 mt-6 space-y-6">
+      <main className="w-full px-3 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
         
         {/* FINANCIAL & WORK STATUS CARDS */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -91,6 +91,7 @@ function App() {
           {/* Worker Protected Routes */}
           <Route path="/worker/dashboard" element={<WorkerDashboard />} />
           <Route path="/worker/orders/create" element={<CreateOrder />} />
+          <Route path="/worker/orders/edit/:id" element={<CreateOrder />} />
           <Route path="/worker/print/:id" element={<InvoicePrint />} />
           <Route path="/print/:id" element={<InvoicePrint />} />
 
@@ -112,6 +113,7 @@ function App() {
             <Route path="/admin/financial-reports" element={<AdminFinancialReports />} />
             <Route path="/admin/payments" element={<AdminPayments />} />
             <Route path="/admin/orders/create" element={<CreateOrder />} />
+            <Route path="/admin/orders/edit/:id" element={<CreateOrder />} />
             <Route path="/admin/allorders" element={<Allorders />} />
             <Route path="/admin/print/:id" element={<InvoicePrint />} />
           </Route>

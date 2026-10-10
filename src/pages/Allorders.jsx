@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useGetOrders, useUpdateOrder, useDeleteOrder, useDeliverOrder } from '../hooks/useOrder';
+import { useGetOrders, useGetOrderById, useUpdateOrder, useDeleteOrder, useDeliverOrder } from '../hooks/useOrder';
 import { useGetShopSettings } from '../hooks/useShopSettings';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import useAuthStore from '../Store/authStore';
 import defaultLogo from '../assets/BT_Logo.png';
 import { formatPhone } from '../utils/formatters';
 import { 
@@ -30,7 +31,10 @@ import {
   FiPhone,
   FiUserCheck,
   FiStar,
-  FiTruck
+  FiTruck,
+  FiEdit,
+  FiImage,
+  FiSave
 } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
@@ -44,9 +48,35 @@ import {
 } from '../hooks/useWorkers';
 import Pagination from '../components/Pagination';
 
+// Order Status Badge Color Logic (Module Scope)
+const getStatusColor = (status) => {
+  switch(status) {
+    case 'Pending':
+    case 'Booked':
+      return 'bg-amber-50 text-amber-900 border-amber-200';
+    case 'In Progress':
+      return 'bg-blue-50 text-blue-800 border-blue-200';
+    case 'Cutting':
+      return 'bg-indigo-50 text-indigo-800 border-indigo-200';
+    case 'Stitching':
+      return 'bg-purple-50 text-purple-800 border-purple-200';
+    case 'Ready':
+      return 'bg-teal-50 text-teal-800 border-teal-200';
+    case 'Completed':
+      return 'bg-amber-50 text-[#DFAC43] border-[#DFAC43]';
+    case 'Delivered':
+      return 'bg-[#0F172A] text-white border-[#0F172A]';
+    case 'Cancelled':
+      return 'bg-red-50 text-red-700 border-red-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
+
 const Allorders = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Filters & Server Pagination State
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,8 +85,29 @@ const Allorders = () => {
   const PAGE_SIZE = 10;
   const [viewingOrder, setViewingOrder] = useState(null);
 
+  const queryViewOrderId = searchParams.get('viewOrderId');
+  const activeViewOrderId = viewingOrder?._id || queryViewOrderId;
+
   // Delivery & Handover modal state
   const [deliveryModalOrder, setDeliveryModalOrder] = useState(null);
+
+  const handleOpenViewOrder = (order) => {
+    setViewingOrder(order);
+    setSearchParams(prev => {
+      const p = new URLSearchParams(prev);
+      p.set('viewOrderId', order._id);
+      return p;
+    }, { replace: true });
+  };
+
+  const handleCloseViewOrder = () => {
+    setViewingOrder(null);
+    setSearchParams(prev => {
+      const p = new URLSearchParams(prev);
+      p.delete('viewOrderId');
+      return p;
+    }, { replace: true });
+  };
 
   // Server-side paginated orders fetch
   const { data: ordersResponse, isLoading } = useGetOrders({
@@ -118,18 +169,6 @@ const Allorders = () => {
 
   const handleDelete = (id) => {
     deleteOrder(id);
-  };
-
-  // Badge Color Logic
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'Pending': return 'bg-amber-50 text-amber-900 border-amber-200';
-      case 'In Progress': return 'bg-slate-100 text-gray-800 border-slate-200';
-      case 'Completed': return 'bg-amber-50 text-[#DFAC43] border-[#DFAC43]';
-      case 'Delivered': return 'bg-[#0F172A] text-white border-[#0F172A]';
-      case 'Cancelled': return 'bg-red-50 text-red-700 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
   };
 
   return (
@@ -337,7 +376,7 @@ const Allorders = () => {
                           )}
 
                           <button 
-                            onClick={() => setViewingOrder(order)}
+                            onClick={() => handleOpenViewOrder(order)}
                             className={`p-1 sm:p-1.5 rounded-lg transition shadow-2xs cursor-pointer ${
                               hasPendingQC 
                                 ? 'bg-[#DFAC43] text-[#0F172A] font-bold hover:bg-white ring-1 ring-[#DFAC43]' 
@@ -483,7 +522,7 @@ const Allorders = () => {
                     )}
 
                     <button
-                      onClick={() => setViewingOrder(order)}
+                      onClick={() => handleOpenViewOrder(order)}
                       className={`flex-1 py-2 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer ${
                         hasPendingQC 
                           ? 'bg-[#DFAC43] text-[#0F172A] ring-1 ring-[#DFAC43]' 
@@ -532,10 +571,10 @@ const Allorders = () => {
       )}
 
       {/* ORDER DETAILS & QC MODAL */}
-      {viewingOrder && (
+      {activeViewOrderId && (
         <OrderDetailsModal 
-          orderId={viewingOrder._id} 
-          closeModal={() => setViewingOrder(null)} 
+          orderId={activeViewOrderId} 
+          closeModal={handleCloseViewOrder} 
           onOpenDelivery={(ord) => setDeliveryModalOrder(ord)}
         />
       )}
@@ -551,47 +590,193 @@ const Allorders = () => {
   );
 };
 
+// Helper: Map measurement keys to Urdu labels
+const MEASUREMENT_URDU_MAP = {
+  length: 'لمبائی',
+  lambai: 'لمبائی',
+  kameezLength: 'قمیض لمبائی',
+  kameez_length: 'قمیض لمبائی',
+  sleeves: 'بازو',
+  bazu: 'بازو',
+  collar: 'گلہ / بین',
+  neck: 'گلہ',
+  gala: 'گلہ',
+  chest: 'چھاتی',
+  chati: 'چھاتی',
+  ghera: 'گھیرا',
+  daman: 'دامن / گھیرا',
+  shoulder: 'تیرا',
+  tera: 'تیرا',
+  teera: 'تیرا',
+  shalwar: 'شلوار',
+  shalwarLength: 'شلوار لمبائی',
+  trouser: 'شلوار',
+  paincha: 'پانچہ',
+  paicha: 'پانچہ',
+  bottom: 'پانچہ',
+  waist: 'کمر',
+  kamar: 'کمر',
+  hip: 'کولہے',
+  thigh: 'تھائی / ران',
+  frontPatti: 'سامنے پٹی',
+  cuff: 'کف',
+  armhole: 'موڈھا',
+  modha: 'موڈھا'
+};
+
+const formatMeasurementsForParchi = (measurements) => {
+  if (!measurements || measurements.length === 0) return [];
+  
+  const merged = {};
+  measurements.forEach(m => {
+    const dataObj = m.data instanceof Map ? Object.fromEntries(m.data) : (m.data || {});
+    Object.entries(dataObj).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') {
+        merged[k] = v;
+      }
+    });
+  });
+
+  const standardKeys = [
+    { keys: ['length', 'lambai', 'kameezLength', 'kameez_length', 'لمبائی'], label: 'لمبائی' },
+    { keys: ['sleeves', 'bazu', 'بازو'], label: 'بازو' },
+    { keys: ['collar', 'neck', 'gala', 'گلہ', 'بین', 'گلہ / بین'], label: 'گلہ' },
+    { keys: ['chest', 'chati', 'چھاتی'], label: 'چھاتی' },
+    { keys: ['ghera', 'daman', 'گھیرا', 'دامن'], label: 'گھیرا' },
+    { keys: ['shoulder', 'tera', 'teera', 'تیرا'], label: 'تیرا' },
+    { keys: ['shalwar', 'shalwarLength', 'trouser', 'شلوار', 'شلوار لمبائی'], label: 'شلوار' },
+    { keys: ['paincha', 'paicha', 'bottom', 'پانچہ'], label: 'پانچہ' },
+  ];
+
+  const rows = [];
+  const handledKeys = new Set();
+
+  standardKeys.forEach(std => {
+    for (const k of std.keys) {
+      if (merged[k] !== undefined) {
+        rows.push({ label: std.label, val: merged[k] });
+        handledKeys.add(k);
+        break;
+      }
+    }
+  });
+
+  Object.entries(merged).forEach(([k, v]) => {
+    if (!handledKeys.has(k)) {
+      const urduLabel = MEASUREMENT_URDU_MAP[k] || k;
+      rows.push({ label: urduLabel, val: v });
+    }
+  });
+
+  return rows;
+};
+
 // -------------------------------------------------------------
 // COMPONENT: ORDER DETAILS, SPECS, NAAP & QC INSPECTION MODAL
 // -------------------------------------------------------------
 const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
-  const { data: orders = [] } = useGetOrders();
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const isWorker = user?.role === 'worker';
+
+  const { data: orderByIdData, isLoading: isLoadingOrder } = useGetOrderById(orderId);
+  const { data: ordersResponse = [] } = useGetOrders();
   const { data: workers = [] } = useGetWorkers();
   const { mutate: assignStage, isPending: isAssigningStage } = useAssignSuitStage();
   const { mutate: approveSuit, isPending: isApproving } = useApproveSuit();
   const { mutate: rejectSuit, isPending: isRejecting } = useRejectSuit();
+  const { mutate: updateOrder, isPending: isUpdatingStatus } = useUpdateOrder();
 
+  const [selectedSuitIndex, setSelectedSuitIndex] = useState(0);
   const [reworkModalSuit, setReworkModalSuit] = useState(null);
   const [reworkNotes, setReworkNotes] = useState('');
   
   // Track selected worker draft per suit (suitId -> workerId | 'self')
   const [workerDrafts, setWorkerDrafts] = useState({});
-  // Track open/collapsed Naap chart per suit
-  const [openNaapMap, setOpenNaapMap] = useState({});
   // State for printing individual suit job card / parchi
   const [printJobSuit, setPrintJobSuit] = useState(null);
 
-  const order = orders.find(o => o._id === orderId);
-  if (!order) return null;
+  const ordersList = Array.isArray(ordersResponse) ? ordersResponse : (ordersResponse?.data || []);
+  const order = orderByIdData || ordersList.find(o => o._id === orderId);
 
-  const toggleNaap = (suitKey) => {
-    setOpenNaapMap(prev => ({
-      ...prev,
-      [suitKey]: !prev[suitKey]
-    }));
-  };
+  if (!order) {
+    if (isLoadingOrder) {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-white rounded-xl p-8 text-center space-y-3 max-w-sm w-full shadow-2xl border border-gray-200">
+            <div className="w-9 h-9 border-4 border-[#0F172A] border-t-[#DFAC43] rounded-full animate-spin mx-auto"></div>
+            <p className="text-xs font-bold text-gray-800">Loading Order Details...</p>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  }
 
-  const handleWorkerDraftChange = (suitId, value) => {
+  const suitsList = order.suits || [];
+  const activeSuit = suitsList[selectedSuitIndex] || suitsList[0] || {};
+  const suitKey = activeSuit._id || `suit-${selectedSuitIndex}`;
+  const suitIdBadge = activeSuit.suitNumber || `BT-${order.orderNumber}-${selectedSuitIndex + 1}`;
+
+  const isUnderInspection = activeSuit.stitchingStatus === 'Submitted for Inspection';
+  const isRework = activeSuit.stitchingStatus === 'Rework Required';
+  const isStitched = activeSuit.stitchingStatus === 'Stitched';
+  
+  const wearer = activeSuit.wearer || {};
+  const measurements = (activeSuit.measurements && activeSuit.measurements.length > 0)
+    ? activeSuit.measurements
+    : (wearer.measurements || order.customer?.measurements || []);
+  const measurementRows = formatMeasurementsForParchi(measurements);
+
+  const prefs = activeSuit.stitchingPreferences || wearer.stitchingPreferences || order.customer?.stitchingPreferences || {};
+  
+  const prefValuesFromObj = [
+    prefs.collar,
+    prefs.sleeves,
+    prefs.daman,
+    prefs.frontPocket,
+    prefs.sidePockets,
+    prefs.shalwarPocket,
+    prefs.patti,
+    prefs.stitchingStyle,
+    prefs.otherPreferences
+  ].filter(Boolean);
+
+  const rawTags = [
+    ...(Array.isArray(prefs.tags) ? prefs.tags : []),
+    ...(Array.isArray(activeSuit.staticTags) ? activeSuit.staticTags : [])
+  ];
+
+  const prefValues = Array.from(new Set([...prefValuesFromObj, ...rawTags])).filter(Boolean);
+
+  // Current assigned worker ID or 'self'
+  const currentAssignedId = activeSuit.stitching?.isSelf 
+    ? 'self' 
+    : (activeSuit.assignedWorker?._id || activeSuit.assignedWorker || '');
+  
+  // Draft selection
+  const draftValue = workerDrafts[suitKey] !== undefined ? workerDrafts[suitKey] : currentAssignedId;
+
+  // Active assigned worker object
+  const activeWorkerObj = workers.find(w => w._id === currentAssignedId) || (typeof activeSuit.assignedWorker === 'object' ? activeSuit.assignedWorker : null);
+
+  const statusOptions = ['Booked', 'In Progress', 'Cutting', 'Stitching', 'Ready', 'Completed', 'Delivered', 'Cancelled'];
+
+  const handleWorkerDraftChange = (sId, value) => {
     setWorkerDrafts(prev => ({
       ...prev,
-      [suitId]: value
+      [sId]: value
     }));
   };
 
   const handleAssignWorker = (suitId) => {
-    const selected = workerDrafts[suitId];
-    if (selected === undefined) {
-      toast.info('Please select a worker or Self-Stitch first.');
+    const selected = workerDrafts[suitKey] !== undefined ? workerDrafts[suitKey] : currentAssignedId;
+    if (selected === undefined || selected === '') {
+      assignStage({
+        orderId: order._id,
+        suitId: suitId,
+        data: { stage: 'stitching', isSelf: false, workerId: null }
+      });
       return;
     }
 
@@ -601,17 +786,24 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
         suitId: suitId,
         data: { stage: 'stitching', isSelf: true }
       });
-    } else if (selected === '') {
-      assignStage({
-        orderId: order._id,
-        suitId: suitId,
-        data: { stage: 'stitching', isSelf: false, workerId: null }
-      });
     } else {
       assignStage({
         orderId: order._id,
         suitId: suitId,
         data: { stage: 'stitching', isSelf: false, workerId: selected }
+      });
+    }
+  };
+
+  const handleModalStatusChange = (newStatus) => {
+    if (newStatus === 'Delivered') {
+      closeModal();
+      if (onOpenDelivery) onOpenDelivery(order);
+    } else {
+      updateOrder({ id: order._id, data: { orderStatus: newStatus } }, {
+        onSuccess: () => {
+          toast.success(`Order status updated to "${newStatus}"`);
+        }
       });
     }
   };
@@ -643,528 +835,456 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-4 font-sans">
-        <div className="bg-white rounded shadow-2xl w-full max-w-5xl relative flex flex-col max-h-[94vh] overflow-hidden ">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-3 font-sans">
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl relative flex flex-col max-h-[92vh] overflow-hidden">
           
           {/* Header */}
-          <div className="flex justify-between items-center p-4 sm:p-5 border-b border-gray-100 bg-[#0F172A] text-white">
+          <div className="flex justify-between items-center py-2.5 px-4 sm:px-5 border-b border-gray-100 bg-[#0F172A] text-white shrink-0">
             <div className="flex items-center gap-2.5">
-              <span className="w-2 h-6 bg-[#DFAC43] rounded"></span>
+              <span className="w-1.5 h-5 bg-[#DFAC43] rounded-sm"></span>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base sm:text-lg font-black text-white">
+                  <h2 className="text-sm sm:text-base font-black text-white">
                     Order Details & Specifications
                   </h2>
-                  <span className="bg-[#DFAC43] text-[#0F172A] font-mono text-xs font-black px-2.5 py-0.5 rounded shadow-xs">
+                  <span className="bg-[#DFAC43] text-[#0F172A] font-mono text-xs font-black px-2 py-0.5 rounded shadow-2xs">
                     #BT-{order.orderNumber}
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-400 font-medium mt-0.5">
-                  Job Order Sheet, Full Naap Measurements, Styling Specs & Karigar Assignment
+                <p className="text-[10px] text-gray-400 font-medium">
+                  Job Sheet, Full Naap Measurements, Specs & Direct Actions
                 </p>
               </div>
             </div>
             <button 
               onClick={closeModal} 
-              className="p-1.5 text-gray-400 hover:text-white transition rounded hover:bg-gray-800 cursor-pointer"
+              className="p-1 text-gray-400 hover:text-white transition rounded hover:bg-gray-800 cursor-pointer"
             >
-              <FiX className="text-xl" />
+              <FiX className="text-lg" />
             </button>
           </div>
 
           {/* Modal Body */}
-          <div className="overflow-y-auto p-3 sm:p-6 space-y-6 flex-1 bg-gray-100/70">
+          <div className="overflow-y-auto p-3 sm:p-4 space-y-3 flex-1 bg-gray-100/70">
             
-            {/* Top 4 Info Cards: Customer, Timeline, Financials, Staff Handling */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            {/* 1. TOP 4 SUMMARY CARDS: Customer, Timeline, Financials, Staff Handling */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
               
               {/* Customer Details Card */}
-              <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1.5">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                   <FiUser className="text-[#DFAC43]" /> Customer Information
                 </span>
-                <p className="text-sm font-bold text-gray-900 truncate">{order.customer?.name || 'Walk-in Customer'}</p>
-                <p className="text-xs text-gray-600 font-semibold flex items-center gap-1">
-                  <FiPhone className="text-gray-400 text-[10px]" /> {formatPhone(order.customer?.phone)}
+                <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{order.customer?.name || 'Walk-in Customer'}</p>
+                <p className="text-[11px] text-gray-600 font-semibold flex items-center gap-1 font-mono">
+                  <FiPhone className="text-gray-400 text-[9px]" /> {formatPhone(order.customer?.phone)}
                 </p>
                 {order.customer?.address && (
-                  <p className="text-[11px] text-gray-400 mt-1 line-clamp-1">{order.customer.address}</p>
+                  <p className="text-[10px] text-gray-400 truncate">{order.customer.address}</p>
                 )}
               </div>
 
               {/* Dates Card */}
-              <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1.5">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                   <FiCalendar className="text-[#DFAC43]" /> Timeline & Schedule
                 </span>
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-gray-500">Booking Date:</span>
+                <div className="flex justify-between text-[11px] font-semibold">
+                  <span className="text-gray-500">Booked:</span>
                   <span className="text-gray-900">{new Date(order.bookingDate).toLocaleDateString()}</span>
                 </div>
-                <div className="flex justify-between text-xs font-semibold">
+                <div className="flex justify-between text-[11px] font-semibold">
                   <span className="text-gray-500">Delivery Due:</span>
                   <span className="text-red-600 font-black">{new Date(order.deliveryDate).toLocaleDateString()}</span>
                 </div>
               </div>
 
               {/* Financial Card */}
-              <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1.5">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                   <FiCreditCard className="text-[#DFAC43]" /> Financial Summary
                 </span>
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-gray-500">Total Price:</span>
-                  <span className="text-black font-black">Rs {order.totalAmount}</span>
+                <div className="flex justify-between text-[11px] font-semibold">
+                  <span className="text-gray-500">Total Bill:</span>
+                  <span className="text-black font-black font-sans">Rs {order.totalAmount}</span>
                 </div>
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-gray-500">Advance Paid:</span>
-                  <span className="text-green-600 font-bold">Rs {order.advancePaid || 0}</span>
-                </div>
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-gray-500">Balance Due:</span>
-                  <span className="text-red-500 font-black">Rs {order.balanceAmount || 0}</span>
+                <div className="flex justify-between text-[11px] font-semibold">
+                  <span className="text-gray-500">Advance / Bal:</span>
+                  <span>
+                    <span className="text-green-600 font-bold font-sans">Rs {order.advancePaid || 0}</span>
+                    <span className="text-gray-300 mx-1">/</span>
+                    <span className="text-red-500 font-black font-sans">Rs {order.balanceAmount || 0}</span>
+                  </span>
                 </div>
               </div>
 
               {/* Staff Handling & Audit Card */}
-              <div className="bg-white p-4 rounded border border-gray-200 shadow-xs space-y-1.5">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <FiUserCheck className="text-[#DFAC43]" /> Staff & Delivery Audit
+              <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                  <FiUserCheck className="text-[#DFAC43]" /> Staff Audit
                 </span>
-                <div className="flex justify-between text-xs font-semibold">
+                <div className="flex justify-between text-[11px] font-semibold">
                   <span className="text-gray-500">Booked By:</span>
-                  <span className="text-gray-900 font-bold">{order.createdBy?.name || 'Admin'} <span className="text-[10px] text-gray-500 font-normal">({order.createdBy?.userType === 'worker' ? 'Worker' : 'Admin'})</span></span>
+                  <span className="text-gray-900 font-bold truncate max-w-[110px]">{order.createdBy?.name || 'Admin'}</span>
                 </div>
-                <div className="flex justify-between text-xs font-semibold">
+                <div className="flex justify-between text-[11px] font-semibold">
                   <span className="text-gray-500">Delivered By:</span>
-                  <span className={`font-bold ${order.orderStatus === 'Delivered' ? 'text-emerald-700' : 'text-gray-400'}`}>
+                  <span className={`font-bold truncate max-w-[110px] ${order.orderStatus === 'Delivered' ? 'text-emerald-700' : 'text-gray-400'}`}>
                     {order.orderStatus === 'Delivered' 
                       ? (order.deliveredBy?.name || order.receivedAtDelivery?.receivedBy || 'Admin')
                       : 'Not Delivered'}
                   </span>
                 </div>
-                {order.orderStatus === 'Delivered' && order.receivedAtDelivery?.amount !== undefined && (
-                  <div className="flex justify-between text-[11px] font-semibold border-t border-gray-100 pt-1">
-                    <span className="text-gray-500">Cash Received:</span>
-                    <span className="text-emerald-800 font-black">Rs {order.receivedAtDelivery.amount} ({order.receivedAtDelivery.paymentMethod || 'Cash'})</span>
-                  </div>
-                )}
               </div>
 
             </div>
 
-            {/* Suits List with Top Karigar Control & Order Form Parchi */}
-            <div className="space-y-6">
-              <div className="flex flex-wrap justify-between items-center border-b pb-2 gap-2">
-                <h3 className="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-2">
-                  <FiScissors className="text-[#DFAC43]" /> Suit Cutting & Stitching Parchi Sheets ({order.suits?.length || 0})
-                </h3>
-                <span className="text-[11px] text-gray-500 font-medium">
-                  Har suit ki alag parchi or naap form niche maujood hai
-                </span>
+            {/* SUIT SELECTION TABS (If multiple suits in order) */}
+            {suitsList.length > 1 && (
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+                <span className="text-[11px] font-bold text-gray-500 uppercase shrink-0">Suits:</span>
+                {suitsList.map((s, sIdx) => (
+                  <button
+                    key={sIdx}
+                    type="button"
+                    onClick={() => setSelectedSuitIndex(sIdx)}
+                    className={`py-1 px-2.5 rounded-lg text-xs font-black transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                      selectedSuitIndex === sIdx
+                        ? 'bg-[#0F172A] text-[#DFAC43] shadow-xs'
+                        : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'
+                    }`}
+                  >
+                    <span>Suit #{sIdx + 1} ({s.suitNumber || `BT-${order.orderNumber}-${sIdx + 1}`})</span>
+                    {s.fabricDetails && <span className="text-[10px] opacity-75">[{s.fabricDetails}]</span>}
+                  </button>
+                ))}
               </div>
+            )}
+
+            {/* 2. MAIN SPLIT SECTION: LEFT SIDE (PARCHI DETAIL) & RIGHT SIDE (IMAGE, STATUS, EDIT, ASSIGN) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
               
-              {order.suits && order.suits.length > 0 ? (
-                order.suits.map((suit, index) => {
-                  const suitKey = suit._id || `suit-${index}`;
-                  const suitIdBadge = suit.suitNumber || `BT-${order.orderNumber}-${index + 1}`;
-                  const isUnderInspection = suit.stitchingStatus === 'Submitted for Inspection';
-                  const isRework = suit.stitchingStatus === 'Rework Required';
-                  const isStitched = suit.stitchingStatus === 'Stitched';
-                  
-                  const wearer = suit.wearer || {};
-                  const measurements = (suit.measurements && suit.measurements.length > 0)
-                    ? suit.measurements
-                    : (wearer.measurements || order.customer?.measurements || []);
-                  const prefs = suit.stitchingPreferences || wearer.stitchingPreferences || order.customer?.stitchingPreferences || {};
-                  
-                  // Extract only the direct active preferences chosen by customer from all sources
-                  const prefValuesFromObj = [
-                    prefs.collar,
-                    prefs.sleeves,
-                    prefs.daman,
-                    prefs.frontPocket,
-                    prefs.sidePockets,
-                    prefs.shalwarPocket,
-                    prefs.patti,
-                    prefs.stitchingStyle,
-                    prefs.otherPreferences
-                  ].filter(Boolean);
+              {/* LEFT SIDE (lg:col-span-7): AUTHENTIC JOB PARCHI / NAAP DETAIL CARD */}
+              <div className="lg:col-span-7 bg-white rounded-xl border-2 border-black overflow-hidden shadow-xs">
+                
+                {/* Parchi Top Header Bar */}
+                <div className="bg-[#0F172A] text-white px-3.5 py-2 flex flex-wrap justify-between items-center gap-2 border-b-2 border-black">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#DFAC43] text-[#0F172A] font-mono text-xs font-black px-2 py-0.5 rounded shadow-2xs">
+                      {suitIdBadge}
+                    </span>
+                    <span className="font-bold text-xs text-gray-200">
+                      {activeSuit.serviceType || 'Shalwar Qameez'}
+                    </span>
+                  </div>
 
-                  const rawTags = [
-                    ...(Array.isArray(prefs.tags) ? prefs.tags : []),
-                    ...(Array.isArray(suit.staticTags) ? suit.staticTags : [])
-                  ];
-
-                  const prefValues = Array.from(new Set([...prefValuesFromObj, ...rawTags])).filter(Boolean);
-
-                  // Current assigned worker ID or 'self'
-                  const currentAssignedId = suit.stitching?.isSelf 
-                    ? 'self' 
-                    : (suit.assignedWorker?._id || suit.assignedWorker || '');
-                  
-                  // Draft selection
-                  const draftValue = workerDrafts[suitKey] !== undefined ? workerDrafts[suitKey] : currentAssignedId;
-                  const isNaapOpen = openNaapMap[suitKey] !== undefined ? openNaapMap[suitKey] : true;
-
-                  // Active assigned worker object
-                  const activeWorkerObj = workers.find(w => w._id === currentAssignedId) || (typeof suit.assignedWorker === 'object' ? suit.assignedWorker : null);
-
-                  return (
-                    <div 
-                      key={suitKey} 
-                      className={`bg-white  rounded overflow-hidden shadow-sm transition ${
-                        isUnderInspection ? 'border-amber-400 ring-2 ring-amber-300/60' : 
-                        isRework ? 'border-red-300 ring-1 ring-red-200' : 
-                        'border-gray-300'
-                      }`}
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs font-black text-[#DFAC43]">
+                      Stitching: Rs {activeSuit.price || 0}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPrintJobSuit({ order, suit: activeSuit, suitIndex: selectedSuitIndex })}
+                      className="bg-[#DFAC43] hover:bg-yellow-400 text-[#0F172A] font-black px-2.5 py-0.5 rounded text-xs transition shadow-2xs flex items-center gap-1 cursor-pointer"
+                      title="Print Suit Job Parchi"
                     >
-                      {/* 1. SUIT TOP HEADER & STATUS BAR */}
-                      <div className="bg-[#0F172A] text-white px-4 py-2.5 flex flex-wrap justify-between items-center gap-2">
-                        {/* <div className="flex items-center gap-2.5">
-                          <span className="bg-[#DFAC43] text-[#0F172A] font-mono text-xs font-black px-2.5 py-0.5 rounded shadow-xs">
-                            SUIT #{index + 1} ({suitIdBadge})
-                          </span>
-                          <span className="font-bold text-xs sm:text-sm text-gray-200">
-                            {suit.serviceType || 'Shalwar Qameez'} - <span className="text-[#DFAC43]">{suit.fabricDetails}</span>
-                          </span>
-                          {suit.volumeNo && (
-                            <span className="bg-gray-800 text-gray-300 px-2 py-0.5 rounded text-[10px] font-sans font-bold">
-                              VOL: {suit.volumeNo}
-                            </span>
-                          )}
-                        </div> */}
+                      <FiPrinter className="text-xs" /> Print Parchi
+                    </button>
+                  </div>
+                </div>
 
-                        <div className="flex items-center gap-2">
-                          {/* <span className="text-xs font-black text-[#DFAC43]">
-                            Stitching: Rs {suit.price}
-                          </span> */}
-                          <span className={`text-[10px] font-black px-2.5 py-0.5 rounded uppercase ${
-                            isStitched ? 'bg-green-600 text-white' :
-                            isUnderInspection ? 'bg-amber-400 text-black animate-pulse' :
-                            isRework ? 'bg-red-600 text-white' :
-                            suit.stitchingStatus === 'Assigned' ? 'bg-blue-600 text-white' :
-                            'bg-gray-700 text-gray-200'
-                          }`}>
-                            {suit.stitchingStatus || 'Pending'}
-                          </span>
-                        </div>
+                {/* Split Parchi: Left (اضافی تفصیل) + Right (ناپ ٹیبل) */}
+                <div className="grid grid-cols-1 sm:grid-cols-12">
+                  
+                  {/* Left Column: اضافی تفصیل + Fabric + Tags + Custom Notes */}
+                  <div className="sm:col-span-7 p-3 sm:p-4 flex flex-col justify-between space-y-3 border-b sm:border-b-0 sm:border-r-2 border-black bg-white">
+                    
+                    <div className="space-y-2.5">
+                      {/* Heading */}
+                      <div className="text-center">
+                        <h3 className="text-lg sm:text-xl font-black text-gray-900 tracking-wide font-serif">
+                          اضافی تفصیل
+                        </h3>
+                        <div className="w-20 h-0.5 bg-gray-300 mx-auto mt-0.5"></div>
                       </div>
 
-                      {/* 2. TOP KARIGAR ASSIGNMENT & WORK CONTROLS PANEL */}
-                      <div className="bg-slate-100/90 p-3 sm:p-4 border-b border-gray-200 space-y-2.5">
-                        <div className="flex flex-wrap justify-between items-center gap-2">
-                          <label className="text-[11px] font-black text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-                            <FiUserCheck className="text-[#DFAC43] text-sm" /> Stitcher / Karigar Assignment:
-                          </label>
-                          <div className="flex items-center gap-3">
-                            <span className="text-[11px] font-bold text-gray-600">
-                              Current Status: {suit.stitching?.isSelf ? (
-                                <span className="text-purple-700 font-black bg-purple-50 px-2.5 py-1 rounded border border-purple-200 inline-flex items-center gap-1">
-                                  <FiStar className="text-amber-500" /> Owner / Self Stitched
-                                </span>
-                              ) : activeWorkerObj ? (
-                                <span className="text-blue-700 font-black bg-blue-50 px-2.5 py-1 rounded border border-blue-200 inline-flex items-center gap-1">
-                                  <FiUser className="text-blue-600" /> {activeWorkerObj.name} (Wage: Rs {activeWorkerObj.perSuitWage})
-                                </span>
-                              ) : (
-                                <span className="text-amber-800 font-black bg-amber-50 px-2.5 py-1 rounded border border-amber-200 inline-flex items-center gap-1">
-                                  <FiClock className="text-amber-600" /> Unassigned (Pending)
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col sm:flex-row gap-2 items-center">
-                          <select
-                            value={draftValue}
-                            disabled={isStitched || isAssigningStage}
-                            onChange={(e) => handleWorkerDraftChange(suitKey, e.target.value)}
-                            className="flex-1 w-full border-2 border-gray-300 focus:border-black rounded p-2 outline-none text-xs font-bold bg-white disabled:bg-gray-200 cursor-pointer shadow-2xs"
-                          >
-                            <option value="">-- Select Karigar (Unassigned) --</option>
-                            <option value="self">★ Owner / Self (In-House Stitched)</option>
-                            <optgroup label="Registered Karigars">
-                              {workers.filter(w => w.isActive).map(w => (
-                                <option key={w._id} value={w._id}>{w.name} - Wage: Rs {w.perSuitWage}</option>
-                              ))}
-                            </optgroup>
-                          </select>
-
-                          {/* Dedicated Assign Worker Button */}
-                          <button
-                            type="button"
-                            onClick={() => handleAssignWorker(suit._id)}
-                            disabled={isStitched || isAssigningStage}
-                            className="w-full sm:w-auto bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black px-4 py-2 rounded text-xs uppercase tracking-wider transition shadow-sm shrink-0 flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer"
-                          >
-                            <FiUserCheck /> Assign Karigar
-                          </button>
-
-                          {/* Direct Admin Pass Button */}
-                          {!isStitched && (
-                            <button
-                              onClick={() => handleApprove(suit._id)}
-                              disabled={isApproving}
-                              className="w-full sm:w-auto bg-green-700 hover:bg-green-800 text-white font-black px-4 py-2 rounded text-xs uppercase tracking-wider transition shadow-sm shrink-0 flex items-center justify-center gap-1 cursor-pointer"
-                              title="Directly mark suit as QC Passed & Stitched"
-                            >
-                              <FiScissors /> Pass & Stitched
-                            </button>
-                          )}
-                        </div>
-
-                        {/* QC APPROVAL / REWORK ACTIONS (IF UNDER INSPECTION) */}
-                        {isUnderInspection && (
-                          <div className="bg-amber-100 border border-amber-300 rounded p-3 mt-2 space-y-2">
-                            <div className="flex items-center gap-2 text-amber-950 font-black text-xs">
-                              <FiClock className="text-amber-800 text-base" />
-                              <span>Karigar has completed stitching and submitted for QC Inspection!</span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              <button
-                                onClick={() => handleApprove(suit._id)}
-                                disabled={isApproving}
-                                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black text-xs py-2 px-3 rounded transition shadow flex items-center justify-center gap-1.5 cursor-pointer"
-                              >
-                                <FiCheck /> Approve & Credit Wage (+ Rs {activeWorkerObj?.perSuitWage || 600})
-                              </button>
-                              <button
-                                onClick={() => handleOpenReworkModal(suit)}
-                                disabled={isRejecting}
-                                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black text-xs py-2 px-3 rounded transition shadow flex items-center justify-center gap-1.5 cursor-pointer"
-                              >
-                                <FiAlertTriangle /> Send for Rework
-                              </button>
-                            </div>
-                          </div>
+                      {/* Fabric Details & Volume Badge (ONLY actual order data) */}
+                      <div className="flex items-center justify-between gap-2 border-b-2 border-black pb-1">
+                        <span className="font-black text-sm sm:text-base text-gray-900 font-serif underline decoration-2">
+                          {activeSuit.fabricDetails || 'کپڑا درج نہیں'}
+                        </span>
+                        {activeSuit.volumeNo && (
+                          <span className="bg-black text-white font-mono font-black text-[11px] px-2 py-0.5 rounded">
+                            VOL: {activeSuit.volumeNo}
+                          </span>
                         )}
                       </div>
 
-                      {/* 3. AUTHENTIC TAILORING ORDER FORM / PARCHI (پرچی) */}
-                      <div className="p-4 sm:p-5 bg-white">
-                        
-                        <div className="border-2  rounded p-4 sm:p-5 bg-linear-to-b from-white to-gray-50/50 shadow-xs space-y-4">
-                          
-                          {/* PARCHI HEADER BANNER WITH SINGLE PRINT BUTTON */}
-                          <div className="flex flex-wrap justify-between items-center border-b-2 border-black pb-3 gap-2">
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="bg-black text-white text-[10px] font-black uppercase px-2 py-0.5 rounded tracking-widest">
-                                  JOB PARCHI
-                                </span>
-                                <h4 className="text-sm sm:text-base font-black text-black uppercase tracking-wider">
-                                  Suit Cutting & Stitching Order Form
-                                </h4>
-                              </div>
-                              <p className="text-[11px] text-gray-500 font-semibold mt-0.5">
-                                Order #BT-{order.orderNumber} | Suit ID: <strong className="text-black">{suitIdBadge}</strong>
-                              </p>
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                              <div className="text-right">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase block">Delivery Due:</span>
-                                <span className="text-xs sm:text-sm font-black text-red-600">
-                                  {new Date(order.deliveryDate).toLocaleDateString()}
-                                </span>
-                              </div>
-                              {/* SINGLE CLEAR PRINT BUTTON PER SUIT */}
-                              <button
-                                type="button"
-                                onClick={() => setPrintJobSuit({ order, suit, suitIndex: index })}
-                                className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] font-black px-3.5 py-1.5 rounded text-xs transition shadow-sm flex items-center gap-1.5 cursor-pointer"
-                                title="Print this Parchi (56mm / 80mm / A4)"
-                              >
-                                <FiPrinter className="text-sm" /> Print Suit Parchi
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* PARCHI METADATA GRID */}
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-gray-50 p-3 rounded border border-gray-200 text-xs">
-                            <div>
-                              <span className="text-[10px] font-bold text-gray-400 uppercase block">Customer:</span>
-                              <span className="font-black text-gray-900">{order.customer?.name || 'Walk-in'}</span>
-                              <p className="text-[10px] text-gray-500 font-semibold">{formatPhone(order.customer?.phone)}</p>
-                            </div>
-
-                            <div>
-                              <span className="text-[10px] font-bold text-gray-400 uppercase block">Wearer </span>
-                              <span className="font-black text-blue-700">{wearer.name || order.customer?.name || 'Customer'}</span>
-                              {wearer.relation && <p className="text-[10px] text-gray-500 font-medium">Rel: {wearer.relation}</p>}
-                            </div>
-
-                            <div>
-                              <span className="text-[10px] font-bold text-gray-400 uppercase block">Fabric & Volume:</span>
-                              <span className="font-black text-gray-900">{suit.fabricDetails}</span>
-                              {suit.volumeNo && <p className="text-[10px] text-gray-500 font-medium">Vol: {suit.volumeNo}</p>}
-                            </div>
-
-                            <div>
-                              <span className="text-[10px] font-bold text-gray-400 uppercase block">Stitching Rate:</span>
-                              <span className="font-black text-[#0F172A] text-sm">Rs {suit.price}</span>
-                            </div>
-                          </div>
-
-                          {/* STYLE & STITCHING PREFERENCES (DIRECT PREFERENCE VALUES) */}
-                          {prefValues.length > 0 && (
-                            <div className="space-y-2">
-                              <span className="text-[10px] font-black text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                                <FiTag className="text-[#DFAC43]" /> Style & Design Specifications 
-                              </span>
-
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                {prefValues.map((val, pIdx) => (
-                                  <div key={pIdx} className="bg-white border-2 border-gray-200 p-2.5 rounded text-xs font-black text-gray-900 shadow-2xs flex items-center gap-1.5 hover:border-[#DFAC43] transition">
-                                    <FiCheck className="text-green-600 shrink-0 text-sm" />
-                                    <span>{val}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* ADD-ONS IN DEDICATED SEPARATE LINE */}
-                          {suit.customizations && suit.customizations.length > 0 && (
-                            <div className="bg-amber-50/80 border border-amber-200 p-2.5 rounded flex items-center flex-wrap gap-2 text-xs">
-                              <span className="font-black text-amber-950 uppercase text-[10px] shrink-0 flex items-center gap-1">
-                                <FiTag className="text-amber-700" /> Add-on Customizations 
-                              </span>
-                              <div className="flex flex-wrap gap-1.5">
-                                {suit.customizations.map((c, cIdx) => (
-                                  <span key={`cust-${cIdx}`} className="bg-[#0F172A] text-[#DFAC43] px-2.5 py-0.5 rounded text-[10px] font-black shadow-2xs">
-                                    + {c.name} {c.urduName ? `(${c.urduName})` : ''} {c.price ? `(+Rs ${c.price})` : ''}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* SPECIAL TAILOR INSTRUCTIONS (خصوصی ہدایات) */}
-                          {suit.customDesign && (
-                            <div className="bg-amber-50/80 border-2 border-amber-300 rounded p-3 space-y-1">
-                              <span className="text-[10px] font-black text-amber-950 uppercase tracking-wider flex items-center gap-1.5">
-                                <FiScissors className="text-amber-800" /> Special Tailor Instructions 
-                              </span>
-                              <p className="text-xs sm:text-sm font-black text-gray-900 leading-relaxed font-sans text-right" dir="rtl">
-                                {suit.customDesign}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* REWORK NOTE IF PRESENT */}
-                          {isRework && suit.stitching?.reworkNotes && (
-                            <div className="bg-red-50 border border-red-300 rounded p-3 text-xs text-red-900">
-                              <strong className="block text-[10px] uppercase font-black text-red-700 flex items-center gap-1">
-                                <FiAlertTriangle /> Alteration / Rework Reason:
-                              </strong>
-                              <p className="mt-1 font-bold">{suit.stitching.reworkNotes}</p>
-                            </div>
-                          )}
-
-                          {/* FULL BODY MEASUREMENTS TABLE (مکمل ناپ کا چارٹ) */}
-                          <div className="space-y-2 pt-1">
-                            <div className="flex justify-between items-center bg-gray-100 px-3 py-1.5 rounded border border-gray-200">
-                              <span className="text-[10px] font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
-                                <FiScissors className="text-[#DFAC43]" /> Complete Measurements 
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => toggleNaap(suitKey)}
-                                className="text-[11px] font-bold text-gray-600 hover:text-black flex items-center gap-1 cursor-pointer"
-                              >
-                                <span>{isNaapOpen ? 'Collapse' : 'Expand'}</span>
-                                {isNaapOpen ? <FiChevronUp /> : <FiChevronDown />}
-                              </button>
-                            </div>
-
-                            {isNaapOpen && (
-                              <div className="space-y-3">
-                                {(!measurements || measurements.length === 0) ? (
-                                  <div className="text-center py-4 bg-gray-50 border border-gray-200 rounded text-gray-400 italic text-xs">
-                                    Is suit / wearer ke liye koi naap save nahi hai.
-                                  </div>
-                                ) : (
-                                  measurements.map((meas, mIdx) => {
-                                    const dataObj = meas.data instanceof Map ? Object.fromEntries(meas.data) : (meas.data || {});
-                                    const keys = Object.keys(dataObj);
-                                    return (
-                                      <div key={mIdx} className="space-y-1.5">
-                                        {meas.category && (
-                                          <span className="inline-block bg-[#0F172A] text-[#DFAC43] text-[10px] font-black px-2.5 py-0.5 rounded uppercase">
-                                            {meas.category}
-                                          </span>
-                                        )}
-                                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                                          {keys.map((key) => (
-                                            <div key={key} className="bg-white border-2 border-gray-200 p-2 rounded text-center shadow-2xs hover:border-[#DFAC43] transition">
-                                              <span className="text-[10px] font-bold text-gray-500 uppercase block truncate">{key}</span>
-                                              <span className="text-sm sm:text-base font-black text-gray-900 font-sans">{dataObj[key] || '-'}</span>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    );
-                                  })
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* FABRIC IMAGE PREVIEW (IF AVAILABLE) */}
-                          {suit.fabricImage?.url && (
-                            <div className="pt-2 border-t border-gray-200 flex items-center gap-3 bg-gray-50 p-2.5 rounded border">
-                              <img 
-                                src={suit.fabricImage.url} 
-                                alt="Suit Fabric" 
-                                className="h-16 w-16 object-cover rounded border border-gray-300 shadow-2xs"
-                              />
-                              <div className="text-xs">
-                                <span className="font-bold text-gray-800 block">Fabric Photo Attached</span>
-                                <a href={suit.fabricImage.url} target="_blank" rel="noreferrer" className="text-[11px] text-blue-600 font-bold hover:underline">
-                                  Click here to open high-res fabric photo
-                                </a>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* PARCHI BOTTOM NOTE */}
-                          <div className="pt-2 border-t border-gray-200 text-center">
-                            <p className="text-[10px] text-gray-400 italic">
-                              * Attach this cutting sheet with fabric bundle for Master / Stitching Karigar.
-                            </p>
-                          </div>
-
+                      {/* Style / Design Preference Tags */}
+                      {prefValues.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-0.5">
+                          {prefValues.map((tag, tIdx) => (
+                            <span 
+                              key={tIdx} 
+                              className="border border-black text-black font-black text-[11px] px-2 py-0.5 rounded bg-white shadow-2xs"
+                            >
+                              {tag}
+                            </span>
+                          ))}
                         </div>
+                      )}
 
-                      </div>
-
+                      {/* Add-on Customizations (if any) */}
+                      {activeSuit.customizations && activeSuit.customizations.length > 0 && (
+                        <div className="pt-1.5 border-t border-dashed border-gray-300">
+                          <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">
+                            Add-on Customizations:
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {activeSuit.customizations.map((c, cIdx) => (
+                              <span key={cIdx} className="bg-amber-50 text-amber-900 border border-amber-300 font-bold text-[11px] px-1.5 py-0.5 rounded">
+                                + {c.name} {c.price ? `(+Rs ${c.price})` : ''}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  );
-                })
-              ) : (
-                <div className="text-center py-6 bg-white border-2 border-dashed border-gray-300 rounded-xl">
-                  <p className="text-sm text-gray-400 font-bold">No suits added to this order.</p>
+
+                    {/* Special Tailor Instructions (خصوصی ہدایات) ONLY if present */}
+                    {activeSuit.customDesign && activeSuit.customDesign.trim() !== '' && (
+                      <div className="border-t-2 border-dashed border-gray-400 pt-2 mt-2">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase block text-right mb-0.5">خصوصی ہدایات:</span>
+                        <p className="text-xs sm:text-sm font-bold text-gray-900 text-right leading-relaxed font-sans" dir="rtl">
+                          {activeSuit.customDesign}
+                        </p>
+                      </div>
+                    )}
+
+                  </div>
+
+                  {/* Right Column: Complete Measurement Table */}
+                  <div className="sm:col-span-5 bg-white flex flex-col justify-start">
+                    {measurementRows.length === 0 ? (
+                      <div className="p-6 text-center text-gray-400 italic text-xs">
+                        Is suit ke liye koi naap darj nahi hai.
+                      </div>
+                    ) : (
+                      <table className="w-full text-center border-collapse">
+                        <tbody>
+                          {measurementRows.map((row, rIdx) => (
+                            <tr key={rIdx} className="border-b border-black last:border-b-0">
+                              <td className="p-1.5 font-sans font-black text-sm text-gray-900 border-r-2 border-black w-1/2 bg-gray-50/60">
+                                {row.val || '-'}
+                              </td>
+                              <td className="p-1.5 font-bold text-xs text-gray-900 text-right pr-2.5 font-serif w-1/2">
+                                {row.label}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+
                 </div>
-              )}
+
+              </div>
+
+              {/* RIGHT SIDE (lg:col-span-5): FABRIC IMAGE + LIVE STATUS CHANGER + EDIT FORM LINK + ASSIGN KARIGAR */}
+              <div className="lg:col-span-5 space-y-3">
+                
+                {/* 1. FABRIC / SUIT IMAGE CARD (Compact) */}
+                <div className="bg-white rounded-xl border border-gray-200 p-2.5 sm:p-3 shadow-2xs space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-[10px] font-black text-gray-700 uppercase tracking-wider flex items-center gap-1">
+                      <FiImage className="text-[#DFAC43]" /> Suit & Fabric Photo
+                    </span>
+                    {activeSuit.fabricImage?.url && (
+                      <a 
+                        href={activeSuit.fabricImage.url} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="text-[10px] text-blue-600 font-bold hover:underline"
+                      >
+                        Open Full Photo
+                      </a>
+                    )}
+                  </div>
+                  
+                  <div className="w-full h-36 sm:h-40 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center relative group">
+                    {activeSuit.fabricImage?.url ? (
+                      <img 
+                        src={activeSuit.fabricImage.url} 
+                        alt="Suit Fabric" 
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      />
+                    ) : (
+                      <div className="text-center p-3 text-gray-400 space-y-1">
+                        <FiImage className="text-3xl mx-auto text-gray-300" />
+                        <p className="text-[11px] font-bold text-gray-600">No Fabric Photo Attached</p>
+                        <p className="text-[10px] text-gray-400">{activeSuit.fabricDetails || 'Standard Fabric'}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. LIVE ORDER STATUS & FULL EDIT BUTTON */}
+                <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-2xs space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-gray-700 uppercase tracking-wider flex items-center gap-1">
+                      <FiBox className="text-[#DFAC43]" /> Order Status & Actions
+                    </span>
+                    <span className={`text-[10px] font-black px-2 py-0.5 rounded uppercase border ${getStatusColor(order.orderStatus)}`}>
+                      {order.orderStatus}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={order.orderStatus}
+                      onChange={(e) => handleModalStatusChange(e.target.value)}
+                      disabled={isUpdatingStatus}
+                      className="flex-1 border-2 border-gray-200 focus:border-black rounded-lg py-2 px-2.5 text-xs font-bold outline-none bg-white cursor-pointer"
+                    >
+                      {statusOptions.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        closeModal();
+                        navigate(isWorker ? `/worker/orders/edit/${order._id}` : `/admin/orders/edit/${order._id}`);
+                      }}
+                      className="bg-[#DFAC43] hover:bg-yellow-400 text-[#0F172A] font-black px-3.5 py-2 rounded-lg text-xs transition shadow-2xs flex items-center gap-1.5 cursor-pointer shrink-0 uppercase tracking-wider active:scale-98"
+                      title="Open full order in order creation/edit form"
+                    >
+                      <FiEdit className="text-xs" /> Edit Order
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. STITCHER / KARIGAR ASSIGNMENT CARD (Compact) */}
+                <div className="bg-slate-50 border border-gray-200 rounded-xl p-3 shadow-2xs space-y-2.5">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[11px] font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <FiUserCheck className="text-[#DFAC43]" /> Karigar Assignment
+                    </label>
+                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${
+                      isStitched ? 'bg-green-600 text-white' :
+                      isUnderInspection ? 'bg-amber-400 text-black' :
+                      isRework ? 'bg-red-600 text-white' :
+                      activeSuit.stitchingStatus === 'Assigned' ? 'bg-blue-600 text-white' :
+                      'bg-gray-700 text-gray-200'
+                    }`}>
+                      {activeSuit.stitchingStatus || 'Pending'}
+                    </span>
+                  </div>
+
+                  <div className="text-[11px] font-bold text-gray-600 bg-white p-2 rounded-lg border border-gray-200">
+                    <span className="text-[9px] text-gray-400 block uppercase mb-0.5">Current Assigned Status:</span>
+                    {activeSuit.stitching?.isSelf ? (
+                      <span className="text-purple-700 font-black inline-flex items-center gap-1">
+                        <FiStar className="text-amber-500" /> Owner / Self Stitched
+                      </span>
+                    ) : activeWorkerObj ? (
+                      <span className="text-blue-700 font-black inline-flex items-center gap-1 truncate">
+                        <FiUser className="text-blue-600 shrink-0" /> {activeWorkerObj.name} (Rs {activeWorkerObj.perSuitWage})
+                      </span>
+                    ) : (
+                      <span className="text-amber-800 font-black inline-flex items-center gap-1">
+                        <FiClock className="text-amber-600" /> Unassigned (Pending)
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <select
+                      value={draftValue}
+                      disabled={isStitched || isAssigningStage}
+                      onChange={(e) => handleWorkerDraftChange(suitKey, e.target.value)}
+                      className="w-full border-2 border-gray-200 focus:border-black rounded-lg p-2 outline-none text-xs font-bold bg-white disabled:bg-gray-200 cursor-pointer"
+                    >
+                      <option value="">-- Select Karigar (Unassigned) --</option>
+                      <option value="self">★ Owner / Self (In-House Stitched)</option>
+                      <optgroup label="Registered Karigars">
+                        {workers.filter(w => w.isActive).map(w => (
+                          <option key={w._id} value={w._id}>{w.name} - Wage: Rs {w.perSuitWage}</option>
+                        ))}
+                      </optgroup>
+                    </select>
+
+                    <div className="flex gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleAssignWorker(activeSuit._id)}
+                        disabled={isStitched || isAssigningStage}
+                        className="flex-1 bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black py-1.5 px-2.5 rounded-lg text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 disabled:opacity-50 cursor-pointer"
+                      >
+                        <FiUserCheck /> Assign
+                      </button>
+
+                      {!isStitched && (
+                        <button
+                          type="button"
+                          onClick={() => handleApprove(activeSuit._id)}
+                          disabled={isApproving}
+                          className="bg-green-700 hover:bg-green-800 text-white font-black py-1.5 px-2.5 rounded-lg text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                          title="Directly mark suit as QC Passed & Stitched"
+                        >
+                          <FiScissors /> Pass & Stitched
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* QC Approval / Rework Actions if under inspection */}
+                  {isUnderInspection && (
+                    <div className="bg-amber-100 border border-amber-300 rounded-lg p-2.5 space-y-1.5">
+                      <div className="flex items-center gap-1.5 text-amber-950 font-black text-xs">
+                        <FiClock className="text-amber-800 text-sm shrink-0" />
+                        <span>Submitted for QC Inspection!</span>
+                      </div>
+                      <div className="flex gap-1.5">
+                        <button
+                          onClick={() => handleApprove(activeSuit._id)}
+                          disabled={isApproving}
+                          className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black text-xs py-1.5 px-2 rounded-lg transition shadow flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <FiCheck /> Approve (+ Rs {activeWorkerObj?.perSuitWage || 600})
+                        </button>
+                        <button
+                          onClick={() => handleOpenReworkModal(activeSuit)}
+                          disabled={isRejecting}
+                          className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black text-xs py-1.5 px-2 rounded-lg transition shadow flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <FiAlertTriangle /> Rework
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
             </div>
 
             {/* Alterations if any */}
             {order.alterations && order.alterations.length > 0 && (
-              <div className="space-y-3">
-                <h3 className="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-2">
+              <div className="space-y-2">
+                <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider border-b border-gray-200 pb-1">
                   Alterations Details
                 </h3>
                 
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-xs space-y-2">
+                <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-2xs space-y-1.5">
                   {order.alterations.map((alt, idx) => (
-                    <div key={idx} className="flex justify-between items-center text-xs sm:text-sm py-1.5 border-b border-gray-100 last:border-b-0 last:pb-0">
+                    <div key={idx} className="flex justify-between items-center text-xs py-1 border-b border-gray-100 last:border-b-0 last:pb-0">
                       <div className="flex flex-col">
                         <span className="font-bold text-gray-800">{alt.description || 'Alteration'}</span>
                         {alt.wearer && (
-                          <span className="text-[10px] text-gray-400 font-semibold mt-0.5">For Wearer ID: {alt.wearer}</span>
+                          <span className="text-[10px] text-gray-400 font-semibold">For Wearer ID: {alt.wearer}</span>
                         )}
                       </div>
                       <span className="font-black text-black">Rs {alt.price || 0}</span>
@@ -1177,21 +1297,21 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200 bg-white flex justify-end gap-3">
+          <div className="py-2.5 px-4 border-t border-gray-200 bg-white flex justify-end gap-2.5 shrink-0">
             {order.orderStatus !== 'Delivered' && onOpenDelivery && (
               <button
                 onClick={() => {
                   closeModal();
                   onOpenDelivery(order);
                 }}
-                className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-5 py-2.5 rounded-lg text-xs font-black transition shadow flex items-center gap-1.5 cursor-pointer"
+                className="bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-4 py-2 rounded-lg text-xs font-black transition shadow flex items-center gap-1.5 cursor-pointer"
               >
                 <FiCheckCircle /> Deliver & Settle Payment
               </button>
             )}
             <button 
               onClick={closeModal} 
-              className="bg-black hover:bg-gray-900 text-white px-6 py-2.5 rounded text-xs font-bold transition shadow cursor-pointer"
+              className="bg-black hover:bg-gray-900 text-white px-5 py-2 rounded-lg text-xs font-bold transition shadow cursor-pointer"
             >
               Close Details
             </button>
@@ -1264,6 +1384,8 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
     </>
   );
 };
+
+
 
 // -------------------------------------------------------------
 // COMPONENT: ORDER DELIVERY & CASH/KHATA SETTLEMENT MODAL

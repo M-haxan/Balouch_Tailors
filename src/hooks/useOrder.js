@@ -25,6 +25,18 @@ export const useGetCustomerOrders = (customerId) => {
   });
 };
 
+// 2.1 Get Single Order by ID (For Edit / View)
+export const useGetOrderById = (id) => {
+  return useQuery({
+    queryKey: ['order', id],
+    queryFn: async () => {
+      const response = await API.get(`/orders/${id}`);
+      return response.data;
+    },
+    enabled: !!id,
+  });
+};
+
 // 3. Create New Order (Naya Khata)
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();

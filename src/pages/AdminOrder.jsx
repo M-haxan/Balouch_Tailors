@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useGetCustomers } from '../hooks/useCustomers';
-import { useCreateOrder } from '../hooks/useOrder';
+import { useCreateOrder, useUpdateOrder, useGetOrderById } from '../hooks/useOrder';
 import { useGetTailoringServices } from '../hooks/useTailoringServices';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { formatPhone } from '../utils/formatters';
 import useAuthStore from '../Store/authStore';
@@ -51,12 +51,19 @@ const COMMON_TAGS = [
 
 const CreateOrder = () => {
   const navigate = useNavigate();
+  const { id: editOrderId } = useParams();
+  const isEditMode = Boolean(editOrderId);
+
   const [searchParams] = useSearchParams();
   const user = useAuthStore((state) => state.user);
   const isWorker = user?.role === 'worker';
   const { data: customers = [], isLoading: loadingCustomers } = useGetCustomers();
   const { data: tailoringList = [], isLoading: loadingPricing } = useGetTailoringServices();
-  const { mutate: createOrder, isPending } = useCreateOrder();
+  const { mutate: createOrder, isPending: isCreating } = useCreateOrder();
+  const { mutate: updateOrder, isPending: isUpdating } = useUpdateOrder();
+  const { data: existingOrder, isLoading: loadingExistingOrder } = useGetOrderById(editOrderId);
+
+  const isPending = isCreating || isUpdating;
 
   // Garment Categories & Customizations
   const garmentServices = useMemo(() => {
@@ -69,6 +76,7 @@ const CreateOrder = () => {
 
   // State Management
   const [customerId, setCustomerId] = useState(searchParams.get('customerId') || '');
+  const [orderStatus, setOrderStatus] = useState('Booked');
 
   useEffect(() => {
     const paramCustId = searchParams.get('customerId');
@@ -89,6 +97,39 @@ const CreateOrder = () => {
   const [cameraSuitIndex, setCameraSuitIndex] = useState(null);
   const [cameraStream, setCameraStream] = useState(null);
   const videoRef = useRef(null);
+
+  // Pre-fill form when editing existing order
+  useEffect(() => {
+    if (existingOrder && isEditMode) {
+      if (existingOrder.customer) {
+        setCustomerId(existingOrder.customer?._id || existingOrder.customer || '');
+      }
+      if (existingOrder.bookingDate) {
+        setBookingDate(new Date(existingOrder.bookingDate).toISOString().split('T')[0]);
+      }
+      if (existingOrder.deliveryDate) {
+        setDeliveryDate(new Date(existingOrder.deliveryDate).toISOString().split('T')[0]);
+      }
+      if (existingOrder.advancePaid !== undefined) {
+        setAdvancePaid(String(existingOrder.advancePaid));
+      }
+      if (existingOrder.discountPercent !== undefined && existingOrder.discountPercent > 0) {
+        setDiscountPercent(String(existingOrder.discountPercent));
+      }
+      if (existingOrder.orderStatus) {
+        setOrderStatus(existingOrder.orderStatus);
+      }
+      if (existingOrder.alterations && existingOrder.alterations.length > 0) {
+        setAlterations(existingOrder.alterations);
+      }
+      if (existingOrder.suits && existingOrder.suits.length > 0) {
+        setSuits(existingOrder.suits.map(s => ({
+          ...s,
+          fabricimage: s.fabricImage?.url || s.fabricimage || 'null'
+        })));
+      }
+    }
+  }, [existingOrder, isEditMode]);
 
   const selectedCustomer = customers.find(c => c._id === customerId);
   const customerKhataBal = Number(selectedCustomer?.khataBalance) || 0;
@@ -511,18 +552,29 @@ const CreateOrder = () => {
       : { userType: 'admin', name: user?.name || 'Admin' };
     formData.append('createdBy', JSON.stringify(createdByData));
 
+    formData.append('orderStatus', orderStatus);
+
     suits.forEach((suit) => {
-      if (suit.fabricimage && suit.fabricimage !== 'null') {
+      if (suit.fabricimage && suit.fabricimage !== 'null' && typeof suit.fabricimage === 'object') {
          formData.append('fabricImages', suit.fabricimage);
       }
     });
 
-    createOrder(formData, {
-      onSuccess: (response) => {
-        setSavedOrder(response.data || response); 
-        window.scrollTo(0, 0);
-      }
-    });
+    if (isEditMode) {
+      updateOrder({ id: editOrderId, data: formData }, {
+        onSuccess: (response) => {
+          setSavedOrder(response.data || response || existingOrder); 
+          window.scrollTo(0, 0);
+        }
+      });
+    } else {
+      createOrder(formData, {
+        onSuccess: (response) => {
+          setSavedOrder(response.data || response); 
+          window.scrollTo(0, 0);
+        }
+      });
+    }
   };
 
   // Success Screen
@@ -533,9 +585,11 @@ const CreateOrder = () => {
           <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-100 text-green-600 rounded flex items-center justify-center mx-auto mb-4 sm:mb-5">
             <FiCheckCircle className="text-2xl sm:text-3xl" />
           </div>
-          <h2 className="text-lg sm:text-2xl font-black text-gray-900 mb-1.5 sm:mb-2">Order Created Successfully</h2>
+          <h2 className="text-lg sm:text-2xl font-black text-gray-900 mb-1.5 sm:mb-2">
+            {isEditMode ? 'Order Updated Successfully' : 'Order Created Successfully'}
+          </h2>
           <p className="text-gray-500 mb-4 text-xs sm:text-sm font-medium">
-            Order has been saved and ledger balance updated.
+            {isEditMode ? 'Order details and changes have been saved.' : 'Order has been saved and ledger balance updated.'}
           </p>
 
           {/* Assigned Suit IDs List for Writing on Cloth */}
@@ -571,30 +625,29 @@ const CreateOrder = () => {
             
             <button 
               onClick={() => {
-                setSavedOrder(null);
-                setSuits([createInitialSuit(garmentServices[0])]);
-                setDiscountPercent('');
-                setAdvancePaid('');
-                setBookingDate(new Date().toISOString().split('T')[0]);
-                setDeliveryDate('');
-                setCustomerId('');
+                if (isEditMode) {
+                  navigate(isWorker ? `/worker/allorders?viewOrderId=${savedOrder._id || editOrderId}` : `/admin/allorders?viewOrderId=${savedOrder._id || editOrderId}`);
+                } else {
+                  navigate(isWorker ? '/worker/dashboard' : '/admin/allorders');
+                }
               }}
               className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold h-10 sm:h-11 rounded transition text-xs sm:text-sm cursor-pointer"
             >
-              + Book Another Order
-            </button>
-
-            <button 
-              onClick={() => navigate(isWorker ? '/worker/dashboard' : '/admin/allorders')}
-              className="w-full text-xs font-bold text-gray-500 hover:text-black py-2 transition cursor-pointer"
-            >
-              ← Back to {isWorker ? 'Worker Portal' : 'All Orders'}
+              ← {isEditMode ? 'Back to Order View Details' : `Back to ${isWorker ? 'Worker Portal' : 'All Orders'}`}
             </button>
           </div>
         </div>
       </div>
     );
   }
+
+  const handleBack = () => {
+    if (isEditMode && editOrderId) {
+      navigate(isWorker ? `/worker/allorders?viewOrderId=${editOrderId}` : `/admin/allorders?viewOrderId=${editOrderId}`);
+    } else {
+      navigate(-1);
+    }
+  };
 
   return (
     <div className="bg-gray-50 min-h-[85vh] p-2 sm:p-4 md:p-6">
@@ -603,23 +656,25 @@ const CreateOrder = () => {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex items-center gap-3">
-            {isWorker && (
-              <button 
-                onClick={() => navigate('/worker/dashboard')} 
-                type="button"
-                className="p-2 bg-white hover:bg-gray-100 border border-gray-200 rounded text-gray-700 hover:text-black transition shadow-xs cursor-pointer"
-                title="Back to Worker Dashboard"
-              >
-                <FiArrowLeft className="text-base" />
-              </button>
-            )}
+            <button 
+              onClick={handleBack} 
+              type="button"
+              className="p-2 bg-white hover:bg-gray-100 border border-gray-200 rounded text-gray-700 hover:text-black transition shadow-xs cursor-pointer"
+              title="Back"
+            >
+              <FiArrowLeft className="text-base" />
+            </button>
             <div>
               <h2 className="text-lg sm:text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
                 <span className="w-2 h-4 sm:h-5 bg-[#DFAC43] rounded inline-block"></span>
-                {isWorker ? 'Karigar Order Booking' : 'Create New Order'}
+                {isEditMode 
+                  ? `Edit Order #BT-${existingOrder?.orderNumber || ''}` 
+                  : (isWorker ? 'Karigar Order Booking' : 'Create New Order')}
               </h2>
               <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5 font-medium">
-                {isWorker ? `Booking on behalf of: ${user?.name || 'Worker'}` : 'Configure garments, customizations, and billing details in section order.'}
+                {isEditMode
+                  ? 'Update garment styling, fabric notes, measurements, and order status.'
+                  : (isWorker ? `Booking on behalf of: ${user?.name || 'Worker'}` : 'Configure garments, customizations, and billing details in section order.')}
               </p>
             </div>
           </div>
@@ -1380,12 +1435,25 @@ const CreateOrder = () => {
                   />
                 </div>
 
-                <div className="flex justify-between items-center pt-2 border-t border-gray-800">
-                  <span className="text-white font-bold text-xs">Remaining Balance:</span>
-                  <span className={`text-base sm:text-lg font-black font-sans ${balanceAmount > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                    Rs {balanceAmount.toLocaleString()}
-                  </span>
-                </div>
+                {/* Order Status Selector (When in Edit Mode) */}
+                {isEditMode && (
+                  <div className="flex justify-between items-center gap-2 pt-2 border-t border-gray-800">
+                    <span className="text-white font-bold text-xs">Order Status:</span>
+                    <select
+                      value={orderStatus}
+                      onChange={(e) => setOrderStatus(e.target.value)}
+                      className="h-9 px-2 bg-black border border-gray-700 focus:border-[#DFAC43] text-[#DFAC43] rounded outline-none font-bold text-xs cursor-pointer"
+                    >
+                      <option value="Booked">Booked</option>
+                      <option value="Cutting">Cutting</option>
+                      <option value="Stitching">Stitching</option>
+                      <option value="Ready">Ready</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Delivered">Delivered</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -1395,9 +1463,9 @@ const CreateOrder = () => {
               <button 
                 type="submit" 
                 disabled={isPending}
-                className="w-full h-11 bg-[#DFAC43] hover:bg-white text-[#0F172A] rounded font-black transition-all shadow-sm disabled:opacity-70 flex items-center justify-center gap-2 text-xs sm:text-base"
+                className="w-full h-11 bg-[#DFAC43] hover:bg-white text-[#0F172A] rounded font-black transition-all shadow-sm disabled:opacity-70 flex items-center justify-center gap-2 text-xs sm:text-base cursor-pointer"
               >
-                <FiSave /> {isPending ? 'Saving Order...' : 'Save & Generate Invoice'}
+                <FiSave /> {isPending ? (isEditMode ? 'Updating Order...' : 'Saving Order...') : (isEditMode ? 'Update Order Details' : 'Save & Generate Invoice')}
               </button>
             </div>
           </div>
