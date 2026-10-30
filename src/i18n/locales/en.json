@@ -254,7 +254,7 @@
   "catalogue": {
     "title": "Design & Style Catalogue",
     "subtitle": "Showcase exclusive Shalwar Qameez, Kurta, and collar styling collections",
-    "addDesign": "+ Add New Design Style",
+    "addDesign": "Add New Design Style",
     "category": "Category",
     "allCategories": "All Categories",
     "styleName": "Design / Style Name",
