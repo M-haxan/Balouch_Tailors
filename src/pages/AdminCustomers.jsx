@@ -48,7 +48,7 @@ const AdminCustomers = () => {
   };
 
   return (
-    <div className="bg-white shadow-sm p-3.5 sm:p-6 relative min-h-[80vh] rounded-xl">
+    <div className="bg-white shadow-sm p-3.5 sm:p-6 relative min-h-[80vh] rounded">
       {/* HEADER & SEARCH */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center border-b pb-4 mb-6 gap-4">
         <div className="w-full xl:w-auto">

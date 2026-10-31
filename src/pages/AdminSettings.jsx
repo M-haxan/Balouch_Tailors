@@ -103,7 +103,7 @@ const AdminSettings = () => {
     <div className="space-y-6">
       
       {/* TOP HEADER & RESPONSIVE TABS ROW */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200/90 p-4 sm:p-6">
+      <div className="bg-white rounded shadow-sm border border-gray-200/90 p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 sm:pb-5 border-b border-gray-100">
           <div>
             <h2 className="text-lg sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight flex items-center gap-2">
@@ -119,7 +119,7 @@ const AdminSettings = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 pt-4 w-full">
           <button 
             onClick={() => setActiveTab('rates')}
-            className={`w-full flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-all cursor-pointer ${
+            className={`w-full flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded text-xs sm:text-sm font-black transition-all cursor-pointer ${
               activeTab === 'rates' 
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-black border border-gray-200'
@@ -138,7 +138,7 @@ const AdminSettings = () => {
           
           <button 
             onClick={() => setActiveTab('templates')}
-            className={`w-full flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-all cursor-pointer ${
+            className={`w-full flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded text-xs sm:text-sm font-black transition-all cursor-pointer ${
               activeTab === 'templates' 
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-black border border-gray-200'
@@ -157,7 +157,7 @@ const AdminSettings = () => {
           
           <button 
             onClick={() => setActiveTab('general')}
-            className={`w-full flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-black transition-all cursor-pointer ${
+            className={`w-full flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded text-xs sm:text-sm font-black transition-all cursor-pointer ${
               activeTab === 'general' 
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-md' 
                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-black border border-gray-200'
@@ -203,11 +203,11 @@ const AdminSettings = () => {
             </div>
 
             {/* Sub-Tabs: 1. Garment Categories vs 2. Customizations */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-gray-50 p-2.5 rounded border border-gray-200">
               <div className="grid grid-cols-2 sm:flex sm:flex-nowrap gap-2 w-full lg:w-auto">
                 <button
                   onClick={() => setRateSection('services')}
-                  className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer ${
+                  className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer ${
                     rateSection === 'services'
                       ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                       : 'text-gray-600 hover:bg-gray-200'
@@ -224,7 +224,7 @@ const AdminSettings = () => {
 
                 <button
                   onClick={() => setRateSection('customizations')}
-                  className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer ${
+                  className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap cursor-pointer ${
                     rateSection === 'customizations'
                       ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                       : 'text-gray-600 hover:bg-gray-200'
@@ -248,7 +248,7 @@ const AdminSettings = () => {
                   placeholder="Search rates..."
                   value={pricingSearch}
                   onChange={(e) => setPricingSearch(e.target.value)}
-                  className="w-full pl-8 pr-3 py-2 rounded-lg bg-white border border-gray-200 text-xs font-medium outline-none focus:border-[#DFAC43]"
+                  className="w-full pl-8 pr-3 py-2 rounded bg-white border border-gray-200 text-xs font-medium outline-none focus:border-[#DFAC43]"
                 />
               </div>
             </div>
@@ -425,7 +425,7 @@ const AdminSettings = () => {
               </div>
               <button 
                 onClick={() => openTemplateModal()}
-                className="w-full sm:w-auto bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap cursor-pointer shrink-0"
+                className="w-full sm:w-auto bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap cursor-pointer shrink-0"
               >
                 <FiPlus className="text-base" /> Add New Template
               </button>
@@ -434,7 +434,7 @@ const AdminSettings = () => {
             {loadingTemplates ? (
               <div className="text-center py-10 text-gray-500">Loading templates...</div>
             ) : templates.length === 0 ? (
-              <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded-lg">
+              <div className="text-center py-16 border-2 border-dashed border-gray-200 rounded">
                 <p className="text-gray-500 mb-4">No measurement templates found.</p>
                 <button onClick={() => openTemplateModal()} className="text-black font-bold underline decoration-[#DFAC43] decoration-2 underline-offset-4">
                   Create your first template
@@ -443,13 +443,13 @@ const AdminSettings = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {templates.map((template) => (
-                  <div key={template._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition bg-white">
+                  <div key={template._id} className="border border-gray-200 rounded p-5 hover:shadow-md transition bg-white">
                     <div className="flex justify-between items-start mb-4">
                       <h4 className="font-black text-lg text-black uppercase tracking-wide">
                         {template.categoryname}
                       </h4>
                       <div className="flex gap-2">
-                        <button onClick={() => openTemplateModal(template)} className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition">
+                        <button onClick={() => openTemplateModal(template)} className="p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded transition">
                           <FiEdit />
                         </button>
                         <button onClick={() => handleDeleteTemplate(template._id)} disabled={isDeletingTemplate} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition">
@@ -460,7 +460,7 @@ const AdminSettings = () => {
                     
                     <div className="flex flex-wrap gap-2">
                       {template.fields.map((field, idx) => (
-                        <span key={idx} className="bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-md border border-gray-200">
+                        <span key={idx} className="bg-gray-100 text-gray-700 text-xs font-bold px-3 py-1.5 rounded border border-gray-200">
                           {field}
                         </span>
                       ))}

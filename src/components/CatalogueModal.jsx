@@ -78,7 +78,7 @@ const CatalogueModal = ({ item = null, closeModal, categories = [], defaultCateg
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-white p-5 sm:p-6 rounded-xl shadow-xl w-full max-w-md relative max-h-[92vh] overflow-y-auto my-auto">
+      <div className="bg-white p-5 sm:p-6 rounded shadow-xl w-full max-w-md relative max-h-[92vh] overflow-y-auto my-auto">
         <button
           onClick={closeModal}
           className="absolute top-4 right-4 text-gray-500 hover:text-black p-1 transition cursor-pointer"
@@ -98,7 +98,7 @@ const CatalogueModal = ({ item = null, closeModal, categories = [], defaultCateg
               required
               type="text"
               placeholder={isEdit ? '' : 'e.g. Vol. 01'}
-              className="w-full border border-gray-300 p-2.5 rounded-lg text-sm focus:border-[#DFAC43] outline-none font-medium"
+              className="w-full border border-gray-300 p-2.5 rounded text-sm focus:border-[#DFAC43] outline-none font-medium"
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
@@ -109,7 +109,7 @@ const CatalogueModal = ({ item = null, closeModal, categories = [], defaultCateg
               Category 
             </label>
             <select
-              className="w-full border border-gray-300 p-2.5 rounded-lg text-sm focus:border-[#DFAC43] outline-none font-medium"
+              className="w-full border border-gray-300 p-2.5 rounded text-sm focus:border-[#DFAC43] outline-none font-medium"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
             >
@@ -129,7 +129,7 @@ const CatalogueModal = ({ item = null, closeModal, categories = [], defaultCateg
               required={!isEdit}
               type="file"
               accept="image/*"
-              className="w-full border border-gray-300 p-2 rounded-lg text-xs bg-gray-50 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-[#0F172A] file:text-white hover:file:bg-[#DFAC43] hover:file:text-black cursor-pointer"
+              className="w-full border border-gray-300 p-2 rounded text-xs bg-gray-50 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-[#0F172A] file:text-white hover:file:bg-[#DFAC43] hover:file:text-black cursor-pointer"
               onChange={handleImageChange}
             />
             <p className="text-[11px] text-gray-500 mt-1 font-medium">
@@ -138,7 +138,7 @@ const CatalogueModal = ({ item = null, closeModal, categories = [], defaultCateg
               <span className="text-[#DFAC43] font-bold">600 × 800 px</span>).
             </p>
             {imagePreview && (
-              <div className="mt-2 w-20 h-24 rounded-lg border overflow-hidden bg-gray-100">
+              <div className="mt-2 w-20 h-24 rounded border overflow-hidden bg-gray-100">
                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
               </div>
             )}
@@ -147,7 +147,7 @@ const CatalogueModal = ({ item = null, closeModal, categories = [], defaultCateg
           <button
             disabled={isPending}
             type="submit"
-            className="w-full bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] p-2.5 rounded-lg font-bold text-sm transition mt-6 cursor-pointer"
+            className="w-full bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] p-2.5 rounded font-bold text-sm transition mt-6 cursor-pointer"
           >
             {isPending
               ? isEdit

@@ -172,7 +172,7 @@ const Allorders = () => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-3.5 sm:p-6 min-h-[85vh] relative">
+    <div className="bg-white rounded shadow-sm p-3.5 sm:p-6 min-h-[85vh] relative">
       
       {/* HEADER & CONTROLS */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center border-b border-gray-100 pb-5 mb-4 gap-4">
@@ -191,7 +191,7 @@ const Allorders = () => {
             <select 
               value={statusFilter}
               onChange={(e) => handleStatusFilterChange(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 border-2 border-gray-100 focus:border-black rounded-lg outline-none font-bold text-xs sm:text-sm bg-white appearance-none cursor-pointer shadow-2xs"
+              className="w-full pl-9 pr-4 py-2.5 border-2 border-gray-100 focus:border-black rounded outline-none font-bold text-xs sm:text-sm bg-white appearance-none cursor-pointer shadow-2xs"
             >
               <option value="All">{t('orders.filterByStatus')}</option>
               <option value="Active">{t('dashboard.activeOrders')}</option>
@@ -209,7 +209,7 @@ const Allorders = () => {
               placeholder={t('orders.searchPlaceholder')} 
               value={searchTerm}
               onChange={handleSearchChange}
-              className="w-full pl-9 pr-8 py-2.5 border-2 border-gray-100 focus:border-black rounded-lg outline-none text-xs sm:text-sm font-medium transition shadow-2xs"
+              className="w-full pl-9 pr-8 py-2.5 border-2 border-gray-100 focus:border-black rounded outline-none text-xs sm:text-sm font-medium transition shadow-2xs"
             />
             {searchTerm && (
               <button 
@@ -233,7 +233,7 @@ const Allorders = () => {
             <button
               key={tab.id}
               onClick={() => handleStatusFilterChange(tab.id)}
-              className={`w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded-lg text-[10px] sm:text-xs font-black transition flex items-center justify-between sm:justify-center gap-1 sm:gap-1.5 cursor-pointer shadow-2xs ${
+              className={`w-full px-2 sm:px-3 py-2 sm:py-2.5 rounded text-[10px] sm:text-xs font-black transition flex items-center justify-between sm:justify-center gap-1 sm:gap-1.5 cursor-pointer shadow-2xs ${
                 isActive
                   ? 'bg-[#0F172A] text-white shadow-md'
                   : tab.isAlert
@@ -265,13 +265,13 @@ const Allorders = () => {
       {isLoading ? (
         <div className="text-center py-20 text-gray-500 font-bold">{t('common.loading')}</div>
       ) : filteredOrders.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl">
+        <div className="text-center py-20 bg-gray-50 border-2 border-dashed border-gray-200 rounded">
           <p className="text-gray-500 font-medium">{t('orders.noOrdersFound')}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {/* 1. DESKTOP VIEW (TABLE) */}
-          <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-xl shadow-xs">
+          <div className="hidden md:block overflow-x-auto border border-gray-200 rounded shadow-xs">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider border-b border-gray-200">
@@ -836,7 +836,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-2 sm:p-3 font-sans">
-        <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl relative flex flex-col max-h-[92vh] overflow-hidden">
+        <div className="bg-white rounded shadow-2xl w-full max-w-6xl relative flex flex-col max-h-[92vh] overflow-hidden">
           
           {/* Header */}
           <div className="flex justify-between items-center py-2.5 px-4 sm:px-5 border-b border-gray-100 bg-[#0F172A] text-white shrink-0">
@@ -871,7 +871,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
               
               {/* Customer Details Card */}
-              <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
+              <div className="bg-white p-2.5 sm:p-3 rounded border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                   <FiUser className="text-[#DFAC43]" /> Customer Information
                 </span>
@@ -885,7 +885,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
               </div>
 
               {/* Dates Card */}
-              <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
+              <div className="bg-white p-2.5 sm:p-3 rounded border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                   <FiCalendar className="text-[#DFAC43]" /> Timeline & Schedule
                 </span>
@@ -900,7 +900,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
               </div>
 
               {/* Financial Card */}
-              <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
+              <div className="bg-white p-2.5 sm:p-3 rounded border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                   <FiCreditCard className="text-[#DFAC43]" /> Financial Summary
                 </span>
@@ -919,7 +919,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
               </div>
 
               {/* Staff Handling & Audit Card */}
-              <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
+              <div className="bg-white p-2.5 sm:p-3 rounded border border-gray-200 shadow-2xs space-y-1 hover:border-[#DFAC43] transition">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
                   <FiUserCheck className="text-[#DFAC43]" /> Staff Audit
                 </span>
@@ -948,7 +948,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                     key={sIdx}
                     type="button"
                     onClick={() => setSelectedSuitIndex(sIdx)}
-                    className={`py-1 px-2.5 rounded-lg text-xs font-black transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                    className={`py-1 px-2.5 rounded text-xs font-black transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
                       selectedSuitIndex === sIdx
                         ? 'bg-[#0F172A] text-[#DFAC43] shadow-xs'
                         : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-200'
@@ -965,7 +965,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
               
               {/* LEFT SIDE (lg:col-span-7): AUTHENTIC JOB PARCHI / NAAP DETAIL CARD */}
-              <div className="lg:col-span-7 bg-white rounded-xl border-2 border-black overflow-hidden shadow-xs">
+              <div className="lg:col-span-7 bg-white rounded border-2 border-black overflow-hidden shadow-xs">
                 
                 {/* Parchi Top Header Bar */}
                 <div className="bg-[#0F172A] text-white px-3.5 py-2 flex flex-wrap justify-between items-center gap-2 border-b-2 border-black">
@@ -1095,7 +1095,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
               <div className="lg:col-span-5 space-y-3">
                 
                 {/* 1. FABRIC / SUIT IMAGE CARD (Compact) */}
-                <div className="bg-white rounded-xl border border-gray-200 p-2.5 sm:p-3 shadow-2xs space-y-2">
+                <div className="bg-white rounded border border-gray-200 p-2.5 sm:p-3 shadow-2xs space-y-2">
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-wider flex items-center gap-1">
                       <FiImage className="text-[#DFAC43]" /> Suit & Fabric Photo
@@ -1112,7 +1112,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                     )}
                   </div>
                   
-                  <div className="w-full h-36 sm:h-40 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center relative group">
+                  <div className="w-full h-36 sm:h-40 bg-gray-100 rounded overflow-hidden border border-gray-200 flex items-center justify-center relative group">
                     {activeSuit.fabricImage?.url ? (
                       <img 
                         src={activeSuit.fabricImage.url} 
@@ -1130,7 +1130,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                 </div>
 
                 {/* 2. LIVE ORDER STATUS & FULL EDIT BUTTON */}
-                <div className="bg-white rounded-xl border border-gray-200 p-3 shadow-2xs space-y-2">
+                <div className="bg-white rounded border border-gray-200 p-3 shadow-2xs space-y-2">
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] font-black text-gray-700 uppercase tracking-wider flex items-center gap-1">
                       <FiBox className="text-[#DFAC43]" /> Order Status & Actions
@@ -1167,7 +1167,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                 </div>
 
                 {/* 3. STITCHER / KARIGAR ASSIGNMENT CARD (Compact) */}
-                <div className="bg-slate-50 border border-gray-200 rounded-xl p-3 shadow-2xs space-y-2.5">
+                <div className="bg-slate-50 border border-gray-200 rounded p-3 shadow-2xs space-y-2.5">
                   <div className="flex justify-between items-center">
                     <label className="text-[11px] font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
                       <FiUserCheck className="text-[#DFAC43]" /> Karigar Assignment
@@ -1183,7 +1183,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                     </span>
                   </div>
 
-                  <div className="text-[11px] font-bold text-gray-600 bg-white p-2 rounded-lg border border-gray-200">
+                  <div className="text-[11px] font-bold text-gray-600 bg-white p-2 rounded border border-gray-200">
                     <span className="text-[9px] text-gray-400 block uppercase mb-0.5">Current Assigned Status:</span>
                     {activeSuit.stitching?.isSelf ? (
                       <span className="text-purple-700 font-black inline-flex items-center gap-1">
@@ -1205,7 +1205,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                       value={draftValue}
                       disabled={isStitched || isAssigningStage}
                       onChange={(e) => handleWorkerDraftChange(suitKey, e.target.value)}
-                      className="w-full border-2 border-gray-200 focus:border-black rounded-lg p-2 outline-none text-xs font-bold bg-white disabled:bg-gray-200 cursor-pointer"
+                      className="w-full border-2 border-gray-200 focus:border-black rounded p-2 outline-none text-xs font-bold bg-white disabled:bg-gray-200 cursor-pointer"
                     >
                       <option value="">-- Select Karigar (Unassigned) --</option>
                       <option value="self">★ Owner / Self (In-House Stitched)</option>
@@ -1221,7 +1221,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                         type="button"
                         onClick={() => handleAssignWorker(activeSuit._id)}
                         disabled={isStitched || isAssigningStage}
-                        className="flex-1 bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black py-1.5 px-2.5 rounded-lg text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 disabled:opacity-50 cursor-pointer"
+                        className="flex-1 bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black py-1.5 px-2.5 rounded text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 disabled:opacity-50 cursor-pointer"
                       >
                         <FiUserCheck /> Assign
                       </button>
@@ -1231,7 +1231,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                           type="button"
                           onClick={() => handleApprove(activeSuit._id)}
                           disabled={isApproving}
-                          className="bg-green-700 hover:bg-green-800 text-white font-black py-1.5 px-2.5 rounded-lg text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                          className="bg-green-700 hover:bg-green-800 text-white font-black py-1.5 px-2.5 rounded text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
                           title="Directly mark suit as QC Passed & Stitched"
                         >
                           <FiScissors /> Pass & Stitched
@@ -1242,7 +1242,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
 
                   {/* QC Approval / Rework Actions if under inspection */}
                   {isUnderInspection && (
-                    <div className="bg-amber-100 border border-amber-300 rounded-lg p-2.5 space-y-1.5">
+                    <div className="bg-amber-100 border border-amber-300 rounded p-2.5 space-y-1.5">
                       <div className="flex items-center gap-1.5 text-amber-950 font-black text-xs">
                         <FiClock className="text-amber-800 text-sm shrink-0" />
                         <span>Submitted for QC Inspection!</span>
@@ -1251,14 +1251,14 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                         <button
                           onClick={() => handleApprove(activeSuit._id)}
                           disabled={isApproving}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black text-xs py-1.5 px-2 rounded-lg transition shadow flex items-center justify-center gap-1 cursor-pointer"
+                          className="flex-1 bg-green-600 hover:bg-green-700 text-white font-black text-xs py-1.5 px-2 rounded transition shadow flex items-center justify-center gap-1 cursor-pointer"
                         >
                           <FiCheck /> Approve (+ Rs {activeWorkerObj?.perSuitWage || 600})
                         </button>
                         <button
                           onClick={() => handleOpenReworkModal(activeSuit)}
                           disabled={isRejecting}
-                          className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black text-xs py-1.5 px-2 rounded-lg transition shadow flex items-center justify-center gap-1 cursor-pointer"
+                          className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black text-xs py-1.5 px-2 rounded transition shadow flex items-center justify-center gap-1 cursor-pointer"
                         >
                           <FiAlertTriangle /> Rework
                         </button>
@@ -1341,7 +1341,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                   value={reworkNotes}
                   onChange={(e) => setReworkNotes(e.target.value)}
                   placeholder="e.g. Collar adjustment, shorten length by 1 inch, loosen sleeve..."
-                  className="w-full border-2 border-gray-200 focus:border-red-500 rounded-lg p-3 text-xs outline-none font-medium text-gray-800"
+                  className="w-full border-2 border-gray-200 focus:border-red-500 rounded p-3 text-xs outline-none font-medium text-gray-800"
                 />
               </div>
 

@@ -42,12 +42,12 @@ const AdminCatalogue = () => {
   if (isError) return <div className="text-red-500 text-center py-10 font-bold">Failed to load catalogue.</div>;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 relative space-y-6">
+    <div className="bg-white rounded shadow-sm p-4 sm:p-6 relative space-y-6">
       {/* HEADER: Title aur Add Button */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-gray-100 pb-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#0F172A] text-[#DFAC43] flex items-center justify-center font-bold shrink-0 shadow-xs">
+            <div className="w-9 h-9 rounded bg-[#0F172A] text-[#DFAC43] flex items-center justify-center font-bold shrink-0 shadow-xs">
               <FiLayers className="text-lg" />
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">{t('catalogue.title')}</h2>
@@ -59,7 +59,7 @@ const AdminCatalogue = () => {
 
         <button
           onClick={handleOpenAdd}
-          className="w-full sm:w-auto bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
+          className="w-full sm:w-auto bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
         >
           <FiPlus className="text-base shrink-0" />
           <span>{t('catalogue.addDesign')}</span>
@@ -67,7 +67,7 @@ const AdminCatalogue = () => {
       </div>
 
       {/* CATEGORY TABS */}
-      <div className="w-full max-w-lg bg-gray-100 p-1 sm:p-1.5 rounded-xl border border-gray-200">
+      <div className="w-full max-w-lg bg-gray-100 p-1 sm:p-1.5 rounded border border-gray-200">
         <div className="grid grid-cols-1 min-[480px]:grid-cols-3 gap-1 sm:gap-1.5">
           {categories.map((cat) => {
             const count = catalogueItems.filter(item => item.category === cat).length;
@@ -76,7 +76,7 @@ const AdminCatalogue = () => {
               <button
                 key={cat}
                 onClick={() => setActiveTab(cat)}
-                className={`w-full py-2 px-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center justify-between min-[480px]:justify-center gap-1.5 cursor-pointer ${
+                className={`w-full py-2 px-3 rounded text-xs font-black uppercase tracking-wider transition-all flex items-center justify-between min-[480px]:justify-center gap-1.5 cursor-pointer ${
                   isActive
                     ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm ring-1 ring-[#DFAC43]/40'
                     : 'text-gray-600 hover:text-black hover:bg-white/70'
@@ -96,7 +96,7 @@ const AdminCatalogue = () => {
 
       {/* GRID: Data Dikhane Ke Liye */}
       {filteredData.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+        <div className="text-center py-16 bg-gray-50 rounded border border-dashed border-gray-300">
           <FiLayers className="mx-auto text-4xl text-gray-400 mb-2" />
           <p className="text-gray-600 font-bold text-sm">No designs found in {activeTab}.</p>
           <p className="text-gray-400 text-xs mt-1">Click the " Add New Design / Vol" button above to upload pictures.</p>

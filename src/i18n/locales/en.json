@@ -226,7 +226,7 @@
   "expenses": {
     "title": "Expenses & Shop Khata",
     "subtitle": "Track daily shop expenses, utility bills, materials, and workshop overheads",
-    "addExpense": "+ Record New Expense",
+    "addExpense": " Add new Vender",
     "todayExpenses": "Today's Expenses",
     "thisMonthExpenses": "This Month's Total",
     "category": "Expense Category",

@@ -155,11 +155,11 @@ const AdminDashboard = () => {
     <div className="space-y-6 sm:space-y-8 pb-12 font-sans">
       
       {/* 1. EXECUTIVE WELCOME BANNER & QUICK ACTIONS */}
-      <section className="bg-[#0F172A] text-white rounded-xl p-4 sm:p-6 md:p-8 border border-gray-800 shadow-xl relative overflow-hidden">
+      <section className="bg-[#0F172A] text-white rounded p-4 sm:p-6 md:p-8 border border-gray-800 shadow-xl relative overflow-hidden">
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5 sm:gap-6">
           <div className="w-full xl:w-auto">
             <div className="flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-[#DFAC43] animate-pulse"></span>
+              <span className="w-2 h-2 rounded bg-[#DFAC43] animate-pulse"></span>
               <span className="text-[11px] sm:text-xs text-gray-400 font-medium">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
@@ -176,14 +176,14 @@ const AdminDashboard = () => {
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 w-full xl:w-auto shrink-0">
             <button
               onClick={() => navigate('/admin/orders/create')}
-              className="min-h-[40px] sm:min-h-[44px] py-2 bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs transition shadow-md flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
+              className="min-h-[40px] sm:min-h-[44px] py-2 bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-2 sm:px-3 rounded text-[11px] sm:text-xs transition shadow-md flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
             >
               <FiPlus className="text-xs sm:text-sm shrink-0" /> 
               <span>{t('dashboard.bookNewOrder')}</span>
             </button>
             <button
               onClick={() => navigate('/admin/allorders')}
-              className={`min-h-[40px] sm:min-h-[44px] py-2 px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs font-black transition border flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              className={`min-h-[40px] sm:min-h-[44px] py-2 px-2 sm:px-3 rounded text-[11px] sm:text-xs font-black transition border flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer ${
                 counts.pendingInspectionCount > 0 
                   ? 'bg-[#DFAC43] text-[#0F172A] border-[#DFAC43] shadow-md animate-pulse' 
                   : 'bg-[#1E293B] hover:bg-gray-800 text-white border-gray-700'
@@ -194,14 +194,14 @@ const AdminDashboard = () => {
             </button>
             <button
               onClick={() => navigate('/admin/financial-reports')}
-              className="min-h-[40px] sm:min-h-[44px] py-2 bg-[#1E293B] hover:bg-gray-800 text-gray-200 hover:text-white font-bold px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs transition border border-gray-700 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
+              className="min-h-[40px] sm:min-h-[44px] py-2 bg-[#1E293B] hover:bg-gray-800 text-gray-200 hover:text-white font-bold px-2 sm:px-3 rounded text-[11px] sm:text-xs transition border border-gray-700 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
             >
               <FaMoneyBillWave className="text-xs shrink-0" /> 
               <span>{t('admin.reports')}</span>
             </button>
             <button
               onClick={() => navigate('/admin/customers')}
-              className="min-h-[40px] sm:min-h-[44px] py-2 bg-[#1E293B] hover:bg-gray-800 text-gray-200 hover:text-white font-bold px-2 sm:px-3 rounded-lg text-[11px] sm:text-xs transition border border-gray-700 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
+              className="min-h-[40px] sm:min-h-[44px] py-2 bg-[#1E293B] hover:bg-gray-800 text-gray-200 hover:text-white font-bold px-2 sm:px-3 rounded text-[11px] sm:text-xs transition border border-gray-700 flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
             >
               <FiUsers className="text-xs shrink-0" /> 
               <span>{t('admin.customers')}</span>
@@ -214,7 +214,7 @@ const AdminDashboard = () => {
       <section className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center px-1 gap-1 sm:gap-2">
           <h2 className="text-xs sm:text-sm font-black uppercase text-gray-800 tracking-wider flex items-center gap-2">
-            <span className="w-1.5 h-3.5 bg-[#DFAC43] rounded-sm shrink-0"></span>
+            <span className="w-1.5 h-3.5 bg-[#DFAC43] rounded shrink-0"></span>
             <span>{t('dashboard.overview')}</span>
           </h2>
           <span className="text-[11px] sm:text-xs text-gray-500 font-bold">Total {totalSuitsCount} Suits ({activeOrders.length} {t('dashboard.activeOrders')})</span>
@@ -223,28 +223,28 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
           
           {/* Stage 1: Booked Total */}
-          <div className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200 text-center space-y-1 hover:border-gray-300 transition shadow-2xs">
+          <div className="bg-white p-3 sm:p-4 rounded border border-gray-200 text-center space-y-1 hover:border-gray-300 transition shadow-2xs">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider block truncate">{t('orders.garments')}</span>
             <p className="text-xl sm:text-2xl font-black text-[#0F172A]">{totalSuitsCount}</p>
             <span className="text-[10px] text-gray-500 font-semibold block truncate">{orders.length} {t('admin.allOrders')}</span>
           </div>
 
           {/* Stage 2: Cutting */}
-          <div className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200 text-center space-y-1 bg-slate-50/50 hover:border-gray-300 transition shadow-2xs">
+          <div className="bg-white p-3 sm:p-4 rounded border border-gray-200 text-center space-y-1 bg-slate-50/50 hover:border-gray-300 transition shadow-2xs">
             <span className="text-[10px] font-black text-gray-600 uppercase tracking-wider block truncate">{t('dashboard.cuttingPending')}</span>
             <p className="text-xl sm:text-2xl font-black text-gray-900">{cuttingPendingCount}</p>
             <span className="text-[10px] text-gray-500 font-semibold block truncate">{t('orders.cutting')}</span>
           </div>
 
           {/* Stage 3: In Stitching */}
-          <div className="bg-white p-3 sm:p-4 rounded-xl border border-gray-200 text-center space-y-1 bg-slate-50/50 hover:border-gray-300 transition shadow-2xs">
+          <div className="bg-white p-3 sm:p-4 rounded border border-gray-200 text-center space-y-1 bg-slate-50/50 hover:border-gray-300 transition shadow-2xs">
             <span className="text-[10px] font-black text-gray-600 uppercase tracking-wider block truncate">{t('dashboard.stitchingActive')}</span>
             <p className="text-xl sm:text-2xl font-black text-gray-900">{stitchingActiveCount}</p>
             <span className="text-[10px] text-gray-500 font-semibold block truncate">{t('admin.workers')}</span>
           </div>
 
           {/* Stage 4: In QC Inspection */}
-          <div className={`p-3 sm:p-4 rounded-xl border text-center space-y-1 transition shadow-2xs ${
+          <div className={`p-3 sm:p-4 rounded border text-center space-y-1 transition shadow-2xs ${
             counts.pendingInspectionCount > 0 
               ? 'bg-amber-50 border-[#DFAC43] text-amber-950 shadow-sm' 
               : 'bg-white border-gray-200 text-gray-700'
@@ -257,7 +257,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Stage 5: Rework / Alteration */}
-          <div className={`p-3 sm:p-4 rounded-xl border text-center space-y-1 transition shadow-2xs ${
+          <div className={`p-3 sm:p-4 rounded border text-center space-y-1 transition shadow-2xs ${
             counts.reworkCount > 0 
               ? 'bg-red-50 border-red-300 text-red-900' 
               : 'bg-white border-gray-200 text-gray-600'
@@ -270,7 +270,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Stage 6: Stitched & Ready */}
-          <div className="bg-white p-3 sm:p-4 rounded-xl border border-[#DFAC43]/40 text-center space-y-1 bg-amber-50/20 hover:border-[#DFAC43] transition shadow-2xs">
+          <div className="bg-white p-3 sm:p-4 rounded border border-[#DFAC43]/40 text-center space-y-1 bg-amber-50/20 hover:border-[#DFAC43] transition shadow-2xs">
             <span className="text-[10px] font-black text-amber-800 uppercase tracking-wider block truncate">{t('dashboard.readyForDelivery')}</span>
             <p className="text-xl sm:text-2xl font-black text-[#DFAC43]">{readySuitsCount}</p>
             <span className="text-[10px] text-gray-500 font-semibold block truncate">{t('orders.ready')}</span>
@@ -280,7 +280,7 @@ const AdminDashboard = () => {
       </section>
 
       {/* 3. SMART DELIVERY SCHEDULE & TIMELINES */}
-      <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-4 sm:p-6 space-y-4 sm:space-y-5">
+      <section className="bg-white rounded border border-gray-200 shadow-sm overflow-hidden p-4 sm:p-6 space-y-4 sm:space-y-5">
         
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-gray-100 pb-4">
@@ -308,7 +308,7 @@ const AdminDashboard = () => {
           {/* Tab 1: Today's Deliveries */}
           <button
             onClick={() => handleDeliveryFilterChange('today')}
-            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
+            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
               deliveryFilter === 'today'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                 : todayOrders.length > 0
@@ -327,7 +327,7 @@ const AdminDashboard = () => {
           {/* Tab 2: Upcoming in 3 Days */}
           <button
             onClick={() => handleDeliveryFilterChange('in3days')}
-            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
+            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
               deliveryFilter === 'in3days'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                 : 'text-gray-600 hover:bg-gray-200 bg-white sm:bg-transparent'
@@ -342,7 +342,7 @@ const AdminDashboard = () => {
           {/* Tab 3: Next Week Deliveries */}
           <button
             onClick={() => handleDeliveryFilterChange('nextWeek')}
-            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
+            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
               deliveryFilter === 'nextWeek'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                 : 'text-gray-600 hover:bg-gray-200 bg-white sm:bg-transparent'
@@ -358,7 +358,7 @@ const AdminDashboard = () => {
           {overdueOrders.length > 0 && (
             <button
               onClick={() => handleDeliveryFilterChange('overdue')}
-              className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
+              className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
                 deliveryFilter === 'overdue'
                   ? 'bg-red-700 text-white shadow-sm'
                   : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200'
@@ -377,7 +377,7 @@ const AdminDashboard = () => {
           {/* Tab 5: All Active Orders */}
           <button
             onClick={() => handleDeliveryFilterChange('all')}
-            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
+            className={`w-full lg:w-auto px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded text-[11px] sm:text-xs font-black transition flex items-center justify-between lg:justify-start gap-1.5 cursor-pointer ${
               deliveryFilter === 'all'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm'
                 : 'text-gray-600 hover:bg-gray-200 bg-white sm:bg-transparent'
@@ -393,7 +393,7 @@ const AdminDashboard = () => {
 
         {/* Deliveries Display (Table on MD+, Cards on Mobile) */}
         {displayedOrders.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-xl p-6">
+          <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded p-6">
             <FiCheckCircle className="text-3xl text-gray-300 mx-auto mb-2" />
             <p className="text-gray-600 text-xs font-bold">
               {deliveryFilter === 'today' ? 'No deliveries scheduled for today.' :

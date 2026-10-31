@@ -49,11 +49,11 @@ const AdminFinancialReports = () => {
     <div className="space-y-8 pb-12 font-sans">
       
       {/* 1. EXECUTIVE FINANCIAL HEADER */}
-      <section className="bg-[#0F172A] text-white rounded-xl p-4 sm:p-6 md:p-8 border border-gray-800 shadow-xl relative overflow-hidden">
+      <section className="bg-[#0F172A] text-white rounded p-4 sm:p-6 md:p-8 border border-gray-800 shadow-xl relative overflow-hidden">
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5 sm:gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="w-2 h-2 rounded-full bg-[#DFAC43] animate-pulse"></span>
+              <span className="w-2 h-2 rounded bg-[#DFAC43] animate-pulse"></span>
               <span className="text-xs text-gray-400 font-medium">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
               </span>
@@ -71,14 +71,14 @@ const AdminFinancialReports = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-center gap-2.5 w-full xl:w-auto shrink-0">
             <button
               onClick={() => navigate('/admin/expenses')}
-              className="w-full sm:w-auto bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-4 py-2.5 rounded-lg text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+              className="w-full sm:w-auto bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-4 py-2.5 rounded text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
             >
               <FiCreditCard className="text-sm shrink-0" /> 
               <span>Manage Shop Expenses</span>
             </button>
             <button
               onClick={() => navigate('/admin/workers')}
-              className="w-full sm:w-auto bg-[#1E293B] hover:bg-gray-800 text-white font-bold px-4 py-2.5 rounded-lg text-xs sm:text-sm transition border border-gray-700 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
+              className="w-full sm:w-auto bg-[#1E293B] hover:bg-gray-800 text-white font-bold px-4 py-2.5 rounded text-xs sm:text-sm transition border border-gray-700 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
             >
               <FiUsers className="text-sm shrink-0 text-[#DFAC43]" /> 
               <span>Karigar Wages</span>
@@ -100,7 +100,7 @@ const AdminFinancialReports = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           
           {/* 1. Total Kaam (Sales / Revenue) */}
-          <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm space-y-3 hover:border-[#DFAC43]/40 transition">
+          <div className="bg-white p-4 sm:p-5 rounded border border-gray-200 shadow-sm space-y-3 hover:border-[#DFAC43]/40 transition">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Work / Sales</span>
               <span className="p-2 bg-amber-50 text-[#DFAC43] rounded-lg text-sm shrink-0"><FiCreditCard /></span>
@@ -114,7 +114,7 @@ const AdminFinancialReports = () => {
           </div>
 
           {/* 2. Total Kharcha */}
-          <div className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm space-y-3 hover:border-gray-400 transition">
+          <div className="bg-white p-4 sm:p-5 rounded border border-gray-200 shadow-sm space-y-3 hover:border-gray-400 transition">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Expenses</span>
               <span className="p-2 bg-gray-100 text-gray-700 rounded-lg text-sm shrink-0"><FiScissors /></span>
@@ -131,7 +131,7 @@ const AdminFinancialReports = () => {
           </div>
 
           {/* 3. Pure Net Business Profit */}
-          <div className="bg-[#0F172A] text-white p-4 sm:p-5 rounded-xl border border-gray-800 shadow-sm space-y-3 hover:border-[#DFAC43]/40 transition relative overflow-hidden sm:col-span-2 lg:col-span-1">
+          <div className="bg-[#0F172A] text-white p-4 sm:p-5 rounded border border-gray-800 shadow-sm space-y-3 hover:border-[#DFAC43]/40 transition relative overflow-hidden sm:col-span-2 lg:col-span-1">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider">Net Business Profit</span>
               <span className="p-2 bg-[#DFAC43]/10 text-[#DFAC43] border border-[#DFAC43]/20 rounded-lg text-sm shrink-0"><FiTrendingUp /></span>
@@ -161,7 +161,7 @@ const AdminFinancialReports = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           
           {/* 4. Total Advance / Cash Collected */}
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2 hover:border-gray-300 transition">
+          <div className="bg-white p-4 rounded border border-gray-200 shadow-sm space-y-2 hover:border-gray-300 transition">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Total Receiving</span>
               <span className="text-xs text-green-600 font-black">Cash In-Hand</span>
@@ -171,7 +171,7 @@ const AdminFinancialReports = () => {
           </div>
 
           {/* 5. Customer Balance Receivable (Udhar) */}
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2 hover:border-amber-300 transition">
+          <div className="bg-white p-4 rounded border border-gray-200 shadow-sm space-y-2 hover:border-amber-300 transition">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Amount Receivable</span>
               <span className="text-[10px] bg-amber-50 text-amber-900 px-1.5 py-0.5 rounded-md font-black border border-amber-200">Customer Credits</span>
@@ -181,7 +181,7 @@ const AdminFinancialReports = () => {
           </div>
 
           {/* 6. Karigar Wages Payable */}
-          <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-2 hover:border-gray-300 transition">
+          <div className="bg-white p-4 rounded border border-gray-200 shadow-sm space-y-2 hover:border-gray-300 transition">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider">Amount Payable</span>
               <span className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-md font-black">Karigar Wages</span>
@@ -191,7 +191,7 @@ const AdminFinancialReports = () => {
           </div>
 
           {/* 7. Material Supplier Payable */}
-          <div className="bg-white p-4 rounded-xl border border-[#DFAC43]/30 shadow-sm space-y-2 hover:border-[#DFAC43] transition bg-gradient-to-br from-white to-amber-50/20">
+          <div className="bg-white p-4 rounded border border-[#DFAC43]/30 shadow-sm space-y-2 hover:border-[#DFAC43] transition bg-gradient-to-br from-white to-amber-50/20">
             <div className="flex justify-between items-start">
               <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider">Amount Payable</span>
               <span className="text-[10px] bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded-md font-black border border-amber-300">Material</span>
@@ -209,10 +209,10 @@ const AdminFinancialReports = () => {
       <section className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
         <div 
           onClick={() => navigate('/admin/expenses')}
-          className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-[#DFAC43] transition group"
+          className="bg-white p-4 sm:p-5 rounded border border-gray-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-[#DFAC43] transition group"
         >
           <div className="flex items-center gap-3.5 sm:gap-4">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-amber-50 text-[#DFAC43] flex items-center justify-center text-xl font-black group-hover:scale-105 transition shrink-0">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded bg-amber-50 text-[#DFAC43] flex items-center justify-center text-xl font-black group-hover:scale-105 transition shrink-0">
               <FiCreditCard />
             </div>
             <div>
@@ -226,10 +226,10 @@ const AdminFinancialReports = () => {
 
         <div 
           onClick={() => navigate('/admin/workers')}
-          className="bg-white p-4 sm:p-5 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-[#0F172A] transition group"
+          className="bg-white p-4 sm:p-5 rounded border border-gray-200 shadow-sm flex items-center justify-between cursor-pointer hover:border-[#0F172A] transition group"
         >
           <div className="flex items-center gap-3.5 sm:gap-4">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-gray-100 text-gray-800 flex items-center justify-center text-xl font-black group-hover:scale-105 transition shrink-0">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded bg-gray-100 text-gray-800 flex items-center justify-center text-xl font-black group-hover:scale-105 transition shrink-0">
               <FiUsers />
             </div>
             <div>

@@ -45,12 +45,12 @@ const AdminServices = () => {
   if (isError) return <div className="text-red-500 text-center py-10 font-bold">Failed to load services & offers data.</div>;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
+    <div className="bg-white rounded shadow-sm p-4 sm:p-6 space-y-6">
       {/* HEADER SECTION */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-gray-100 pb-5">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#0F172A] text-[#DFAC43] flex items-center justify-center font-bold shrink-0 shadow-xs">
+            <div className="w-9 h-9 rounded bg-[#0F172A] text-[#DFAC43] flex items-center justify-center font-bold shrink-0 shadow-xs">
               <FiLayers className="text-lg" />
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
@@ -64,7 +64,7 @@ const AdminServices = () => {
 
         <button
           onClick={() => openModal()}
-          className="w-full sm:w-auto bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
+          className="w-full sm:w-auto bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 shadow-sm shrink-0 whitespace-nowrap cursor-pointer"
         >
           <FiPlus className="text-base shrink-0" />
           <span>Add New Service</span>
@@ -72,7 +72,7 @@ const AdminServices = () => {
       </div>
 
       {/* FILTER & STATS BAR */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50 p-3 sm:p-3.5 rounded-xl border border-gray-200">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gray-50 p-3 sm:p-3.5 rounded border border-gray-200">
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
             Total Services: <strong className="text-black text-sm">{offersList.length}</strong>
@@ -84,14 +84,14 @@ const AdminServices = () => {
             placeholder="Search service title or description..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-white border border-gray-300 text-xs font-medium outline-none focus:border-[#DFAC43] transition shadow-2xs"
+            className="w-full px-3 py-2 rounded bg-white border border-gray-300 text-xs font-medium outline-none focus:border-[#DFAC43] transition shadow-2xs"
           />
         </div>
       </div>
 
       {/* OFFERS GRID */}
       {filteredOffers.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+        <div className="text-center py-16 bg-gray-50 rounded border border-dashed border-gray-300">
           <FiLayers className="mx-auto text-4xl text-gray-400 mb-2" />
           <p className="text-gray-500 font-bold text-sm">No services or offers found.</p>
           <p className="text-gray-400 text-xs mt-1">Click the "Add New Service" button above to create one.</p>
@@ -101,7 +101,7 @@ const AdminServices = () => {
           {filteredOffers.map((offer) => (
             <div 
               key={offer._id} 
-              className="group bg-white rounded-xl border border-gray-200 overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col h-full"
+              className="group bg-white rounded border border-gray-200 overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col h-full"
             >
               {/* IMAGE HEADER */}
               <div className="relative h-48 bg-gray-100 overflow-hidden">
@@ -151,7 +151,7 @@ const AdminServices = () => {
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between gap-1.5">
                   <button
                     onClick={() => setPreviewOffer(offer)}
-                    className="text-xs font-bold text-gray-600 hover:text-black flex items-center gap-1 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition cursor-pointer shrink-0"
+                    className="text-xs font-bold text-gray-600 hover:text-black flex items-center gap-1 px-2.5 py-1.5 rounded hover:bg-gray-100 transition cursor-pointer shrink-0"
                   >
                     <FiEye className="text-xs sm:text-sm" /> <span>Preview</span>
                   </button>
@@ -159,14 +159,14 @@ const AdminServices = () => {
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => openModal(offer)}
-                      className="text-[11px] sm:text-xs font-bold text-gray-800 hover:text-black bg-gray-100 hover:bg-gray-200 px-2.5 sm:px-3 py-1.5 rounded-lg transition flex items-center gap-1 border border-gray-200 cursor-pointer"
+                      className="text-[11px] sm:text-xs font-bold text-gray-800 hover:text-black bg-gray-100 hover:bg-gray-200 px-2.5 sm:px-3 py-1.5 rounded transition flex items-center gap-1 border border-gray-200 cursor-pointer"
                     >
                       <FiEdit className="text-xs" /> <span>Edit</span>
                     </button>
                     <button
                       onClick={() => handleDelete(offer._id, offer.title)}
                       disabled={isDeleting}
-                      className="text-[11px] sm:text-xs font-bold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-2.5 sm:px-3 py-1.5 rounded-lg transition flex items-center gap-1 border border-red-100 cursor-pointer"
+                      className="text-[11px] sm:text-xs font-bold text-red-600 hover:text-red-800 bg-red-50 hover:bg-red-100 px-2.5 sm:px-3 py-1.5 rounded transition flex items-center gap-1 border border-red-100 cursor-pointer"
                     >
                       <FiTrash2 className="text-xs" /> <span>Delete</span>
                     </button>

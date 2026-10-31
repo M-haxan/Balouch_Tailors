@@ -119,7 +119,7 @@ const AdminPayments = () => {
     <div className="space-y-6 pb-12 font-sans">
       
       {/* 1. EXECUTIVE HEADER */}
-      <section className="bg-[#0F172A] text-white rounded-xl p-4 sm:p-6 md:p-7 border border-gray-800 shadow-xl relative overflow-hidden">
+      <section className="bg-[#0F172A] text-white rounded p-4 sm:p-6 md:p-7 border border-gray-800 shadow-xl relative overflow-hidden">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-5">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
@@ -152,7 +152,7 @@ const AdminPayments = () => {
       <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
         
         {/* Card 1: Today's Collection */}
-        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
+        <div className="bg-white p-3.5 sm:p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-[#DFAC43] transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider truncate">Today's Cash</span>
             <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs shrink-0"><FaMoneyBillWave /></span>
@@ -162,7 +162,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Card 2: Partially Paid Orders */}
-        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-amber-300 transition">
+        <div className="bg-white p-3.5 sm:p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-amber-300 transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-amber-900 uppercase tracking-wider truncate">Partially Paid</span>
             <span className="p-1.5 bg-amber-50 text-amber-900 rounded-lg text-xs shrink-0"><FiClock /></span>
@@ -174,7 +174,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Card 3: Total Outstanding Balance (Udhar) */}
-        <div className="bg-[#0F172A] text-white p-3.5 sm:p-4 rounded-xl border border-gray-800 shadow-xs space-y-1 hover:border-[#DFAC43] transition col-span-2 sm:col-span-1">
+        <div className="bg-[#0F172A] text-white p-3.5 sm:p-4 rounded border border-gray-800 shadow-xs space-y-1 hover:border-[#DFAC43] transition col-span-2 sm:col-span-1">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-gray-300 uppercase tracking-wider truncate">Outstanding Udhar</span>
             <span className="p-1.5 bg-[#DFAC43]/10 text-[#DFAC43] rounded-lg text-xs shrink-0"><FiAlertCircle /></span>
@@ -184,7 +184,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Card 4: Fully Paid Orders */}
-        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-green-300 transition">
+        <div className="bg-white p-3.5 sm:p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-green-300 transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider truncate">Paid Orders</span>
             <span className="p-1.5 bg-green-50 text-green-700 rounded-lg text-xs shrink-0"><FiCheckCircle /></span>
@@ -194,7 +194,7 @@ const AdminPayments = () => {
         </div>
 
         {/* Card 5: Unpaid Orders (Zero Advance) */}
-        <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-gray-200 shadow-xs space-y-1 hover:border-red-300 transition">
+        <div className="bg-white p-3.5 sm:p-4 rounded border border-gray-200 shadow-xs space-y-1 hover:border-red-300 transition">
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-wider truncate">Unpaid Orders</span>
             <span className="p-1.5 bg-red-50 text-red-700 rounded-lg text-xs shrink-0"><FiAlertCircle /></span>
@@ -206,7 +206,7 @@ const AdminPayments = () => {
       </section>
 
       {/* 3. SEARCH, FILTERS & TABLE */}
-      <section className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-3.5 sm:p-5 md:p-6 space-y-4">
+      <section className="bg-white rounded border border-gray-200 shadow-sm overflow-hidden p-3.5 sm:p-5 md:p-6 space-y-4">
         
         {/* Search & Filter Bar */}
         <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 pb-3 border-b border-gray-100">

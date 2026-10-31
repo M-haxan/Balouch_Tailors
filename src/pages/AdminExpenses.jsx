@@ -116,7 +116,7 @@ const AdminExpenses = () => {
     <div className="space-y-6 pb-12 font-sans">
       
       {/* 1. TOP HEADER & METRIC TILES */}
-      <div className="bg-[#0F172A] text-white rounded-xl p-4 sm:p-6 md:p-8 border border-gray-800 shadow-xl relative overflow-hidden">
+      <div className="bg-[#0F172A] text-white rounded p-4 sm:p-6 md:p-8 border border-gray-800 shadow-xl relative overflow-hidden">
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-5 sm:gap-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
@@ -134,14 +134,14 @@ const AdminExpenses = () => {
           <div className="grid grid-cols-1 min-[450px]:grid-cols-2 lg:flex lg:flex-wrap gap-2 w-full xl:w-auto shrink-0">
             <button
               onClick={() => setIsAddSupplierOpen(true)}
-              className="bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-3.5 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
+              className="bg-[#DFAC43] hover:bg-white text-[#0F172A] font-black px-3.5 sm:px-4 py-2.5 rounded text-xs sm:text-sm transition shadow-md flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer"
             >
               <FiPlus className="text-base shrink-0" /> 
-              <span>+ {t('expenses.addExpense')}</span>
+              <span> {t('expenses.addExpense')}</span>
             </button>
             <button
               onClick={() => setIsDirectExpenseOpen(true)}
-              className="bg-[#1E293B] hover:bg-gray-800 text-white font-bold px-3.5 sm:px-4 py-2.5 rounded-lg text-xs sm:text-sm transition border border-gray-700 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+              className="bg-[#1E293B] hover:bg-gray-800 text-white font-bold px-3.5 sm:px-4 py-2.5 rounded text-xs sm:text-sm transition border border-gray-700 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <FaMoneyBillWave className="text-sm text-[#DFAC43] shrink-0" /> 
               <span>{t('expenses.todayExpenses')}</span>
@@ -152,20 +152,20 @@ const AdminExpenses = () => {
         {/* 4 HIGHLIGHT METRIC CARDS */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5 mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-gray-800">
           
-          <div className="bg-[#1E293B]/60 p-3 sm:p-3.5 rounded-xl border border-gray-800">
+          <div className="bg-[#1E293B]/60 p-3 sm:p-3.5 rounded border border-gray-800">
             <span className="text-[10px] text-gray-400 uppercase font-black block truncate">Total Purchases</span>
             <p className="text-lg sm:text-xl font-black text-white mt-1">Rs {(supplierSummary.totalPurchasesAll || 0).toLocaleString()}</p>
             <span className="text-[10px] text-gray-400 block truncate">{suppliers.length} Registered Vendors</span>
           </div>
 
-          <div className="bg-[#1E293B]/60 p-3 sm:p-3.5 rounded-xl border border-gray-800">
+          <div className="bg-[#1E293B]/60 p-3 sm:p-3.5 rounded border border-gray-800">
             <span className="text-[10px] text-gray-400 uppercase font-black block truncate">Paid to Shops</span>
             <p className="text-lg sm:text-xl font-black text-green-400 mt-1">Rs {(supplierSummary.totalPaidAll || 0).toLocaleString()}</p>
             <span className="text-[10px] text-gray-400 block truncate">Settled Purchases</span>
           </div>
 
           {/* CRITICAL METRIC: Abhi Denay Hain (Material Walon Ko) */}
-          <div className="bg-amber-950/40 p-3 sm:p-3.5 rounded-xl border border-[#DFAC43]/40">
+          <div className="bg-amber-950/40 p-3 sm:p-3.5 rounded border border-[#DFAC43]/40">
             <span className="text-[10px] text-amber-300 uppercase font-black block truncate">Remaining Dues</span>
             <p className="text-lg sm:text-xl font-black text-[#DFAC43] mt-1">
               Rs {(supplierSummary.totalBalancePayableAll || 0).toLocaleString()}
@@ -173,7 +173,7 @@ const AdminExpenses = () => {
             <span className="text-[10px] text-amber-200/70 font-semibold block truncate">Vendor Outstanding</span>
           </div>
 
-          <div className="bg-[#1E293B]/60 p-3 sm:p-3.5 rounded-xl border border-gray-800">
+          <div className="bg-[#1E293B]/60 p-3 sm:p-3.5 rounded border border-gray-800">
             <span className="text-[10px] text-gray-400 uppercase font-black block truncate">Direct Expenses</span>
             <p className="text-lg sm:text-xl font-black text-gray-200 mt-1">Rs {(expenseData.totalExpenseAmount || 0).toLocaleString()}</p>
             <span className="text-[10px] text-gray-400 block truncate">Rent, Bills & Misc</span>
@@ -183,7 +183,7 @@ const AdminExpenses = () => {
       </div>
 
       {/* 2. TAB CONTROLS & SEARCH */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-3.5 sm:p-4 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 sm:gap-4">
+      <div className="bg-white rounded border border-gray-200 shadow-sm p-3.5 sm:p-4 flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-3 sm:gap-4">
         
         {/* Navigation Tabs (Equal-width Grid on Mobile / Flex on Desktop) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full lg:w-auto">
@@ -192,7 +192,7 @@ const AdminExpenses = () => {
               setActiveTab('suppliers');
               setCurrentPage(1);
             }}
-            className={`py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 text-center whitespace-nowrap cursor-pointer ${
+            className={`py-2.5 px-3.5 rounded text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 text-center whitespace-nowrap cursor-pointer ${
               activeTab === 'suppliers'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm ring-1 ring-[#DFAC43]/40'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -207,7 +207,7 @@ const AdminExpenses = () => {
               setActiveTab('direct');
               setCurrentPage(1);
             }}
-            className={`py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 text-center whitespace-nowrap cursor-pointer ${
+            className={`py-2.5 px-3.5 rounded text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 text-center whitespace-nowrap cursor-pointer ${
               activeTab === 'direct'
                 ? 'bg-[#0F172A] text-[#DFAC43] shadow-sm ring-1 ring-[#DFAC43]/40'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -224,7 +224,7 @@ const AdminExpenses = () => {
           <input 
             type="text" 
             placeholder="Search vendor, item or category..." 
-            className="w-full pl-9 pr-4 py-2 border border-gray-200 focus:border-[#DFAC43] rounded-lg outline-none font-medium text-xs sm:text-sm transition shadow-2xs"
+            className="w-full pl-9 pr-4 py-2 border border-gray-200 focus:border-[#DFAC43] rounded outline-none font-medium text-xs sm:text-sm transition shadow-2xs"
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -238,7 +238,7 @@ const AdminExpenses = () => {
       
       {/* TAB 1: MATERIAL SHOPS / SUPPLIERS */}
       {activeTab === 'suppliers' && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden p-3.5 sm:p-5 space-y-4">
+        <div className="bg-white rounded border border-gray-200 shadow-sm overflow-hidden p-3.5 sm:p-5 space-y-4">
           {filteredSuppliers.length === 0 ? (
             <div className="text-center py-16 text-gray-400 text-xs font-bold space-y-3">
               <p>No material vendors registered yet.</p>
@@ -252,7 +252,7 @@ const AdminExpenses = () => {
           ) : (
             <>
               {/* 1. DESKTOP VIEW (TABLE) */}
-              <div className="hidden md:block overflow-x-auto border border-gray-200 rounded-xl">
+              <div className="hidden md:block overflow-x-auto border border-gray-200 rounded">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-[#0F172A] text-[#DFAC43] uppercase text-[10px] tracking-wider whitespace-nowrap">

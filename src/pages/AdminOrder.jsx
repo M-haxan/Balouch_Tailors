@@ -4,50 +4,18 @@ import { useCreateOrder, useUpdateOrder, useGetOrderById } from '../hooks/useOrd
 import { useGetTailoringServices } from '../hooks/useTailoringServices';
 import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { formatPhone } from '../utils/formatters';
 import useAuthStore from '../Store/authStore';
-import { 
-  FiPlus, 
-  FiTrash2, 
-  FiSave, 
-  FiMic, 
-  FiUser, 
-  FiCalendar, 
-  FiCreditCard, 
-  FiScissors, 
-  FiX, 
-  FiTag, 
-  FiPercent, 
-  FiLayers,
-  FiUpload,
-  FiCamera,
-  FiImage,
-  FiAlertCircle,
-  FiCheckCircle,
-  FiEdit,
-  FiShoppingBag,
-  FiCornerDownRight,
-  FiCopy,
-  FiArrowLeft
-} from 'react-icons/fi';
-import { FaMoneyBillWave } from 'react-icons/fa';
+import { FiArrowLeft } from 'react-icons/fi';
 
-// Standard stitching tags
-const COMMON_TAGS = [
-  'Half Bain', 
-  'Full Bain', 
-  'Collar', 
-  'Gol Bazu', 
-  'Gol Kaf', 
-  'Chor Kaf', 
-  'Gol Daman',
-  'Choras Daman',
-  'Front Pocket', 
-  '2 Side Pockets', 
-  'Shalwar Pocket',
-  'Gum Patti',
-  'Double Silai'
-];
+import OrderSuccessScreen from '../components/OrderSuccessScreen';
+import OrderCustomerSection from '../components/OrderCustomerSection';
+import OrderGarmentsSection from '../components/OrderGarmentsSection';
+import OrderSummaryTable from '../components/OrderSummaryTable';
+import OrderPaymentSection from '../components/OrderPaymentSection';
+import OrderCameraModal from '../components/OrderCameraModal';
+import { COMMON_TAGS } from '../components/OrderSuitCard';
+
+export { COMMON_TAGS };
 
 const CreateOrder = () => {
   const navigate = useNavigate();
@@ -580,64 +548,13 @@ const CreateOrder = () => {
   // Success Screen
   if (savedOrder) {
     return (
-      <div className="bg-gray-50 min-h-[85vh] p-3 sm:p-6 flex items-center justify-center">
-        <div className="bg-white p-5 sm:p-8 rounded shadow-md border border-gray-200 text-center max-w-md w-full">
-          <div className="w-14 h-14 sm:w-16 sm:h-16 bg-green-100 text-green-600 rounded flex items-center justify-center mx-auto mb-4 sm:mb-5">
-            <FiCheckCircle className="text-2xl sm:text-3xl" />
-          </div>
-          <h2 className="text-lg sm:text-2xl font-black text-gray-900 mb-1.5 sm:mb-2">
-            {isEditMode ? 'Order Updated Successfully' : 'Order Created Successfully'}
-          </h2>
-          <p className="text-gray-500 mb-4 text-xs sm:text-sm font-medium">
-            {isEditMode ? 'Order details and changes have been saved.' : 'Order has been saved and ledger balance updated.'}
-          </p>
-
-          {/* Assigned Suit IDs List for Writing on Cloth */}
-          <div className="bg-gray-50 border border-gray-200 rounded p-3 mb-5 text-left">
-            <div className="flex justify-between items-center pb-2 border-b border-gray-200 mb-2">
-              <span className="text-xs font-bold text-gray-500 uppercase">Order Number:</span>
-              <span className="font-black text-sm text-[#0F172A]">#BT-{savedOrder.orderNumber}</span>
-            </div>
-            <p className="text-[10px] font-black text-gray-600 uppercase mb-2">
-              Assigned Suit IDs (Tagging on fabric):
-            </p>
-            <div className="space-y-1.5">
-              {savedOrder.suits && savedOrder.suits.map((s, idx) => (
-                <div key={idx} className="flex justify-between items-center bg-white p-2 rounded border border-gray-200 text-xs">
-                  <span className="font-bold text-gray-800 truncate pr-2">
-                    Suit #{idx + 1} ({s.serviceType || 'Shalwar Qameez'}{s.fabricDetails ? ` - ${s.fabricDetails}` : ''})
-                  </span>
-                  <span className="bg-[#0F172A] text-[#DFAC43] font-mono font-black px-2 py-0.5 rounded text-xs shrink-0 shadow-xs">
-                    {s.suitNumber || `BT-${savedOrder.orderNumber}-${idx + 1}`}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <div className="space-y-2.5 sm:space-y-3">
-            <button 
-              onClick={() => navigate(`/print/${savedOrder._id}`)}
-              className="w-full bg-[#DFAC43] hover:bg-[#0F172A] text-[#0F172A] hover:text-[#DFAC43] font-black h-10 sm:h-11 rounded transition shadow-sm flex justify-center items-center gap-2 text-xs sm:text-sm cursor-pointer"
-            >
-              <FiScissors /> Print Customer Booking Slip
-            </button>
-            
-            <button 
-              onClick={() => {
-                if (isEditMode) {
-                  navigate(isWorker ? `/worker/allorders?viewOrderId=${savedOrder._id || editOrderId}` : `/admin/allorders?viewOrderId=${savedOrder._id || editOrderId}`);
-                } else {
-                  navigate(isWorker ? '/worker/dashboard' : '/admin/allorders');
-                }
-              }}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold h-10 sm:h-11 rounded transition text-xs sm:text-sm cursor-pointer"
-            >
-              ← {isEditMode ? 'Back to Order View Details' : `Back to ${isWorker ? 'Worker Portal' : 'All Orders'}`}
-            </button>
-          </div>
-        </div>
-      </div>
+      <OrderSuccessScreen
+        savedOrder={savedOrder}
+        isEditMode={isEditMode}
+        editOrderId={editOrderId}
+        isWorker={isWorker}
+        navigate={navigate}
+      />
     );
   }
 
@@ -687,836 +604,77 @@ const CreateOrder = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-          
-          {/* ============================================================== */}
-          {/* ROW 1: SECTION 1 - CUSTOMER INFORMATION                        */}
-          {/* ============================================================== */}
-          <div className="bg-white p-3.5 sm:p-5 rounded border border-gray-200 shadow-sm">
-            <div className="flex items-center justify-between mb-2.5 sm:mb-3">
-              <h3 className="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
-                <span className="w-5 h-5 rounded bg-amber-100 text-[#DFAC43] flex items-center justify-center text-xs">
-                  <FiUser />
-                </span>
-                1. Customer Information
-              </h3>
-              {selectedCustomer && (
-                <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                  ID: {selectedCustomer._id.slice(-6)}
-                </span>
-              )}
-            </div>
+          {/* SECTION 1: CUSTOMER INFORMATION */}
+          <OrderCustomerSection
+            customers={customers}
+            loadingCustomers={loadingCustomers}
+            customerId={customerId}
+            setCustomerId={setCustomerId}
+            selectedCustomer={selectedCustomer}
+            customerKhataBal={customerKhataBal}
+            adjustKhata={adjustKhata}
+            setAdjustKhata={setAdjustKhata}
+          />
 
-            {loadingCustomers ? (
-              <div className="text-xs text-gray-500 font-bold py-2">Loading customer list...</div>
-            ) : (
-              <select 
-                required
-                value={customerId}
-                onChange={(e) => setCustomerId(e.target.value)}
-                className="w-full h-10 px-3 border border-gray-300 focus:border-[#DFAC43] rounded text-xs sm:text-sm font-semibold text-gray-800 bg-white outline-none transition"
-              >
-                <option value="">-- Select Customer --</option>
-                {customers.map(c => {
-                  const bal = Number(c.khataBalance) || 0;
-                  const balBadge = bal > 0 ? ` [Due: Rs ${bal}]` : bal < 0 ? ` [Credit: Rs ${Math.abs(bal)}]` : '';
-                  return (
-                    <option key={c._id} value={c._id}>
-                      {c.name} - {formatPhone(c.phone)}{balBadge}
-                    </option>
-                  );
-                })}
-              </select>
-            )}
+          {/* SECTION 2: GARMENTS & CUSTOMIZATIONS */}
+          <OrderGarmentsSection
+            suits={suits}
+            alterations={alterations}
+            garmentServices={garmentServices}
+            customizationList={customizationList}
+            customers={customers}
+            commonTags={COMMON_TAGS}
+            handleCopySpecs={handleCopySpecs}
+            handleRemoveSuit={handleRemoveSuit}
+            handleGarmentCategoryChange={handleGarmentCategoryChange}
+            handleToggleSuitCustomization={handleToggleSuitCustomization}
+            handleSuitChange={handleSuitChange}
+            toggleTag={toggleTag}
+            startCamera={startCamera}
+            startListening={startListening}
+            handleAddSuit={handleAddSuit}
+            handleAddSuitCopy={handleAddSuitCopy}
+            handleAddAlteration={handleAddAlteration}
+            handleRemoveAlteration={handleRemoveAlteration}
+            handleAlterationChange={handleAlterationChange}
+          />
 
-            {/* Khata Adjustment Alert Banner */}
-            {selectedCustomer && customerKhataBal !== 0 && (
-              <div className={`mt-3 p-2.5 sm:p-3 rounded border flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
-                customerKhataBal > 0 
-                  ? 'bg-red-50 border-red-200 text-red-900' 
-                  : 'bg-green-50 border-green-200 text-green-900'
-              }`}>
-                <div className="flex items-start sm:items-center gap-2">
-                  {customerKhataBal > 0 ? (
-                    <FiAlertCircle className="text-base text-red-600 shrink-0 mt-0.5 sm:mt-0" />
-                  ) : (
-                    <FiCheckCircle className="text-base text-green-600 shrink-0 mt-0.5 sm:mt-0" />
-                  )}
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider block opacity-75">
-                      {customerKhataBal > 0 ? 'Outstanding Ledger Due' : 'Advance Credit Balance'}
-                    </span>
-                    <p className="text-xs sm:text-sm font-bold">
-                      {customerKhataBal > 0 
-                        ? `Rs ${customerKhataBal.toLocaleString()} pending from previous orders` 
-                        : `Rs ${Math.abs(customerKhataBal).toLocaleString()} advance credit available`}
-                    </p>
-                  </div>
-                </div>
+          {/* SECTION 3: ORDER SUMMARY & BILL BREAKDOWN */}
+          <OrderSummaryTable
+            suits={suits}
+            alterations={alterations}
+            rawSubtotal={rawSubtotal}
+          />
 
-                <label className="flex items-center gap-2 text-xs font-bold cursor-pointer bg-white px-2.5 sm:px-3 py-1.5 rounded border border-gray-200 shadow-sm shrink-0 self-start sm:self-auto">
-                  <input 
-                    type="checkbox" 
-                    checked={adjustKhata} 
-                    onChange={(e) => setAdjustKhata(e.target.checked)}
-                    className="w-4 h-4 text-black rounded accent-[#DFAC43] cursor-pointer"
-                  />
-                  <span>
-                    {customerKhataBal > 0 ? 'Add to Bill (+)' : 'Deduct from Bill (-)'}
-                  </span>
-                </label>
-              </div>
-            )}
-          </div>
-
-          {/* ============================================================== */}
-          {/* ROW 2: SECTION 2 - GARMENTS & CUSTOMIZATIONS                   */}
-          {/* ============================================================== */}
-          <div className="bg-white p-3.5 sm:p-5 rounded border border-gray-200 shadow-sm">
-            <div className="flex items-center justify-between mb-3.5 sm:mb-4 pb-2 border-b border-gray-100">
-              <h3 className="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
-                <span className="w-5 h-5 rounded bg-amber-100 text-[#DFAC43] flex items-center justify-center text-xs">
-                  <FiScissors />
-                </span>
-                2. Garments & Customizations
-              </h3>
-              <span className="text-[10px] sm:text-[11px] font-bold text-gray-500">
-                {suits.length} {suits.length === 1 ? 'Garment' : 'Garments'}
-              </span>
-            </div>
-
-            {/* List of Suits */}
-            <div className="space-y-4">
-              {suits.map((suit, index) => {
-                const suitCustoms = suit.customizations || [];
-                const customTotal = suitCustoms.reduce((sum, c) => sum + (Number(c.price) || 0), 0);
-                const currentBasePrice = Number(suit.basePrice) || 0;
-                const hasFabricImage = suit.fabricimage && suit.fabricimage !== 'null';
-
-                return (
-                  <div key={index} className="border border-gray-200 rounded p-3 sm:p-4 bg-gray-50/70 relative">
-                    
-                    {/* Suit Card Header */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-gray-200">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="bg-[#0F172A] text-[#DFAC43] text-xs font-black px-2 py-0.5 sm:px-2.5 sm:py-1 rounded">
-                          Suit #{index + 1}
-                        </span>
-                        <span className="font-black text-gray-900 text-xs sm:text-sm">
-                          {suit.serviceType || 'Garment'}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        {index > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => handleCopySpecs(index, index - 1)}
-                            className="bg-amber-100 hover:bg-[#DFAC43] hover:text-[#0F172A] text-amber-900 border border-amber-300 text-[11px] font-black px-2.5 py-1 rounded transition flex items-center gap-1 cursor-pointer shadow-2xs"
-                            title={`Copy all styles, tags, add-ons, and instructions from Suit #${index} to this suit`}
-                          >
-                            <FiCopy /> Same as Suit #{index}
-                          </button>
-                        )}
-
-                        <div className="bg-white border border-gray-200 px-2 sm:px-2.5 py-1 rounded shadow-sm flex items-center gap-1.5 text-xs">
-                          <span className="text-[10px] font-bold text-gray-500 hidden sm:inline">
-                            Base (Rs {currentBasePrice}) + Add-ons (Rs {customTotal}) =
-                          </span>
-                          <span className="font-black text-gray-900 font-sans">
-                            Rs {suit.price}
-                          </span>
-                        </div>
-
-                        {suits.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSuit(index)}
-                            className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-1 sm:p-1.5 rounded transition"
-                            title="Remove Suit"
-                          >
-                            <FiTrash2 className="text-sm" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Step A & B: Category & Customization Dropdowns */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 bg-white p-2.5 sm:p-3 rounded border border-gray-200">
-                      
-                      {/* Garment Category Dropdown */}
-                      <div>
-                        <div className="flex justify-between items-center mb-1">
-                          <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1">
-                            <FiLayers className="text-[#DFAC43]" /> Garment Category:
-                          </label>
-                        </div>
-
-                        <select
-                          value={suit.serviceType || ''}
-                          onChange={(e) => handleGarmentCategoryChange(index, e.target.value)}
-                          className="w-full h-10 px-3 border border-gray-300 focus:border-[#DFAC43] rounded text-xs sm:text-sm font-semibold text-gray-800 bg-white outline-none transition"
-                        >
-                          {garmentServices.length === 0 ? (
-                            <option value="Shalwar Qameez">Shalwar Qameez</option>
-                          ) : (
-                            garmentServices.map(service => {
-                              const urdu = service.serviceNameUrdu ? ` (${service.serviceNameUrdu})` : '';
-                              return (
-                                <option key={service._id} value={service.serviceName}>
-                                  {service.serviceName}{urdu}
-                                </option>
-                              );
-                            })
-                          )}
-                        </select>
-                      </div>
-
-                      {/* Add Customization Dropdown */}
-                      <div>
-                        <div className="flex justify-between items-center mb-1">
-                          <label className="text-[11px] font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1">
-                            <FiTag className="text-[#DFAC43]" /> Add-on Customization:
-                          </label>
-                          {suitCustoms.length > 0 && (
-                            <span className="text-[10px] font-bold text-amber-900 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                              {suitCustoms.length} Selected (+Rs {customTotal})
-                            </span>
-                          )}
-                        </div>
-
-                        <select
-                          value=""
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            if (val) {
-                              const item = customizationList.find(c => c.serviceName === val);
-                              if (item) handleToggleSuitCustomization(index, item);
-                            }
-                          }}
-                          className="w-full h-10 px-3 border border-gray-300 focus:border-[#DFAC43] rounded text-xs sm:text-sm font-semibold text-gray-700 bg-white outline-none transition"
-                        >
-                          <option value="">Select Customization</option>
-                          {customizationList.map(customItem => {
-                            const isAlready = suitCustoms.some(c => c.name === customItem.serviceName);
-                            const addPrice = Number(customItem.price) || 0;
-                            const urdu = customItem.serviceNameUrdu ? ` (${customItem.serviceNameUrdu})` : '';
-                            return (
-                              <option 
-                                key={customItem._id} 
-                                value={customItem.serviceName}
-                                className={isAlready ? 'font-bold text-amber-600' : ''}
-                              >
-                                {isAlready ? 'Selected: ' : '+ '}{customItem.serviceName}{urdu} (+Rs {addPrice})
-                              </option>
-                            );
-                          })}
-                        </select>
-
-                        {/* Active Customization Badges */}
-                        {suitCustoms.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 mt-2">
-                            {suitCustoms.map((c, cIdx) => (
-                              <span 
-                                key={cIdx} 
-                                className="inline-flex items-center gap-1 bg-[#0F172A] text-[#DFAC43] px-2 py-0.5 rounded text-[11px] font-bold shadow-sm"
-                              >
-                                <span>{c.name} (+Rs {c.price})</span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleSuitCustomization(index, { serviceName: c.name, price: c.price })}
-                                  className="text-gray-400 hover:text-red-400 font-black text-xs ml-1"
-                                  title="Remove"
-                                >
-                                  <FiX />
-                                </button>
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                    </div>
-
-                    {/* Fabric Details, Vol # & Suit Price Row - Distributed evenly on all screen sizes */}
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 mb-3">
-                      <div className="sm:col-span-6">
-                        <label className="block text-[11px] font-bold text-gray-600 mb-1">Fabric & Color</label>
-                        <input 
-                          type="text" 
-                          placeholder="e.g. Black Wash-n-Wear, White Boski" 
-                          value={suit.fabricDetails} 
-                          onChange={(e) => handleSuitChange(index, 'fabricDetails', e.target.value)} 
-                          className="w-full h-10 px-3 border border-gray-300 focus:border-[#DFAC43] rounded text-xs sm:text-sm font-medium bg-white outline-none" 
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 sm:col-span-6">
-                        <div>
-                          <label className="block text-[11px] font-bold text-gray-600 mb-1">Vol #</label>
-                          <input 
-                            type="text" 
-                            placeholder="Vol-01" 
-                            value={suit.volumeNo} 
-                            onChange={(e) => handleSuitChange(index, 'volumeNo', e.target.value)} 
-                            className="w-full h-10 px-3 border border-gray-300 focus:border-[#DFAC43] rounded text-xs sm:text-sm font-medium bg-white outline-none" 
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-[11px] font-bold text-gray-700 mb-1">Suit Price (Rs)</label>
-                          <input 
-                            type="number" 
-                            min="0" 
-                            placeholder="0" 
-                            value={suit.price} 
-                            onChange={(e) => handleSuitChange(index, 'price', e.target.value)} 
-                            onWheel={(e) => e.target.blur()} 
-                            className="w-full h-10 px-3 border-2 border-gray-300 focus:border-[#DFAC43] rounded text-xs sm:text-sm font-black text-gray-900 bg-white outline-none" 
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Fabric Sample Selection (Gallery / Camera Options) */}
-                    <div className="bg-white p-2.5 sm:p-3 rounded border border-gray-200 mb-3">
-                      <label className="block text-[11px] font-bold text-gray-600 mb-1.5">
-                        Fabric Sample Photo (Camera / Gallery):
-                      </label>
-
-                      <div className="flex flex-wrap items-center gap-2">
-                        {/* Option 1: File / Gallery Upload */}
-                        <label className="cursor-pointer flex-1 min-w-[120px] sm:flex-initial h-10 px-3 bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded flex items-center justify-center gap-1.5 text-xs font-bold text-gray-700 shadow-sm transition">
-                          <FiImage className="text-gray-500 text-sm" />
-                          <span>Gallery / Files</span>
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                handleSuitChange(index, 'fabricimage', e.target.files[0]);
-                              }
-                            }}
-                            className="hidden" 
-                          />
-                        </label>
-
-                        {/* Option 2: Live Camera Capture */}
-                        <button
-                          type="button"
-                          onClick={() => startCamera(index)}
-                          className="flex-1 min-w-[120px] sm:flex-initial h-10 px-3 bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded flex items-center justify-center gap-1.5 text-xs font-bold text-gray-700 shadow-sm transition"
-                        >
-                          <FiCamera className="text-[#DFAC43] text-sm" />
-                          <span>Capture Photo</span>
-                        </button>
-
-                        {/* Active Image Indicator / Thumbnail */}
-                        {hasFabricImage && (
-                          <div className="w-full sm:w-auto flex items-center gap-2 bg-green-50 border border-green-200 px-2.5 py-1.5 rounded text-xs text-green-800">
-                            {suit.fabricimage instanceof Blob && (
-                              <img 
-                                src={URL.createObjectURL(suit.fabricimage)} 
-                                alt="Sample preview" 
-                                className="w-7 h-7 object-cover rounded border border-green-300 shrink-0"
-                              />
-                            )}
-                            <span className="font-bold text-[11px] truncate max-w-[150px]">
-                              {suit.fabricimage.name || 'Photo Attached'}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => handleSuitChange(index, 'fabricimage', 'null')}
-                              className="text-red-500 hover:text-red-700 font-bold ml-auto p-0.5"
-                              title="Remove photo"
-                            >
-                              <FiX />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Wearer Dropdown */}
-                    <div className="bg-white p-2.5 sm:p-3 rounded border border-gray-200 mb-3">
-                      <label className="block text-[11px] font-bold text-gray-600 mb-1">
-                        Wearer Assignment:
-                      </label>
-                      <select
-                        value={suit.wearer || ''}
-                        onChange={(e) => handleSuitChange(index, 'wearer', e.target.value)}
-                        className="w-full h-10 px-3 border border-gray-300 focus:border-[#DFAC43] rounded text-xs sm:text-sm font-medium bg-gray-50 outline-none"
-                      >
-                        <option value="">-- Main Customer (Default) --</option>
-                        {customers.map(c => (
-                          <option key={c._id} value={c._id}>{c.name} - {formatPhone(c.phone)}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Smart Tags & Voice Note */}
-                    <div className="space-y-2">
-                      <label className="block text-[11px] font-bold text-gray-600">
-                        Design Specifications:
-                      </label>
-
-                      <div className="flex flex-wrap gap-1.5">
-                        {COMMON_TAGS.map(tag => {
-                          const isSelected = (suit.staticTags || []).includes(tag);
-                          return (
-                            <button
-                              type="button"
-                              key={tag}
-                              onClick={() => toggleTag(index, tag)}
-                              className={`text-[11px] font-bold px-2.5 py-1 rounded border transition-all ${
-                                isSelected
-                                  ? 'bg-black text-[#DFAC43] border-black shadow-sm'
-                                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
-                              }`}
-                            >
-                              {tag}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      <div className="relative">
-                        <textarea
-                          rows="2"
-                          placeholder="Special stitching instructions or voice notes..."
-                          value={suit.customDesign}
-                          onChange={(e) => handleSuitChange(index, 'customDesign', e.target.value)}
-                          className="w-full border border-gray-300 focus:border-[#DFAC43] rounded p-2.5 pr-11 text-xs font-medium resize-none bg-white outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => startListening(index)}
-                          title="Voice Typing"
-                          className="absolute right-2.5 top-2.5 text-[#0F172A] bg-[#DFAC43] hover:bg-black hover:text-[#DFAC43] p-1.5 rounded shadow-sm transition-all"
-                        >
-                          <FiMic className="text-sm" />
-                        </button>
-                      </div>
-                    </div>
-
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Alterations Sub-Section */}
-            {alterations.length > 0 && (
-              <div className="space-y-3 mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-gray-200">
-                <h4 className="text-xs font-black text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded bg-purple-600"></span>
-                  Alterations ({alterations.length})
-                </h4>
-                {alterations.map((alt, index) => (
-                  <div key={index} className="border border-gray-200 rounded p-2.5 sm:p-3 bg-gray-50 relative">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAlteration(index)}
-                      className="absolute top-2 right-2 text-red-400 hover:text-red-600 p-1"
-                      title="Remove alteration"
-                    >
-                      <FiX className="text-sm" />
-                    </button>
-                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5 sm:gap-3 pr-5 sm:pr-6">
-                      <div className="sm:col-span-8">
-                        <label className="block text-[10px] font-bold text-gray-500 mb-0.5">Description</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Shalwar Length Alteration"
-                          value={alt.description}
-                          onChange={(e) => handleAlterationChange(index, 'description', e.target.value)}
-                          className="w-full h-10 px-3 border border-gray-300 focus:border-[#DFAC43] rounded text-xs font-medium bg-white outline-none"
-                        />
-                      </div>
-                      <div className="sm:col-span-4">
-                        <label className="block text-[10px] font-bold text-gray-500 mb-0.5">Price (Rs)</label>
-                        <input
-                          type="number"
-                          placeholder="0"
-                          value={alt.price}
-                          onChange={(e) => handleAlterationChange(index, 'price', e.target.value)}
-                          className="w-full h-10 px-3 border border-gray-300 focus:border-[#DFAC43] rounded text-xs font-bold bg-white outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2 sm:gap-2.5 mt-4 sm:mt-5 pt-3 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={handleAddSuit}
-                className="w-full sm:w-auto min-h-[42px] py-2 px-3.5 sm:px-4 bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black rounded transition text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-              >
-                <FiPlus className="text-sm shrink-0" />
-                <span>Add Blank Suit</span>
-              </button>
-
-              {suits.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => handleAddSuitCopy(suits.length - 1)}
-                  className="w-full sm:w-auto min-h-[42px] py-2 px-3.5 sm:px-4 bg-[#DFAC43] hover:bg-amber-500 text-[#0F172A] font-black rounded transition text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-pointer text-center"
-                  title="Add new suit pre-filled with the same specifications and styling"
-                >
-                  <FiCopy className="text-sm shrink-0" />
-                  <span>Add Suit (Same Specs as Above)</span>
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={handleAddAlteration}
-                className="w-full sm:w-auto min-h-[42px] py-2 px-3.5 sm:px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded transition text-xs flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <FiPlus className="text-sm shrink-0" />
-                <span>Add Alteration</span>
-              </button>
-            </div>
-
-          </div>
-
-          {/* ============================================================== */}
-          {/* ROW 3: SECTION 3 - ORDER SUMMARY & BILL BREAKDOWN TABLE        */}
-          {/* ============================================================== */}
-          <div className="bg-white p-3.5 sm:p-5 rounded border border-gray-200 shadow-sm">
-            <div className="flex items-center justify-between mb-2.5 sm:mb-3">
-              <h3 className="text-xs sm:text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
-                <span className="w-5 h-5 rounded bg-amber-100 text-[#DFAC43] flex items-center justify-center text-xs">
-                  <FaMoneyBillWave />
-                </span>
-                3. Order Summary
-              </h3>
-              <span className="text-[10px] sm:text-[11px] font-black text-[#0F172A] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                Subtotal: Rs {rawSubtotal.toLocaleString()}
-              </span>
-            </div>
-
-            <div className="border border-gray-200 rounded overflow-hidden bg-gray-50/40">
-              <div className="overflow-x-auto w-full">
-                <table className="w-full text-left text-xs min-w-[300px]">
-                  <thead className="bg-gray-100 text-gray-700 font-bold uppercase text-[10px] border-b border-gray-200">
-                    <tr>
-                      <th className="py-2.5 px-2.5 sm:px-3">Item / Service Details</th>
-                      <th className="py-2.5 px-2 text-center w-12 sm:w-16">Qty</th>
-                      <th className="py-2.5 px-2.5 sm:px-3 text-right w-24 sm:w-32">Amount (Rs)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 bg-white font-medium">
-                    {suits.map((suit, suitIdx) => {
-                      const suitCustoms = suit.customizations || [];
-                      const baseRate = Number(suit.basePrice || 0);
-
-                      return (
-                        <React.Fragment key={`suit-${suitIdx}`}>
-                          {/* Suit Base Garment Row */}
-                          <tr className="hover:bg-gray-50 transition bg-white">
-                            <td className="py-2.5 px-2.5 sm:px-3">
-                              <div className="font-bold text-gray-900 text-xs">
-                                Suit #{suitIdx + 1}: {suit.serviceType || 'Garment'}
-                              </div>
-                              {suit.fabricDetails && (
-                                <div className="text-[10px] text-gray-500">
-                                  Fabric: {suit.fabricDetails} {suit.volumeNo ? `(${suit.volumeNo})` : ''}
-                                </div>
-                              )}
-                            </td>
-                            <td className="py-2.5 px-2 text-center font-bold text-gray-600 text-xs">1</td>
-                            <td className="py-2.5 px-2.5 sm:px-3 text-right font-bold text-xs text-gray-900 font-sans">
-                              Rs {baseRate.toLocaleString()}
-                            </td>
-                          </tr>
-
-                          {/* Individual Customization Rows */}
-                          {suitCustoms.map((cust, cIdx) => (
-                            <tr key={`suit-${suitIdx}-cust-${cIdx}`} className="bg-amber-50/30">
-                              <td className="py-2 px-2.5 sm:px-3 pl-4 sm:pl-6 text-[11px] text-gray-700 flex items-center gap-1">
-                                <FiCornerDownRight className="text-amber-600 shrink-0" />
-                                <span>Add-on: {cust.name}</span>
-                              </td>
-                              <td className="py-2 px-2 text-center text-[10px] text-gray-500">1</td>
-                              <td className="py-2 px-2.5 sm:px-3 text-right font-bold text-[11px] text-gray-800 font-sans">
-                                +Rs {Number(cust.price || 0).toLocaleString()}
-                              </td>
-                            </tr>
-                          ))}
-                        </React.Fragment>
-                      );
-                    })}
-
-                    {alterations.map((alt, idx) => (
-                      <tr key={`alt-${idx}`} className="hover:bg-gray-50 transition bg-white">
-                        <td className="py-2.5 px-2.5 sm:px-3">
-                          <span className="font-bold text-gray-800 text-xs">
-                            Alteration: {alt.description || 'Alteration Work'}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-2 text-center font-bold text-gray-600 text-xs">1</td>
-                        <td className="py-2.5 px-2.5 sm:px-3 text-right font-bold text-xs text-gray-900 font-sans">
-                          Rs {Number(alt.price || 0).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot className="bg-gray-50 font-black text-xs border-t border-gray-200">
-                    <tr>
-                      <td colSpan="2" className="py-2.5 px-2.5 sm:px-3 text-right text-gray-600">Gross Subtotal:</td>
-                      <td className="py-2.5 px-2.5 sm:px-3 text-right text-xs sm:text-sm text-[#0F172A] font-sans font-black">
-                        Rs {rawSubtotal.toLocaleString()}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* ============================================================== */}
-          {/* ROW 4: SECTION 4 - DELIVERY, DISCOUNT & BILL SETTLEMENT        */}
-          {/* ============================================================== */}
-          <div className="bg-[#0F172A] text-white p-3.5 sm:p-5 rounded border border-gray-800 space-y-4 sm:space-y-5 shadow-sm">
-            <div className="flex items-center justify-between pb-2 border-b border-gray-800">
-              <h3 className="text-xs sm:text-sm font-bold text-[#DFAC43] uppercase tracking-wider flex items-center gap-1.5 sm:gap-2">
-                <FiCreditCard /> 4. Delivery & Payment Settlement
-              </h3>
-              <span className="text-[10px] font-bold text-gray-400">Final Step</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-              
-              {/* Delivery Date & Discount Inputs */}
-              <div className="space-y-3 sm:space-y-4">
-                {/* Booking Date & Delivery Due Date Inputs */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Booking Date */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-gray-300 mb-1">
-                      Booking Date (بکنگ کی تاریخ) *
-                    </label>
-                    <div className="relative">
-                      <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input 
-                        required 
-                        type="date" 
-                        value={bookingDate} 
-                        onChange={(e) => setBookingDate(e.target.value)} 
-                        className="w-full h-10 pl-9 pr-3 bg-gray-900 border border-gray-700 focus:border-[#DFAC43] text-white rounded outline-none font-medium text-xs sm:text-sm cursor-pointer" 
-                      />
-                    </div>
-                  </div>
-
-                  {/* Delivery Due Date */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-gray-300 mb-1">
-                      Delivery Due Date (ڈیلیوری کی تاریخ) *
-                    </label>
-                    <div className="relative">
-                      <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input 
-                        required 
-                        type="date" 
-                        value={deliveryDate} 
-                        onChange={(e) => setDeliveryDate(e.target.value)} 
-                        className="w-full h-10 pl-9 pr-3 bg-gray-900 border border-gray-700 focus:border-[#DFAC43] text-white rounded outline-none font-medium text-xs sm:text-sm cursor-pointer" 
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Discount Percentage Section */}
-                <div className="bg-gray-900/90 p-2.5 sm:p-3 rounded border border-gray-800 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <label className="text-[11px] font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1">
-                      <FiPercent className="text-[#DFAC43]" /> Special Discount (%)
-                    </label>
-                    {discountPercent && Number(discountPercent) > 0 && (
-                      <span className="text-[11px] font-bold text-green-400">
-                        - Rs {discountAmount.toLocaleString()} Saved
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <div className="relative flex-1">
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-gray-500 text-xs">%</span>
-                      <input 
-                        type="number"
-                        min="0"
-                        max="100"
-                        placeholder="0" 
-                        value={discountPercent} 
-                        onChange={(e) => setDiscountPercent(e.target.value)} 
-                        className="w-full h-10 pl-3 pr-7 bg-black border border-gray-700 focus:border-[#DFAC43] text-white rounded outline-none font-bold text-xs sm:text-sm" 
-                      />
-                    </div>
-
-                    {/* Quick Discount Presets */}
-                    <div className="flex items-center gap-1">
-                      {[5, 10, 15, 20].map(pct => (
-                        <button
-                          type="button"
-                          key={pct}
-                          onClick={() => setDiscountPercent(pct.toString())}
-                          className={`flex-1 sm:flex-initial text-[11px] h-10 px-2 sm:px-2.5 rounded font-bold transition-all ${
-                            discountPercent === pct.toString()
-                              ? 'bg-[#DFAC43] text-[#0F172A]'
-                              : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                          }`}
-                        >
-                          {pct}%
-                        </button>
-                      ))}
-                      {discountPercent && (
-                        <button
-                          type="button"
-                          onClick={() => setDiscountPercent('')}
-                          className="text-[11px] h-10 px-2.5 rounded bg-gray-800 text-red-400 hover:bg-gray-700 font-bold"
-                          title="Clear Discount"
-                        >
-                          <FiX />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Financial Totals Breakdown Card */}
-              <div className="bg-gray-900/90 p-3 sm:p-4 rounded border border-gray-800 space-y-2.5 text-xs">
-                <div className="flex justify-between items-center text-gray-400">
-                  <span>Gross Subtotal:</span>
-                  <span className="text-gray-200 font-bold font-sans">Rs {rawSubtotal.toLocaleString()}</span>
-                </div>
-
-                {discountAmount > 0 && (
-                  <div className="flex justify-between items-center text-green-400">
-                    <span>Discount ({discountPercent}%):</span>
-                    <span className="font-bold font-sans">- Rs {discountAmount.toLocaleString()}</span>
-                  </div>
-                )}
-
-                {khataAdjustment.type === 'added_due' && (
-                  <div className="flex justify-between items-center text-red-400">
-                    <span>+ Previous Due Added:</span>
-                    <span className="font-bold font-sans">+ Rs {khataAdjustment.amount.toLocaleString()}</span>
-                  </div>
-                )}
-
-                {khataAdjustment.type === 'deducted_advance' && (
-                  <div className="flex justify-between items-center text-green-400">
-                    <span>- Advance Credit Deducted:</span>
-                    <span className="font-bold font-sans">- Rs {khataAdjustment.amount.toLocaleString()}</span>
-                  </div>
-                )}
-
-                <div className="flex justify-between items-center pt-2 border-t border-gray-800">
-                  <span className="text-white font-black uppercase tracking-wider text-xs sm:text-sm">Net Total Bill:</span>
-                  <span className="text-xl sm:text-2xl font-black text-[#DFAC43] font-sans">
-                    Rs {totalAmount.toLocaleString()}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between items-center gap-2 pt-2">
-                  <span className="text-gray-300 font-bold text-xs whitespace-nowrap">Advance Paid:</span>
-                  <input 
-                    type="number" 
-                    min="0" 
-                    placeholder="0" 
-                    value={advancePaid} 
-                    onChange={(e) => setAdvancePaid(e.target.value)} 
-                    onWheel={(e) => e.target.blur()} 
-                    className="w-28 sm:w-36 h-10 px-3 bg-black border border-gray-700 focus:border-[#DFAC43] text-white rounded outline-none font-bold text-right text-xs sm:text-sm" 
-                  />
-                </div>
-
-                {/* Order Status Selector (When in Edit Mode) */}
-                {isEditMode && (
-                  <div className="flex justify-between items-center gap-2 pt-2 border-t border-gray-800">
-                    <span className="text-white font-bold text-xs">Order Status:</span>
-                    <select
-                      value={orderStatus}
-                      onChange={(e) => setOrderStatus(e.target.value)}
-                      className="h-9 px-2 bg-black border border-gray-700 focus:border-[#DFAC43] text-[#DFAC43] rounded outline-none font-bold text-xs cursor-pointer"
-                    >
-                      <option value="Booked">Booked</option>
-                      <option value="Cutting">Cutting</option>
-                      <option value="Stitching">Stitching</option>
-                      <option value="Ready">Ready</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Delivered">Delivered</option>
-                      <option value="Cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                )}
-              </div>
-
-            </div>
-
-            {/* Save & Generate Invoice Submit Button */}
-            <div className="pt-1 sm:pt-2">
-              <button 
-                type="submit" 
-                disabled={isPending}
-                className="w-full h-11 bg-[#DFAC43] hover:bg-white text-[#0F172A] rounded font-black transition-all shadow-sm disabled:opacity-70 flex items-center justify-center gap-2 text-xs sm:text-base cursor-pointer"
-              >
-                <FiSave /> {isPending ? (isEditMode ? 'Updating Order...' : 'Saving Order...') : (isEditMode ? 'Update Order Details' : 'Save & Generate Invoice')}
-              </button>
-            </div>
-          </div>
-
+          {/* SECTION 4: DELIVERY & PAYMENT SETTLEMENT */}
+          <OrderPaymentSection
+            bookingDate={bookingDate}
+            setBookingDate={setBookingDate}
+            deliveryDate={deliveryDate}
+            setDeliveryDate={setDeliveryDate}
+            discountPercent={discountPercent}
+            setDiscountPercent={setDiscountPercent}
+            discountAmount={discountAmount}
+            rawSubtotal={rawSubtotal}
+            khataAdjustment={khataAdjustment}
+            totalAmount={totalAmount}
+            advancePaid={advancePaid}
+            setAdvancePaid={setAdvancePaid}
+            isEditMode={isEditMode}
+            orderStatus={orderStatus}
+            setOrderStatus={setOrderStatus}
+            isPending={isPending}
+          />
         </form>
 
         {/* Live Camera Modal */}
-        {cameraStream && cameraSuitIndex !== null && (
-          <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3 sm:p-4">
-            <div className="bg-[#0F172A] border border-gray-800 text-white rounded p-3 sm:p-4 max-w-lg w-full space-y-3 shadow-xl">
-              <div className="flex items-center justify-between pb-2 border-b border-gray-800">
-                <h4 className="text-xs sm:text-sm font-bold text-[#DFAC43] flex items-center gap-2">
-                  <FiCamera /> Capture Fabric Sample (Suit #{cameraSuitIndex + 1})
-                </h4>
-                <button
-                  type="button"
-                  onClick={stopCamera}
-                  className="text-gray-400 hover:text-white p-1"
-                >
-                  <FiX className="text-lg" />
-                </button>
-              </div>
-
-              <div className="relative rounded overflow-hidden bg-black aspect-video flex items-center justify-center max-h-[55vh]">
-                <video 
-                  ref={videoRef} 
-                  autoPlay 
-                  playsInline 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={stopCamera}
-                  className="h-10 px-3.5 sm:px-4 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded text-xs font-bold transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={capturePhoto}
-                  className="h-10 px-4 sm:px-5 bg-[#DFAC43] hover:bg-white text-[#0F172A] rounded text-xs font-black transition flex items-center gap-1.5 sm:gap-2"
-                >
-                  <FiCamera /> Capture Snapshot
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        <OrderCameraModal
+          cameraStream={cameraStream}
+          cameraSuitIndex={cameraSuitIndex}
+          videoRef={videoRef}
+          stopCamera={stopCamera}
+          capturePhoto={capturePhoto}
+        />
 
       </div>
     </div>
