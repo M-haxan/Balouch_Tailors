@@ -172,7 +172,7 @@ const AdminSettings = () => {
       </div>
 
       {/* FULL-WIDTH CONTENT CARD */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200/90 p-4 sm:p-6 md:p-8 min-w-0">
+      <div className="bg-white rounded shadow-sm border border-gray-200/90 p-4 sm:p-6 md:p-8 min-w-0">
         
         {/* ============================================================== */}
         {/* TAB 1: TAILORING RATES & CUSTOMIZATIONS                       */}
@@ -194,7 +194,7 @@ const AdminSettings = () => {
               <div className="flex items-center gap-2 shrink-0">
                 <button 
                   onClick={() => openPricingModal(null, rateSection === 'customizations' ? 'customization' : 'service')}
-                  className="w-full sm:w-auto bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded-lg text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap cursor-pointer"
+                  className="w-full sm:w-auto bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-4 py-2.5 rounded text-xs sm:text-sm font-black transition flex items-center justify-center gap-2 shadow-sm whitespace-nowrap cursor-pointer"
                 >
                   <FiPlus className="text-base shrink-0" />
                   <span>{rateSection === 'services' ? 'Add Category' : 'Add Customization'}</span>
@@ -271,7 +271,7 @@ const AdminSettings = () => {
                     <p className="text-gray-600 font-bold mb-2">No garment categories found.</p>
                     <button 
                       onClick={() => openPricingModal(null, 'service')}
-                      className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-5 py-2.5 rounded-xl font-black text-xs transition"
+                      className="bg-[#0F172A] text-[#DFAC43] hover:bg-[#DFAC43] hover:text-[#0F172A] px-5 py-2.5 rounded font-black text-xs transition"
                     >
                       + Add Your First Garment Category
                     </button>
@@ -935,7 +935,7 @@ const ShopGeneralSettings = () => {
             <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
               Shop Logo (Web, Navbar, Preloader & Invoices)
             </label>
-            <div className="flex flex-col sm:flex-row items-start gap-4 p-3 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+            <div className="flex flex-col sm:flex-row items-start gap-4 p-3 bg-gray-50 rounded border border-dashed border-gray-300">
               <div className="flex-1 w-full">
                 <input
                   type="file"
