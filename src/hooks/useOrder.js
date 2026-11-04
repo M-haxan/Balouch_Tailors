@@ -3,16 +3,16 @@ import API from '../api/axios';
 import { toast } from 'react-toastify';
 
 // 1. Get All Orders (Dashboard ke liye - Supports server-side pagination, search, and status filter)
-export const useGetOrders = (params = {}) => {
+export const useGetOrders = (params = {}, options = {}) => {
   return useQuery({
     queryKey: ['orders', params],
     queryFn: async () => {
       const response = await API.get('/orders', { params });
       return response.data;
-    }
+    },
+    ...options
   });
 };
-
 // 2. Get Customer Specific Orders (History dekhne ke liye)
 export const useGetCustomerOrders = (customerId) => {
   return useQuery({

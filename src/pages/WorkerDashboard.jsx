@@ -49,12 +49,17 @@ const WorkerDashboard = () => {
     search: searchTerm
   });
 
-  // Orders for Delivery Counter (active when worker has permission)
-  const { data: ordersResponse, isLoading: loadingOrders } = useGetOrders({
-    page: 1,
-    limit: 100,
-    search: deliverySearchTerm
-  });
+   // Orders for Delivery Counter: only fetched if this worker is allowed to deliver
+  const { data: ordersResponse, isLoading: loadingOrders } = useGetOrders(
+    {
+      page: 1,
+      limit: 100,
+      search: deliverySearchTerm
+    },
+    {
+      enabled: Boolean(dashboardData?.worker?.canDeliverOrder ?? user?.canDeliverOrder)
+    }
+  );
 
   const { mutate: submitForQC, isPending: isSubmitting } = useSubmitSuitForInspection();
   const { data: ledgerData = [], isLoading: loadingLedger } = useGetWorkerLedger(workerId);
