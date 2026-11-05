@@ -5,15 +5,15 @@ import { FiShoppingBag, FiCreditCard, FiLogOut, FiUsers, FiTrendingUp, FiLayers,
 import { FaMoneyBillWave } from 'react-icons/fa';
 import { CgProfile } from "react-icons/cg";
 import { IoMdSettings } from "react-icons/io";
-import useAuthStore from '../Store/authStore';
+import { useLogout } from '../hooks/useLogout';
 
 const AdminSidebar = ({ collapsed = false, mobileOpen = false, onCloseMobile }) => {
   const { t } = useTranslation();
-  const logout = useAuthStore((state) => state.logout);
+   const performLogout = useLogout();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    if (logout) logout();
+  const handleLogout = async () => {
+    await performLogout();
     if (onCloseMobile) onCloseMobile();
     navigate('/admin/login');
   };

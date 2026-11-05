@@ -20,10 +20,11 @@ import WorkerDeliveryCounterTab from '../components/WorkerDeliveryCounterTab';
 import WorkerSuitSpecsModal from '../components/WorkerSuitSpecsModal';
 import WorkerPaymentReceiptModal from '../components/WorkerPaymentReceiptModal';
 import WorkerOrderDeliveryModal from '../components/WorkerOrderDeliveryModal';
+import { useLogout } from '../hooks/useLogout';
 
 const WorkerDashboard = () => {
   const navigate = useNavigate();
-  const logout = useAuthStore((state) => state.logout);
+  const performLogout = useLogout();
   const user = useAuthStore((state) => state.user);
   
   const workerId = user?.id || user?._id;
@@ -93,8 +94,8 @@ const WorkerDashboard = () => {
     setCurrentPage(1);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await performLogout();
     navigate('/worker/login');
   };
 

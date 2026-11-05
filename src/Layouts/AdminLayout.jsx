@@ -8,7 +8,8 @@ const AdminLayout = () => {
   // Zustand persistence hydrate hone ka wait karna zaroori hai
   const hasHydrated = useAuthStore.persist.hasHydrated();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-
+ const [collapsed, setCollapsed] = useState(false);
+const [mobileOpen, setMobileOpen] = useState(false);
   if (!hasHydrated) {
     return null; // Ya loading spinner dikhayen agar chahein
   }
@@ -17,8 +18,7 @@ const AdminLayout = () => {
     return <Navigate to="/admin/login" replace />;
   }
 
-  const [collapsed, setCollapsed] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+ 
 
   const handleToggle = () => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) {
