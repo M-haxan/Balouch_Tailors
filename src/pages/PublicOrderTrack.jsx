@@ -1,37 +1,58 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api/axios';
+import useAuthStore from '../Store/authStore';
 import { FiCheck, FiClock, FiScissors, FiSmile, FiAlertCircle } from 'react-icons/fi';
 import Preloader from '../components/Preloader';
 import { useGetShopSettings } from '../hooks/useShopSettings';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://bt-backend-5d1ec458f8eb.herokuapp.com/api';
 
 const PublicOrderTrack = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { orderNumber } = useParams();
   const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [phoneInput, setPhoneInput] = useState('');
+  const [verifiedDigits, setVerifiedDigits] = useState('');
   const { data: shopSettings } = useGetShopSettings();
   const shopName = shopSettings?.shopName || 'Balouch Tailors';
 
   useEffect(() => {
+    if (!orderNumber || !verifiedDigits) return;
+
     const fetchOrderStatus = async () => {
       try {
         setLoading(true);
         setError('');
-        const res = await axios.get(`${BACKEND_URL}/orders/track/${orderNumber}`);
-        setOrder(res.data);
+                const res = await API.get(`/orders/track/suit/${suitId}`);
+        setSuit(res.data);
       } catch (err) {
-        setError(err.response?.data?.message || 'Order not found. Please verify the QR Code or Order Number on your booking slip.');
+        const status = err.response?.status;
+        if (status === 401 || !isAuthenticated) {
+          setError('This specification sheet is for the shop team. Please log in as a worker or admin, then scan the QR code again.');
+        } else if (status === 403) {
+          setError('This suit is not assigned to you.');
+        } else {
+          setError(err.response?.data?.message || 'Suit details not found. Please verify the QR Code or URL.');
+        }
       } finally {
         setLoading(false);
       }
     };
-    if (orderNumber) {
-      fetchOrderStatus();
+    fetchOrderStatus();
+  }, [orderNumber, verifiedDigits]);
+
+  const handleVerify = (e) => {
+    e.preventDefault();
+    const digits = phoneInput.replace(/\D/g, '').slice(-4);
+    if (digits.length < 4) {
+      setError('Please enter the last 4 digits of your phone number.');
+      return;
     }
-  }, [orderNumber]);
+    setError('');
+    setVerifiedDigits(digits);
+  };
 
   if (loading) {
     return (
@@ -41,15 +62,45 @@ const PublicOrderTrack = () => {
     );
   }
 
-  if (error) {
+  // Step 1: ask for the last 4 digits of the phone number
+  if (!order) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-        <div className="bg-gray-800 text-white rounded p-8 max-w-md w-full shadow-2xl border border-red-900/30 text-center space-y-4">
-          <FiAlertCircle className="text-5xl text-red-500 mx-auto" />
-          <h2 className="text-xl font-black uppercase tracking-wider text-red-500">Order Not Found</h2>
-          <p className="text-sm text-gray-400 font-medium">{error}</p>
-          <div className="w-16 h-1 bg-red-500 mx-auto rounded"></div>
-        </div>
+        <form
+          onSubmit={handleVerify}
+          className="bg-gray-800 text-white rounded p-8 max-w-md w-full shadow-2xl border border-gray-700/50 space-y-4 text-center"
+        >
+          <h1 className="text-xl font-black tracking-widest text-[#D4AF37] uppercase">{shopName}</h1>
+          <p className="text-xs text-gray-400 font-black uppercase tracking-wider">
+            Track Order #BT-{orderNumber}
+          </p>
+          <div className="w-16 h-0.5 bg-[#D4AF37] mx-auto"></div>
+          <p className="text-sm text-gray-300">
+            To protect your privacy, please enter the <strong>last 4 digits</strong> of the phone
+            number you gave us when booking.
+          </p>
+          <input
+            type="tel"
+            inputMode="numeric"
+            maxLength={4}
+            autoFocus
+            value={phoneInput}
+            onChange={(e) => setPhoneInput(e.target.value.replace(/\D/g, ''))}
+            placeholder="e.g. 6331"
+            className="w-full text-center text-2xl tracking-[0.5em] font-black bg-black/40 border border-gray-600 rounded px-4 py-3 text-white focus:outline-none focus:border-[#D4AF37]"
+          />
+          {error && (
+            <p className="flex items-center justify-center gap-2 text-sm text-red-400 font-medium">
+              <FiAlertCircle className="shrink-0" /> {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            className="w-full bg-[#D4AF37] text-black font-black uppercase tracking-wider py-3 rounded hover:opacity-90 transition"
+          >
+            Track My Order
+          </button>
+        </form>
       </div>
     );
   }
