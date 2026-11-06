@@ -494,7 +494,8 @@ const CreateOrder = () => {
     formData.append('deliveryDate', deliveryDate);
     formData.append('previousKhataAdjusted', JSON.stringify(khataAdjustment));
 
-    const suitsData = suits.map(s => ({
+        const suitsData = suits.map(s => ({
+      ...(s._id ? { _id: s._id } : {}),
       serviceType: s.serviceType || 'Shalwar Qameez',
       basePrice: Number(s.basePrice) || 0,
       customizations: s.customizations || [],
@@ -514,19 +515,16 @@ const CreateOrder = () => {
     }));
     formData.append('alterations', JSON.stringify(alterationsData));
 
-    // Attach who created this order for transparency
-    const createdByData = isWorker
-      ? { userType: 'worker', workerId: user?.id || user?._id, name: user?.name || 'Worker' }
-      : { userType: 'admin', name: user?.name || 'Admin' };
-    formData.append('createdBy', JSON.stringify(createdByData));
-
     formData.append('orderStatus', orderStatus);
 
-    suits.forEach((suit) => {
+    const fabricImageSuitIndexes = [];
+    suits.forEach((suit, index) => {
       if (suit.fabricimage && suit.fabricimage !== 'null' && typeof suit.fabricimage === 'object') {
-         formData.append('fabricImages', suit.fabricimage);
+        formData.append('fabricImages', suit.fabricimage);
+        fabricImageSuitIndexes.push(index); // which suit this photo belongs to
       }
     });
+    formData.append('fabricImageSuitIndexes', JSON.stringify(fabricImageSuitIndexes));
 
     if (isEditMode) {
       updateOrder({ id: editOrderId, data: formData }, {
