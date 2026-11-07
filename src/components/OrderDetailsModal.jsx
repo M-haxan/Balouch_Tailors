@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../Store/authStore';
-import { useGetOrderById, useGetOrders, useUpdateOrder } from '../hooks/useOrder';
+// import { useGetOrderById, useGetOrders, useUpdateOrder } from '../hooks/useOrder';
 import { useGetWorkers, useAssignSuitStage, useApproveSuit, useRejectSuit } from '../hooks/useWorkers';
 import { formatPhone } from '../utils/formatters';
-import { getStatusColor } from '../utils/orderStatus';
+// import { getStatusColor } from '../utils/orderStatus';
 import { toast } from 'react-toastify';
+import { useGetOrderById, useGetOrders, useUpdateOrderStatus } from '../hooks/useOrder';
+import { getStatusColor, ORDER_STATUS_OPTIONS, ORDER_STATUS_FLOW } from '../utils/orderStatus';
 import { 
   FiUser, 
   FiPhone, 
@@ -121,7 +123,8 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
   const { mutate: assignStage, isPending: isAssigningStage } = useAssignSuitStage();
   const { mutate: approveSuit, isPending: isApproving } = useApproveSuit();
   const { mutate: rejectSuit, isPending: isRejecting } = useRejectSuit();
-  const { mutate: updateOrder, isPending: isUpdatingStatus } = useUpdateOrder();
+  const { mutate: changeOrderStatus, isPending: isUpdatingStatus } = useUpdateOrderStatus();
+  
 
   const [selectedSuitIndex, setSelectedSuitIndex] = useState(0);
   const [reworkModalSuit, setReworkModalSuit] = useState(null);
@@ -196,7 +199,42 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
   // Active assigned worker object
   const activeWorkerObj = workers.find(w => w._id === currentAssignedId) || (typeof activeSuit.assignedWorker === 'object' ? activeSuit.assignedWorker : null);
 
-  const statusOptions = ['Booked', 'In Progress', 'Cutting', 'Stitching', 'Ready', 'Completed', 'Delivered', 'Cancelled'];
+    // ---- Assign button state (prevents repeated / useless assign requests) ----
+  const orderLocked = ['Delivered', 'Cancelled'].includes(order.orderStatus);
+  const isStitchLocked = isStitched || isUnderInspection;          // QC / stitched suits cannot be re-assigned
+  const assignmentChanged = draftValue !== currentAssignedId;       // nothing new selected => nothing to send
+  const canAssign = !orderLocked && !isStitchLocked && !isAssigningStage && assignmentChanged;
+
+  const assignButtonLabel = isAssigningStage
+    ? 'Assigning...'
+    : isStitched
+      ? 'Stitched'
+      : isUnderInspection
+        ? 'Under QC'
+        : !assignmentChanged && currentAssignedId !== ''
+          ? 'Assigned'
+          : draftValue === '' && currentAssignedId !== ''
+            ? 'Unassign'
+            : currentAssignedId !== ''
+              ? 'Re-assign'
+              : 'Assign';
+
+  // ---- Order status dropdown state ----
+  const statusDropdownDisabled = isWorker || orderLocked || isUpdatingStatus; // only admin can change status
+  const allSuitsStitched = suitsList.length > 0 && suitsList.every((s) => s.stitchingStatus === 'Stitched');
+  const allowedNextStatuses = ORDER_STATUS_FLOW[order.orderStatus] || [];
+
+  const getStatusOptionState = (opt) => {
+    if (opt.value === order.orderStatus) return { disabled: false, hint: '' };
+    if (opt.value === 'Delivered') {
+      return { disabled: !onOpenDelivery || order.orderStatus === 'Cancelled', hint: '' };
+    }
+    if (!allowedNextStatuses.includes(opt.value)) return { disabled: true, hint: '' };
+    if (opt.value === 'Completed' && !allSuitsStitched) {
+      return { disabled: true, hint: ' (stitch all suits first)' };
+    }
+    return { disabled: false, hint: '' };
+  };
 
   const handleWorkerDraftChange = (sId, value) => {
     setWorkerDrafts(prev => ({
@@ -206,42 +244,52 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
   };
 
   const handleAssignWorker = (suitId) => {
-    const selected = workerDrafts[suitKey] !== undefined ? workerDrafts[suitKey] : currentAssignedId;
-    if (selected === undefined || selected === '') {
-      assignStage({
-        orderId: order._id,
-        suitId: suitId,
-        data: { stage: 'stitching', isSelf: false, workerId: null }
-      });
-      return;
-    }
+    if (!canAssign) return; // double-click / stale state protection
 
-    if (selected === 'self') {
-      assignStage({
-        orderId: order._id,
-        suitId: suitId,
-        data: { stage: 'stitching', isSelf: true }
-      });
-    } else {
-      assignStage({
-        orderId: order._id,
-        suitId: suitId,
-        data: { stage: 'stitching', isSelf: false, workerId: selected }
-      });
-    }
+    const data =
+      draftValue === 'self'
+        ? { stage: 'stitching', isSelf: true, workerId: null }
+        : draftValue === ''
+          ? { stage: 'stitching', isSelf: false, workerId: null }
+          : { stage: 'stitching', isSelf: false, workerId: draftValue };
+
+    assignStage(
+      { orderId: order._id, suitId, data },
+      {
+        onSuccess: () => {
+          // forget the draft: the select now follows the saved (refetched) assignment
+          setWorkerDrafts(prev => {
+            const next = { ...prev };
+            delete next[suitKey];
+            return next;
+          });
+        }
+      }
+    );
   };
 
   const handleModalStatusChange = (newStatus) => {
+    if (newStatus === order.orderStatus) return;
+
     if (newStatus === 'Delivered') {
       closeModal();
       if (onOpenDelivery) onOpenDelivery(order);
-    } else {
-      updateOrder({ id: order._id, data: { orderStatus: newStatus } }, {
-        onSuccess: () => {
-          toast.success(`Order status updated to "${newStatus}"`);
-        }
-      });
+      return;
     }
+
+    if (newStatus === 'Completed' && !allSuitsStitched) {
+      toast.error('Please stitch / approve all suits first, then mark the order Completed.');
+      return;
+    }
+
+    if (newStatus === 'Cancelled') {
+      const ok = window.confirm(
+        `Cancel order #BT-${order.orderNumber}? A cancelled order is locked and cannot be edited or assigned again.`
+      );
+      if (!ok) return;
+    }
+
+    changeOrderStatus({ id: order._id, orderStatus: newStatus });
   };
 
   const handleApprove = (suitId) => {
@@ -577,15 +625,21 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <select
+                                        <select
                       value={order.orderStatus}
                       onChange={(e) => handleModalStatusChange(e.target.value)}
-                      disabled={isUpdatingStatus}
-                      className="flex-1 border-2 border-gray-200 focus:border-black rounded-lg py-2 px-2.5 text-xs font-bold outline-none bg-white cursor-pointer"
+                      disabled={statusDropdownDisabled}
+                      title={isWorker ? 'Only admin can change the order status' : orderLocked ? `${order.orderStatus} orders are locked` : ''}
+                      className="flex-1 border-2 border-gray-200 focus:border-black rounded py-2  text-xs font-bold outline-none bg-white cursor-pointer disabled:bg-gray-100 disabled:cursor-not-allowed"
                     >
-                      {statusOptions.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
+                      {ORDER_STATUS_OPTIONS.map((opt) => {
+                        const { disabled, hint } = getStatusOptionState(opt);
+                        return (
+                          <option key={opt.value} value={opt.value} disabled={disabled}>
+                            {opt.label}{hint}
+                          </option>
+                        );
+                      })}
                     </select>
 
                     <button
@@ -594,7 +648,7 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                         closeModal();
                         navigate(isWorker ? `/worker/orders/edit/${order._id}` : `/admin/orders/edit/${order._id}`);
                       }}
-                      className="bg-[#DFAC43] hover:bg-yellow-400 text-[#0F172A] font-black px-3.5 py-2 rounded-lg text-xs transition shadow-2xs flex items-center gap-1.5 cursor-pointer shrink-0 uppercase tracking-wider active:scale-98"
+                      className="bg-[#DFAC43] hover:bg-yellow-400 text-[#0F172A] font-black px-2 py-2 rounded text-xs transition shadow-2xs flex items-center gap-1.5 cursor-pointer shrink-0 uppercase tracking-wider active:scale-98"
                       title="Open full order in order creation/edit form"
                     >
                       <FiEdit className="text-xs" /> Edit Order
@@ -636,12 +690,12 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                     )}
                   </div>
 
-                  <div className="space-y-1.5">
+                                    <div className="space-y-1.5">
                     <select
                       value={draftValue}
-                      disabled={isStitched || isAssigningStage}
+                      disabled={orderLocked || isStitchLocked || isAssigningStage}
                       onChange={(e) => handleWorkerDraftChange(suitKey, e.target.value)}
-                      className="w-full border-2 border-gray-200 focus:border-black rounded p-2 outline-none text-xs font-bold bg-white disabled:bg-gray-200 cursor-pointer"
+                      className="w-full border-2 border-gray-200 focus:border-black rounded p-2 outline-none text-xs font-bold bg-white disabled:bg-gray-200 disabled:cursor-not-allowed cursor-pointer"
                     >
                       <option value="">-- Select Karigar (Unassigned) --</option>
                       <option value="self">★ Owner / Self (In-House Stitched)</option>
@@ -656,18 +710,18 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
                       <button
                         type="button"
                         onClick={() => handleAssignWorker(activeSuit._id)}
-                        disabled={isStitched || isAssigningStage}
-                        className="flex-1 bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black py-1.5 px-2.5 rounded text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 disabled:opacity-50 cursor-pointer"
+                        disabled={!canAssign}
+                        className="flex-1 bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] font-black py-1.5 px-2.5 rounded text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#0F172A] disabled:hover:text-white cursor-pointer"
                       >
-                        <FiUserCheck /> Assign
+                        <FiUserCheck /> {assignButtonLabel}
                       </button>
 
-                      {!isStitched && (
+                      {!isStitched && !isUnderInspection && !orderLocked && (
                         <button
                           type="button"
                           onClick={() => handleApprove(activeSuit._id)}
                           disabled={isApproving}
-                          className="bg-green-700 hover:bg-green-800 text-white font-black py-1.5 px-2.5 rounded text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer"
+                          className="bg-green-700 hover:bg-green-800 text-white font-black py-1.5 px-2.5 rounded text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Directly mark suit as QC Passed & Stitched"
                         >
                           <FiScissors /> Pass & Stitched

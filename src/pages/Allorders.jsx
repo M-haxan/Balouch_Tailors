@@ -64,7 +64,7 @@ const Allorders = () => {
     status: statusFilter
   });
 
-  const { mutate: updateOrder } = useUpdateOrder();
+  const { mutate: changeOrderStatus } = useUpdateOrder();
   const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
 
   const orders = Array.isArray(ordersResponse) 
@@ -107,6 +107,7 @@ const Allorders = () => {
 
   // Handlers
   const handleStatusChange = (order, newStatus) => {
+    changeOrderStatus({ id: order._id, orderStatus: newStatus });
     if (newStatus === 'Delivered') {
       setDeliveryModalOrder(order);
     } else {

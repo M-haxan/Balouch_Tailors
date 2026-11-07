@@ -22,3 +22,19 @@ export const getStatusColor = (status) => {
       return 'bg-gray-100 text-gray-800 border-gray-200';
   }
 };
+// Order status flow (must match the backend ORDER_STATUS_FLOW in orderController.js)
+export const ORDER_STATUS_OPTIONS = [
+  { value: 'Pending', label: 'Pending - Booked / Stitching' },
+  { value: 'In Progress', label: 'In Progress - Pressing & Packing' },
+  { value: 'Completed', label: 'Completed - Ready for Pickup' },
+  { value: 'Delivered', label: 'Delivered - Settle Payment...' },
+  { value: 'Cancelled', label: 'Cancelled' }
+];
+
+export const ORDER_STATUS_FLOW = {
+  'Pending': ['In Progress', 'Completed', 'Cancelled'],
+  'In Progress': ['Pending', 'Completed', 'Cancelled'],
+  'Completed': ['In Progress', 'Cancelled'],
+  'Delivered': [],
+  'Cancelled': []
+};

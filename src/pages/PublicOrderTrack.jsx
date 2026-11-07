@@ -472,7 +472,6 @@ const PublicOrderTrack = () => {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );

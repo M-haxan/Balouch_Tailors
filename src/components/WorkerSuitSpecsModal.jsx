@@ -443,7 +443,8 @@ const SuitSpecsModal = ({ suit: initialSuit, allSuits = [], worker, closeModal, 
 
   // Fetch full order data if available for complete customer details & all order suits
   const orderId = initialSuit?.orderId;
-  const { data: orderData, isLoading: isLoadingOrder } = useGetOrderById(orderId);
+  const canFetchFullOrder = Boolean(worker?.canCreateOrder || worker?.canDeliverOrder);
+  const { data: orderData, isLoading: isLoadingOrder } = useGetOrderById(orderId, { enabled: canFetchFullOrder });
 
   // Deduplicate and resolve all suits in this order
   const orderSuits = useMemo(() => {

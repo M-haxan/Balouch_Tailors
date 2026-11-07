@@ -44,7 +44,7 @@ const CreateOrder = () => {
 
   // State Management
   const [customerId, setCustomerId] = useState(searchParams.get('customerId') || '');
-  const [orderStatus, setOrderStatus] = useState('Booked');
+  const [orderStatus, setOrderStatus] = useState('Pending');   // pehle 'Booked' tha (backend reject karta hai)
 
   useEffect(() => {
     const paramCustId = searchParams.get('customerId');

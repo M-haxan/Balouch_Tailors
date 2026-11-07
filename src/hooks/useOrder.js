@@ -26,14 +26,14 @@ export const useGetCustomerOrders = (customerId) => {
 };
 
 // 2.1 Get Single Order by ID (For Edit / View)
-export const useGetOrderById = (id) => {
+export const useGetOrderById = (id, options = {}) => {
   return useQuery({
     queryKey: ['order', id],
     queryFn: async () => {
       const response = await API.get(`/orders/${id}`);
       return response.data;
     },
-    enabled: !!id,
+    enabled: !!id && options.enabled !== false,
   });
 };
 
@@ -68,9 +68,29 @@ export const useUpdateOrder = () => {
     onSuccess: () => {
       toast.success('Order updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to update order.');
+    }
+  });
+};
+
+export const useUpdateOrderStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, orderStatus }) => {
+      const response = await API.put(`/orders/${id}/status`, { orderStatus });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      toast.success(`Order status updated to "${data?.orderStatus}"`);
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to update order status.');
     }
   });
 };
@@ -87,6 +107,7 @@ export const useDeleteOrder = () => {
     onSuccess: () => {
       toast.success('Order deleted successfully!');
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to delete order.');
@@ -109,6 +130,7 @@ export const useDeliverOrder = () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
       queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to deliver order.');

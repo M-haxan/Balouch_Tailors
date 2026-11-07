@@ -28,7 +28,7 @@ import InvoicePrint from './pages/InvoicePrinnt';
 import AdminWorkers from './pages/AdminWorkers';
 import WorkerDashboard from './pages/WorkerDashboard';
 import PublicOrderTrack from './pages/PublicOrderTrack';
-import PublicSuitTrack from './pages/PublicSuitTrack';
+// import PublicSuitTrack from './pages/PublicSuitTrack';
 import AdminExpenses from './pages/AdminExpenses';
 import AdminFinancialReports from './pages/AdminFinancialReports';
 import AdminPayments from './pages/AdminPayments';
@@ -72,7 +72,7 @@ function App() {
           
           {/* Public Tracking Routes */}
           <Route path="/track/:orderNumber" element={<PublicOrderTrack />} />
-          <Route path="/track/suit/:suitId" element={<PublicSuitTrack />} />
+          {/* <Route path="/track/suit/:suitId" element={<PublicSuitTrack />} /> */}
 
           {/* Admin Login & Authentication */}
           <Route path="/admin/login" element={<Login />} />

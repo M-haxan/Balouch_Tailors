@@ -25,6 +25,7 @@ export const useAddWorker = () => {
     onSuccess: () => {
       toast.success('Worker added successfully!');
       queryClient.invalidateQueries({ queryKey: ['workers'] });
+      
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to add worker.');
@@ -82,6 +83,7 @@ export const useAssignWorker = () => {
     onSuccess: () => {
       toast.success('Suit assigned successfully!');
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to assign suit.');
@@ -113,6 +115,7 @@ export const useSubmitSuitForInspection = () => {
       toast.success(data?.message || 'Suit submitted for admin inspection!');
       queryClient.invalidateQueries({ queryKey: ['workerDashboard'] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to submit suit for inspection.');
@@ -135,6 +138,7 @@ export const useApproveSuit = () => {
       queryClient.invalidateQueries({ queryKey: ['workerDashboard'] });
       queryClient.invalidateQueries({ queryKey: ['financialSummary'] });
       queryClient.invalidateQueries({ queryKey: ['workers'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to approve suit.');
@@ -156,6 +160,7 @@ export const useRejectSuit = () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['workerDashboard'] });
       queryClient.invalidateQueries({ queryKey: ['financialSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to reject suit.');
@@ -176,6 +181,7 @@ export const useAssignSuitStage = () => {
       toast.success('Suit stage assigned successfully!');
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['financialSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to assign stage.');
@@ -208,6 +214,7 @@ export const useMarkSuitStitched = () => {
       queryClient.invalidateQueries({ queryKey: ['workerDashboard'] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['financialSummary'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to update suit status.');
@@ -347,6 +354,7 @@ export const useDeleteLedgerEntry = () => {
       queryClient.invalidateQueries({ queryKey: ['workerDetails'] });
       queryClient.invalidateQueries({ queryKey: ['workerDashboard'] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to delete ledger entry.');
