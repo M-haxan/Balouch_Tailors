@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGetOrders, useUpdateOrder, useDeleteOrder } from '../hooks/useOrder';
+import { useGetOrders, useUpdateOrderStatus, useDeleteOrder } from '../hooks/useOrder';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -64,7 +64,7 @@ const Allorders = () => {
     status: statusFilter
   });
 
-  const { mutate: changeOrderStatus } = useUpdateOrder();
+  const { mutate: changeOrderStatus } = useUpdateOrderStatus();
   const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
 
   const orders = Array.isArray(ordersResponse) 
@@ -107,12 +107,14 @@ const Allorders = () => {
 
   // Handlers
   const handleStatusChange = (order, newStatus) => {
-    changeOrderStatus({ id: order._id, orderStatus: newStatus });
+    if (!newStatus || newStatus === order.orderStatus) return;
+
     if (newStatus === 'Delivered') {
       setDeliveryModalOrder(order);
-    } else {
-      updateOrder({ id: order._id, data: { orderStatus: newStatus } });
+      return;
     }
+
+    changeOrderStatus({ id: order._id, orderStatus: newStatus });
   };
 
   const handleDelete = (id) => {
