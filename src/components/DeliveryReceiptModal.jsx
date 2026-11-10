@@ -237,24 +237,53 @@ const DeliveryReceiptModal = ({ order, settlementData, closeModal }) => {
                 <span className="font-bold font-sans">Rs {advancePaid.toLocaleString()}</span>
               </div>
 
+              {settlementData?.breakdown?.creditUsed > 0 && (
+                <div className="flex justify-between text-emerald-800">
+                  <span>Customer Credit Applied:</span>
+                  <span className="font-bold font-sans">- Rs {settlementData.breakdown.creditUsed.toLocaleString()}</span>
+                </div>
+              )}
+
               <div className="flex justify-between text-green-900 font-bold bg-green-50 px-1 py-0.5 rounded border border-green-200">
-                <span>Cash/Payment Received at Handover ({paymentMethod}):</span>
+                <span>Payment Received at Delivery ({paymentMethod}):</span>
                 <span className="font-black font-sans">Rs {Number(receivedAmount).toLocaleString()}</span>
               </div>
 
-              {/* REMAINING BALANCE ROW */}
+              {settlementData?.breakdown?.duesReceived > 0 && (
+                <div className="flex justify-between text-gray-600 text-[10px] pl-2">
+                  <span>↳ Paid towards previous dues:</span>
+                  <span className="font-bold font-sans">Rs {settlementData.breakdown.duesReceived.toLocaleString()}</span>
+                </div>
+              )}
+
+              {/* REMAINING ORDER UDHAAR ROW */}
               <div className="flex justify-between items-center pt-1 border-t border-gray-200 text-xs font-black">
-                <span>Net Balance Status:</span>
+                <span>Order Udhaar Remaining:</span>
                 <span>
-                  {remainingBal === 0 ? (
-                    <span className="text-green-800 font-black">Rs 0 (NILL / FULLY PAID)</span>
+                  {settlementData?.breakdown ? (
+                    settlementData.breakdown.orderUdhaarRemaining === 0 ? (
+                      <span className="text-green-800 font-black">Rs 0 (FULLY PAID)</span>
+                    ) : (
+                      <span className="text-red-700 font-black">Rs {settlementData.breakdown.orderUdhaarRemaining.toLocaleString()}</span>
+                    )
+                  ) : remainingBal === 0 ? (
+                    <span className="text-green-800 font-black">Rs 0 (FULLY PAID)</span>
                   ) : remainingBal > 0 ? (
-                    <span className="text-red-700 font-black">Rs {remainingBal.toLocaleString()} (Udhar / Khata)</span>
+                    <span className="text-red-700 font-black">Rs {remainingBal.toLocaleString()}</span>
                   ) : (
-                    <span className="text-blue-700 font-black">Rs {Math.abs(remainingBal).toLocaleString()} (Credit Balance)</span>
+                    <span className="text-blue-700 font-black">Rs {Math.abs(remainingBal).toLocaleString()} Credit</span>
                   )}
                 </span>
               </div>
+
+              {settlementData?.breakdown?.newKhataBalance !== undefined && (
+                <div className="flex justify-between items-center text-[10px] text-gray-600 pt-0.5">
+                  <span>New Customer Net Khata:</span>
+                  <span className="font-black font-sans text-gray-900">
+                    Rs {settlementData.breakdown.newKhataBalance.toLocaleString()}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* CUSTOMER CONFIRMATION & RECEIPT CLAUSE */}

@@ -127,13 +127,132 @@ export const useDeliverOrder = () => {
     onSuccess: (res) => {
       toast.success(res.message || 'Order delivered successfully!');
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      queryClient.invalidateQueries({ queryKey: ['customers'] });
-      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
-      queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
       queryClient.invalidateQueries({ queryKey: ['order'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['customerKhata'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-dues'] });
+      queryClient.invalidateQueries({ queryKey: ['financial-summary'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to deliver order.');
+    }
+  });
+};
+
+// 7. Add Payment to open order
+export const useAddOrderPayment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }) => {
+      const response = await API.post(`/orders/${id}/payments`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Payment added successfully!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
+      queryClient.invalidateQueries({ queryKey: ['orderPayments'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-dues'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to add payment.');
+    }
+  });
+};
+
+// 8. Get Order Payments
+export const useOrderPayments = (orderId) => {
+  return useQuery({
+    queryKey: ['orderPayments', orderId],
+    queryFn: async () => {
+      if (!orderId) return [];
+      const response = await API.get(`/orders/${orderId}/payments`);
+      return response.data;
+    },
+    enabled: Boolean(orderId)
+  });
+};
+
+// 9. Cancel Order (Admin only)
+export const useCancelOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }) => {
+      const response = await API.put(`/orders/${id}/cancel`, data);
+      return response.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message || 'Order cancelled successfully!');
+      if (res.warnings && res.warnings.length > 0) {
+        res.warnings.forEach(w => toast.warn(w));
+      }
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
+      queryClient.invalidateQueries({ queryKey: ['orderPayments'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-dues'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to cancel order.');
+    }
+  });
+};
+
+// 10. Refund on Cancelled Order (Admin only)
+export const useRefundOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }) => {
+      const response = await API.post(`/orders/${id}/refund`, data);
+      return response.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message || 'Refund processed successfully!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
+      queryClient.invalidateQueries({ queryKey: ['orderPayments'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-dues'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to process refund.');
+    }
+  });
+};
+
+// 11. Void Payment (Admin only)
+export const useVoidPayment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, data }) => {
+      const response = await API.post(`/payments/${id}/void`, data);
+      return response.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message || 'Payment voided successfully!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['order'] });
+      queryClient.invalidateQueries({ queryKey: ['orderPayments'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-dues'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to void payment.');
     }
   });
 };

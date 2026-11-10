@@ -118,7 +118,16 @@ const Allorders = () => {
   };
 
   const handleDelete = (id) => {
-    deleteOrder(id);
+    const targetOrder = (Array.isArray(orders) ? orders : (orders?.orders || [])).find(o => o._id === id);
+    if (targetOrder) {
+      if (Number(targetOrder.paidAmount || targetOrder.advancePaid || 0) > 0 || targetOrder.orderStatus === 'Delivered') {
+        toast.error('Cannot delete order with active payments or delivered status. Please cancel the order instead.');
+        return;
+      }
+    }
+    if (window.confirm('Are you sure you want to delete this order?')) {
+      deleteOrder(id);
+    }
   };
 
   return (

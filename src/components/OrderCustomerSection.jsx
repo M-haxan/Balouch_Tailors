@@ -1,17 +1,27 @@
 import React from 'react';
-import { FiUser, FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
+import { FiUser, FiAlertCircle, FiCheckCircle, FiInfo } from 'react-icons/fi';
 import { formatPhone } from '../utils/formatters';
+import { useCustomerDues } from '../hooks/useCustomers';
+import useAuthStore from '../Store/authStore';
 
 const OrderCustomerSection = ({
   customers,
   loadingCustomers,
   customerId,
   setCustomerId,
-  selectedCustomer,
-  customerKhataBal,
-  adjustKhata,
-  setAdjustKhata
+  selectedCustomer
 }) => {
+  const user = useAuthStore((state) => state.user);
+  const canSeeDues = Boolean(user?.role === 'admin' || user?.canDeliverOrder);
+
+  const { data: duesData } = useCustomerDues(customerId, {
+    enabled: Boolean(customerId && canSeeDues)
+  });
+
+  const totalDues = Number(duesData?.totalDues ?? selectedCustomer?.duesBalance ?? (selectedCustomer?.khataBalance > 0 ? selectedCustomer?.khataBalance : 0));
+  const openCount = Number(duesData?.openOrdersCount ?? 0);
+  const creditBalance = Number(duesData?.creditBalance ?? selectedCustomer?.creditBalance ?? (selectedCustomer?.khataBalance < 0 ? Math.abs(selectedCustomer?.khataBalance) : 0));
+
   return (
     <div className="bg-white p-3.5 sm:p-5 rounded border border-gray-200 shadow-sm">
       <div className="flex items-center justify-between mb-2.5 sm:mb-3">
@@ -39,7 +49,7 @@ const OrderCustomerSection = ({
         >
           <option value="">-- Select Customer --</option>
           {customers.map(c => {
-            const bal = Number(c.khataBalance) || 0;
+            const bal = Number(c.duesBalance !== undefined ? (c.duesBalance - (c.creditBalance || 0)) : (c.khataBalance || 0));
             const balBadge = bal > 0 ? ` [Due: Rs ${bal}]` : bal < 0 ? ` [Credit: Rs ${Math.abs(bal)}]` : '';
             return (
               <option key={c._id} value={c._id}>
@@ -50,42 +60,23 @@ const OrderCustomerSection = ({
         </select>
       )}
 
-      {/* Khata Adjustment Alert Banner */}
-      {selectedCustomer && customerKhataBal !== 0 && (
-        <div className={`mt-3 p-2.5 sm:p-3 rounded border flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
-          customerKhataBal > 0 
-            ? 'bg-red-50 border-red-200 text-red-900' 
-            : 'bg-green-50 border-green-200 text-green-900'
-        }`}>
-          <div className="flex items-start sm:items-center gap-2">
-            {customerKhataBal > 0 ? (
-              <FiAlertCircle className="text-base text-red-600 shrink-0 mt-0.5 sm:mt-0" />
-            ) : (
-              <FiCheckCircle className="text-base text-green-600 shrink-0 mt-0.5 sm:mt-0" />
-            )}
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider block opacity-75">
-                {customerKhataBal > 0 ? 'Outstanding Ledger Due' : 'Advance Credit Balance'}
+      {/* Dues and Credit Information Chips (No bill adjustment) */}
+      {selectedCustomer && canSeeDues && (totalDues > 0 || creditBalance > 0) && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {totalDues > 0 && (
+            <div className="flex items-center gap-2 p-2 px-3 rounded border bg-amber-50 border-amber-200 text-amber-900 text-xs font-bold">
+              <FiInfo className="text-amber-600 shrink-0" />
+              <span>
+                Customer has Rs {totalDues.toLocaleString()} open dues {openCount > 0 ? `on ${openCount} previous order${openCount > 1 ? 's' : ''}` : 'in ledger'}
               </span>
-              <p className="text-xs sm:text-sm font-bold">
-                {customerKhataBal > 0 
-                  ? `Rs ${customerKhataBal.toLocaleString()} pending from previous orders` 
-                  : `Rs ${Math.abs(customerKhataBal).toLocaleString()} advance credit available`}
-              </p>
             </div>
-          </div>
-
-          <label className="flex items-center gap-2 text-xs font-bold cursor-pointer bg-white px-2.5 sm:px-3 py-1.5 rounded border border-gray-200 shadow-sm shrink-0 self-start sm:self-auto">
-            <input 
-              type="checkbox" 
-              checked={adjustKhata} 
-              onChange={(e) => setAdjustKhata(e.target.checked)}
-              className="w-4 h-4 text-black rounded accent-[#DFAC43] cursor-pointer"
-            />
-            <span>
-              {customerKhataBal > 0 ? 'Add to Bill (+)' : 'Deduct from Bill (-)'}
-            </span>
-          </label>
+          )}
+          {creditBalance > 0 && (
+            <div className="flex items-center gap-2 p-2 px-3 rounded border bg-emerald-50 border-emerald-200 text-emerald-900 text-xs font-bold">
+              <FiCheckCircle className="text-emerald-600 shrink-0" />
+              <span>Customer has Rs {creditBalance.toLocaleString()} advance credit</span>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -370,15 +370,15 @@ const InvoicePrint = () => {
             </div>
           )}
 
-          {order.previousKhataAdjusted?.type === 'added_due' && (
+          {order.legacyKhataAdjusted && order.previousKhataAdjusted?.type === 'added_due' && (
             <div className="flex justify-between text-red-600 font-bold">
-              <span>+ Previous Udhar Added:</span>
+              <span>+ Previous Udhar Added (Legacy):</span>
               <span>+ Rs {Number(order.previousKhataAdjusted.amount).toLocaleString()}</span>
             </div>
           )}
-          {order.previousKhataAdjusted?.type === 'deducted_advance' && (
+          {order.legacyKhataAdjusted && order.previousKhataAdjusted?.type === 'deducted_advance' && (
             <div className="flex justify-between text-green-700 font-bold">
-              <span>- Stored Advance Adjusted:</span>
+              <span>- Stored Advance Adjusted (Legacy):</span>
               <span>- Rs {Number(order.previousKhataAdjusted.amount).toLocaleString()}</span>
             </div>
           )}

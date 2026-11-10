@@ -6,6 +6,7 @@ import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useAuthStore from '../Store/authStore';
 import { FiArrowLeft } from 'react-icons/fi';
+import { newIdempotencyKey } from '../utils/idempotency';
 
 import OrderSuccessScreen from '../components/OrderSuccessScreen';
 import OrderCustomerSection from '../components/OrderCustomerSection';
@@ -56,10 +57,10 @@ const CreateOrder = () => {
   const [bookingDate, setBookingDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [deliveryDate, setDeliveryDate] = useState('');
   const [advancePaid, setAdvancePaid] = useState('');
+  const [advancePaymentMethod, setAdvancePaymentMethod] = useState('Cash');
   const [savedOrder, setSavedOrder] = useState(null);
   const [alterations, setAlterations] = useState([]);
   const [discountPercent, setDiscountPercent] = useState('');
-  const [adjustKhata, setAdjustKhata] = useState(true);
 
   // Live Camera Capture States
   const [cameraSuitIndex, setCameraSuitIndex] = useState(null);
@@ -323,24 +324,9 @@ const CreateOrder = () => {
     return Math.max(0, rawSubtotal - discountAmount);
   }, [rawSubtotal, discountAmount]);
 
-  const khataAdjustment = useMemo(() => {
-    if (!adjustKhata || customerKhataBal === 0) return { type: 'none', amount: 0 };
-    if (customerKhataBal > 0) {
-      return { type: 'added_due', amount: customerKhataBal };
-    } else {
-      const maxDeductible = Math.min(discountedSubtotal, Math.abs(customerKhataBal));
-      return { type: 'deducted_advance', amount: maxDeductible };
-    }
-  }, [adjustKhata, customerKhataBal, discountedSubtotal]);
-
   const totalAmount = useMemo(() => {
-    if (khataAdjustment.type === 'added_due') {
-      return discountedSubtotal + khataAdjustment.amount;
-    } else if (khataAdjustment.type === 'deducted_advance') {
-      return Math.max(0, discountedSubtotal - khataAdjustment.amount);
-    }
     return discountedSubtotal;
-  }, [discountedSubtotal, khataAdjustment]);
+  }, [discountedSubtotal]);
 
   const balanceAmount = useMemo(() => {
     return totalAmount - (Number(advancePaid) || 0);
@@ -488,11 +474,14 @@ const CreateOrder = () => {
     formData.append('discountPercent', Number(discountPercent) || 0);
     formData.append('discountAmount', discountAmount);
     formData.append('totalAmount', totalAmount);
-    formData.append('advancePaid', Number(advancePaid) || 0);
+    if (!isEditMode) {
+      formData.append('advancePaid', Number(advancePaid) || 0);
+      formData.append('paymentMethod', advancePaymentMethod || 'Cash');
+      formData.append('idempotencyKey', newIdempotencyKey());
+    }
     formData.append('balanceAmount', balanceAmount);
     formData.append('bookingDate', bookingDate);
     formData.append('deliveryDate', deliveryDate);
-    formData.append('previousKhataAdjusted', JSON.stringify(khataAdjustment));
 
         const suitsData = suits.map(s => ({
       ...(s._id ? { _id: s._id } : {}),
@@ -609,9 +598,6 @@ const CreateOrder = () => {
             customerId={customerId}
             setCustomerId={setCustomerId}
             selectedCustomer={selectedCustomer}
-            customerKhataBal={customerKhataBal}
-            adjustKhata={adjustKhata}
-            setAdjustKhata={setAdjustKhata}
           />
 
           {/* SECTION 2: GARMENTS & CUSTOMIZATIONS */}
@@ -654,11 +640,14 @@ const CreateOrder = () => {
             setDiscountPercent={setDiscountPercent}
             discountAmount={discountAmount}
             rawSubtotal={rawSubtotal}
-            khataAdjustment={khataAdjustment}
             totalAmount={totalAmount}
             advancePaid={advancePaid}
             setAdvancePaid={setAdvancePaid}
+            advancePaymentMethod={advancePaymentMethod}
+            setAdvancePaymentMethod={setAdvancePaymentMethod}
             isEditMode={isEditMode}
+            editOrderId={editOrderId}
+            existingOrder={existingOrder}
             orderStatus={orderStatus}
             setOrderStatus={setOrderStatus}
             isPending={isPending}

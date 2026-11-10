@@ -6,7 +6,7 @@ import { useGetWorkers, useAssignSuitStage, useApproveSuit, useRejectSuit } from
 import { formatPhone } from '../utils/formatters';
 // import { getStatusColor } from '../utils/orderStatus';
 import { toast } from 'react-toastify';
-import { useGetOrderById, useGetOrders, useUpdateOrderStatus } from '../hooks/useOrder';
+import { useGetOrderById, useGetOrders, useUpdateOrderStatus, useOrderPayments, useVoidPayment, useCancelOrder, useRefundOrder } from '../hooks/useOrder';
 import { getStatusColor, ORDER_STATUS_OPTIONS, ORDER_STATUS_FLOW } from '../utils/orderStatus';
 import { 
   FiUser, 
@@ -129,6 +129,22 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
   const [selectedSuitIndex, setSelectedSuitIndex] = useState(0);
   const [reworkModalSuit, setReworkModalSuit] = useState(null);
   const [reworkNotes, setReworkNotes] = useState('');
+  
+  // Phase 1: Payments & Order Cancellation
+  const isAdmin = user?.role === 'admin';
+  const { data: payments = [], refetch: refetchPayments } = useOrderPayments(orderId, { enabled: Boolean(orderId) });
+  const { mutate: voidPayment, isPending: isVoiding } = useVoidPayment();
+  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
+  const { mutate: refundOrder, isPending: isRefunding } = useRefundOrder();
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelRefundMode, setCancelRefundMode] = useState('credit');
+  const [cancelRefundAmount, setCancelRefundAmount] = useState('');
+  const [cancelRefundMethod, setCancelRefundMethod] = useState('Cash');
+
+  const [voidPaymentModal, setVoidPaymentModal] = useState(null);
+  const [voidReason, setVoidReason] = useState('');
   
   // Track selected worker draft per suit (suitId -> workerId | 'self')
   const [workerDrafts, setWorkerDrafts] = useState({});
@@ -313,6 +329,48 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
     }, {
       onSuccess: () => {
         setReworkModalSuit(null);
+      }
+    });
+  };
+
+  const handleCancelSubmit = (e) => {
+    e.preventDefault();
+    if (!cancelReason.trim()) {
+      toast.error('Please enter a cancellation reason.');
+      return;
+    }
+    cancelOrder({
+      orderId: order._id,
+      data: {
+        reason: cancelReason,
+        refundMode: cancelRefundMode,
+        refundAmount: Number(cancelRefundAmount) || 0,
+        refundMethod: cancelRefundMethod
+      }
+    }, {
+      onSuccess: () => {
+        toast.success('Order cancelled successfully.');
+        setShowCancelModal(false);
+        closeModal();
+      }
+    });
+  };
+
+  const handleVoidSubmit = (e) => {
+    e.preventDefault();
+    if (!voidReason.trim()) {
+      toast.error('Please enter a reason for voiding this payment.');
+      return;
+    }
+    voidPayment({
+      paymentId: voidPaymentModal._id,
+      data: { reason: voidReason }
+    }, {
+      onSuccess: () => {
+        toast.success('Payment marked as void.');
+        setVoidPaymentModal(null);
+        setVoidReason('');
+        refetchPayments();
       }
     });
   };
@@ -784,10 +842,87 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
               </div>
             )}
 
+            {/* Payments History Section */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center border-b border-gray-200 pb-1">
+                <h3 className="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
+                  <FiCreditCard className="text-[#DFAC43]" /> Payments History ({payments.length})
+                </h3>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-2xs">
+                {payments.length === 0 ? (
+                  <p className="text-gray-400 text-xs p-3 text-center">No payment receipts recorded for this order.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-gray-50 text-gray-600 font-black text-[10px] uppercase border-b border-gray-200">
+                          <th className="p-2.5">Receipt #</th>
+                          <th className="p-2.5">Date</th>
+                          <th className="p-2.5">Kind</th>
+                          <th className="p-2.5">Method</th>
+                          <th className="p-2.5 text-right">Amount</th>
+                          <th className="p-2.5 text-center">Status</th>
+                          {isAdmin && <th className="p-2.5 text-center">Action</th>}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {payments.map(p => (
+                          <tr key={p._id} className="hover:bg-gray-50/50">
+                            <td className="p-2.5 font-mono font-bold">{p.receiptNumber || '---'}</td>
+                            <td className="p-2.5 text-gray-500">{new Date(p.date).toLocaleDateString()}</td>
+                            <td className="p-2.5 font-bold capitalize">{p.kind}</td>
+                            <td className="p-2.5 text-gray-600">{p.method}</td>
+                            <td className="p-2.5 text-right font-black font-sans">Rs {p.amount?.toLocaleString()}</td>
+                            <td className="p-2.5 text-center">
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${p.status === 'void' ? 'bg-red-100 text-red-700 line-through' : 'bg-emerald-100 text-emerald-800'}`}>
+                                {p.status}
+                              </span>
+                            </td>
+                            {isAdmin && (
+                              <td className="p-2.5 text-center">
+                                {p.status === 'active' ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setVoidPaymentModal(p);
+                                      setVoidReason('');
+                                    }}
+                                    className="text-[10px] font-black text-red-600 hover:text-red-800 hover:underline cursor-pointer"
+                                  >
+                                    Void
+                                  </button>
+                                ) : (
+                                  <span className="text-[10px] text-gray-400 italic">Voided</span>
+                                )}
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
 
           {/* Footer */}
           <div className="py-2.5 px-4 border-t border-gray-200 bg-white flex justify-end gap-2.5 shrink-0">
+            {isAdmin && !['Delivered', 'Cancelled'].includes(order.orderStatus) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCancelReason('');
+                  setCancelRefundAmount(String(order.paidAmount || 0));
+                  setShowCancelModal(true);
+                }}
+                className="bg-red-50 hover:bg-red-600 text-red-700 hover:text-white border border-red-200 px-3.5 py-2 rounded-lg text-xs font-black transition flex items-center gap-1 cursor-pointer"
+              >
+                Cancel Order
+              </button>
+            )}
             {order.orderStatus !== 'Delivered' && onOpenDelivery && (
               <button
                 onClick={() => {
@@ -870,6 +1005,150 @@ const OrderDetailsModal = ({ orderId, closeModal, onOpenDelivery }) => {
           suitIndex={printJobSuit.suitIndex}
           closeModal={() => setPrintJobSuit(null)}
         />
+      )}
+
+      {/* CANCEL ORDER MODAL */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 space-y-4 border border-red-200 animate-scale-up">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <h3 className="text-base font-black text-red-600 flex items-center gap-2">
+                <FiAlertTriangle /> Cancel Order #BT-{order.orderNumber}
+              </h3>
+              <button onClick={() => setShowCancelModal(false)} className="text-gray-400 hover:text-black">
+                <FiX />
+              </button>
+            </div>
+
+            <form onSubmit={handleCancelSubmit} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-gray-700 font-bold mb-1">Cancellation Reason *</label>
+                <textarea
+                  required
+                  rows={2}
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="e.g. Customer requested cancellation before fabric cutting"
+                  className="w-full border border-gray-300 rounded p-2 text-xs outline-none"
+                />
+              </div>
+
+              {Number(order.paidAmount || 0) > 0 && (
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded space-y-2">
+                  <span className="text-[11px] font-bold text-amber-900 block">
+                    Advance Paid on Order: <strong>Rs {Number(order.paidAmount || 0).toLocaleString()}</strong>
+                  </span>
+                  <div>
+                    <label className="block text-gray-700 font-bold mb-1">Refund Handling</label>
+                    <select
+                      value={cancelRefundMode}
+                      onChange={(e) => setCancelRefundMode(e.target.value)}
+                      className="w-full border border-gray-300 rounded p-1.5 font-bold bg-white"
+                    >
+                      <option value="credit">Keep in Customer Credit Balance</option>
+                      <option value="cash">Refund Directly Now</option>
+                      <option value="none">No Refund (Retain Advance)</option>
+                    </select>
+                  </div>
+
+                  {cancelRefundMode === 'cash' && (
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div>
+                        <label className="block text-gray-700 font-bold mb-1">Refund Amount</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max={Number(order.paidAmount || 0)}
+                          value={cancelRefundAmount}
+                          onChange={(e) => setCancelRefundAmount(e.target.value)}
+                          className="w-full border border-gray-300 rounded p-1.5 font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 font-bold mb-1">Method</label>
+                        <select
+                          value={cancelRefundMethod}
+                          onChange={(e) => setCancelRefundMethod(e.target.value)}
+                          className="w-full border border-gray-300 rounded p-1.5 font-bold bg-white"
+                        >
+                          <option value="Cash">Cash</option>
+                          <option value="EasyPaisa">EasyPaisa</option>
+                          <option value="JazzCash">JazzCash</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setShowCancelModal(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCancelling}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded disabled:opacity-50"
+                >
+                  {isCancelling ? 'Processing...' : 'Confirm Order Cancellation'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* VOID PAYMENT MODAL */}
+      {voidPaymentModal && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-5 space-y-3 border border-red-200 animate-scale-up">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <h3 className="text-sm font-black text-red-600 flex items-center gap-1.5">
+                <FiAlertTriangle /> Void Payment ({voidPaymentModal.receiptNumber})
+              </h3>
+              <button onClick={() => setVoidPaymentModal(null)} className="text-gray-400 hover:text-black">
+                <FiX />
+              </button>
+            </div>
+            <form onSubmit={handleVoidSubmit} className="space-y-3 text-xs">
+              <p className="text-gray-600">
+                Amount: <strong className="text-black font-black">Rs {voidPaymentModal.amount?.toLocaleString()}</strong> ({voidPaymentModal.kind})
+              </p>
+              <div>
+                <label className="block text-gray-700 font-bold mb-1">Reason for Voiding *</label>
+                <input
+                  type="text"
+                  required
+                  value={voidReason}
+                  onChange={(e) => setVoidReason(e.target.value)}
+                  placeholder="e.g. Erroneous duplicate entry"
+                  className="w-full border border-gray-300 rounded p-2 text-xs outline-none"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setVoidPaymentModal(null)}
+                  className="px-3 py-1.5 bg-gray-100 text-gray-700 font-bold rounded"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  disabled={isVoiding}
+                  className="px-4 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded disabled:opacity-50"
+                >
+                  {isVoiding ? 'Voiding...' : 'Confirm Void'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </>
   );

@@ -1,26 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useDeliverOrder } from '../hooks/useOrder';
+import { useCustomerDues } from '../hooks/useCustomers';
+import { newIdempotencyKey } from '../utils/idempotency';
 import { FiCheckCircle, FiX, FiAlertTriangle, FiCheck } from 'react-icons/fi';
 
-// -------------------------------------------------------------
-// COMPONENT: WORKER ORDER DELIVERY MODAL
-// -------------------------------------------------------------
+const PAYMENT_METHODS = ['Cash', 'JazzCash', 'EasyPaisa', 'Bank Transfer', 'Card'];
+
 const WorkerOrderDeliveryModal = ({ order, worker = {}, closeModal, onDelivered }) => {
   const { mutate: deliverOrder, isPending } = useDeliverOrder();
   
-  const balanceDue = Number(order.balanceAmount) || 0;
-  const [receivedAmount, setReceivedAmount] = useState(balanceDue.toString());
-  const [paymentMethod, setPaymentMethod] = useState('Cash');
+  const customerId = order.customer?._id || order.customer;
+  const { data: duesData } = useCustomerDues(customerId, {
+    enabled: Boolean(customerId)
+  });
 
-  const numReceived = Number(receivedAmount) || 0;
-  const diff = balanceDue - numReceived;
+  const availableCredit = Number(duesData?.creditBalance || 0);
+  const otherOpenOrders = useMemo(() => {
+    return (duesData?.openOrders || []).filter(o => String(o._id) !== String(order._id));
+  }, [duesData?.openOrders, order._id]);
+
+  const billTotal = Number(order.netAmount ?? order.totalAmount ?? 0);
+  const advancePaid = Number(order.paidAmount ?? order.advancePaid ?? 0);
+  const currentOrderDue = Math.max(0, billTotal - advancePaid);
+
+  const [creditToUse, setCreditToUse] = useState(() => {
+    return availableCredit > 0 ? Math.min(availableCredit, currentOrderDue).toString() : '0';
+  });
+  const [billReceived, setBillReceived] = useState(() => {
+    const defaultCredit = availableCredit > 0 ? Math.min(availableCredit, currentOrderDue) : 0;
+    return Math.max(0, currentOrderDue - defaultCredit).toString();
+  });
+  const [duesReceived, setDuesReceived] = useState('0');
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
+  const [deliveryNote, setDeliveryNote] = useState('');
+
+  useEffect(() => {
+    if (availableCredit > 0 && Number(creditToUse) === 0) {
+      const initCredit = Math.min(availableCredit, currentOrderDue);
+      setCreditToUse(initCredit.toString());
+      setBillReceived(Math.max(0, currentOrderDue - initCredit).toString());
+    }
+  }, [availableCredit, currentOrderDue]);
+
+  const numCreditToUse = Math.min(availableCredit, Math.max(0, Number(creditToUse) || 0));
+  const numBillReceived = Math.max(0, Number(billReceived) || 0);
+  const numDuesReceived = Math.max(0, Number(duesReceived) || 0);
+
+  const totalCoveredForBill = numCreditToUse + numBillReceived;
+  const orderUdhaar = Math.max(0, currentOrderDue - totalCoveredForBill);
+  const extraCredit = Math.max(0, totalCoveredForBill - currentOrderDue);
+
+  const previousDuesTotal = otherOpenOrders.reduce((acc, o) => acc + (Number(o.due) || 0), 0);
+  const previousDuesRemaining = Math.max(0, previousDuesTotal - numDuesReceived);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const payload = {
-      receivedAmount: numReceived,
+      billReceived: numBillReceived,
+      duesReceived: numDuesReceived,
+      creditToUse: numCreditToUse,
       paymentMethod,
+      note: deliveryNote,
+      idempotencyKey: newIdempotencyKey(),
       deliveredBy: {
         userType: 'worker',
         workerId: worker._id || worker.id,
@@ -32,20 +74,37 @@ const WorkerOrderDeliveryModal = ({ order, worker = {}, closeModal, onDelivered 
       id: order._id,
       data: payload
     }, {
-      onSuccess: () => {
-        onDelivered({
-          receivedAmount: numReceived,
-          paymentMethod,
-          diff,
-          deliveredByName: worker.name || 'Worker'
-        });
+      onSuccess: (response) => {
+        const breakdown = response?.deliveryBreakdown || {
+          billDue: currentOrderDue,
+          creditUsed: numCreditToUse,
+          billPaidNow: numBillReceived,
+          orderUdhaarRemaining: orderUdhaar,
+          duesReceived: numDuesReceived,
+          creditCreated: extraCredit,
+          newKhataBalance: orderUdhaar + previousDuesRemaining - extraCredit
+        };
+
+        if (onDelivered) {
+          onDelivered({
+            receivedAmount: numBillReceived + numDuesReceived,
+            billReceived: numBillReceived,
+            duesReceived: numDuesReceived,
+            creditUsed: numCreditToUse,
+            orderUdhaar,
+            extraCredit,
+            paymentMethod,
+            breakdown,
+            deliveredByName: worker.name || 'Worker'
+          });
+        }
       }
     });
   };
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-4 font-sans">
-      <div className="bg-white rounded shadow-2xl w-full max-w-md overflow-hidden border border-gray-200 animate-scale-up">
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/75 backdrop-blur-sm p-3 sm:p-4 font-sans overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-2xl w-full max-w-lg overflow-hidden border border-gray-200 animate-scale-up my-4">
         
         {/* Modal Header */}
         <div className="bg-[#0F172A] text-white p-4 sm:p-5 flex justify-between items-center">
@@ -68,28 +127,59 @@ const WorkerOrderDeliveryModal = ({ order, worker = {}, closeModal, onDelivered 
           </button>
         </div>
 
-        {/* Financial Snapshot */}
-        <div className="p-5 space-y-4 bg-gray-50/50">
-          <div className="bg-white border border-gray-200 p-4 rounded space-y-2.5 shadow-2xs">
-            <div className="flex justify-between text-xs font-bold text-gray-600">
-              <span>Total Order Bill:</span>
-              <span className="text-black font-black font-sans">Rs {order.totalAmount}</span>
+        {/* Handover Form */}
+        <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
+          
+          {/* Current Order Financial Breakdown */}
+          <div className="bg-slate-50 border border-slate-200 rounded p-3 space-y-2">
+            <span className="text-[11px] font-black uppercase text-slate-800 tracking-wider block">
+              1. Current Order Bill Breakdown
+            </span>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-white p-2 rounded border border-slate-200">
+                <span className="text-[10px] text-gray-500 block">Total Bill</span>
+                <span className="font-bold text-gray-900 text-sm">Rs {billTotal.toLocaleString()}</span>
+              </div>
+              <div className="bg-white p-2 rounded border border-slate-200">
+                <span className="text-[10px] text-gray-500 block">Advance Paid</span>
+                <span className="font-bold text-emerald-600 text-sm">Rs {advancePaid.toLocaleString()}</span>
+              </div>
+              <div className="bg-white p-2 rounded border border-slate-200">
+                <span className="text-[10px] text-gray-500 block">Balance Due</span>
+                <span className="font-black text-amber-600 text-sm">Rs {currentOrderDue.toLocaleString()}</span>
+              </div>
             </div>
-            <div className="flex justify-between text-xs font-bold text-gray-600">
-              <span>Advance Paid Earlier:</span>
-              <span className="text-green-700 font-black font-sans">Rs {order.advancePaid || 0}</span>
-            </div>
-            <div className="flex justify-between text-sm font-black text-black pt-2 border-t border-gray-200">
-              <span>Remaining Balance Due:</span>
-              <span className="text-red-600 font-black font-sans text-base">Rs {balanceDue}</span>
-            </div>
-          </div>
 
-          {/* Handover Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-[11px] font-black text-gray-700 uppercase tracking-wider mb-1">
-                Amount Received from Customer (PKR)
+            {/* Credit available */}
+            {availableCredit > 0 && (
+              <div className="mt-2 p-2 bg-emerald-50 border border-emerald-200 rounded flex items-center justify-between gap-2">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-emerald-800 block">Customer Credit Available</span>
+                  <span className="text-xs font-black text-emerald-900">Rs {availableCredit.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[11px] font-bold text-gray-700">Use:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max={Math.min(availableCredit, currentOrderDue)}
+                    value={creditToUse}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCreditToUse(val);
+                      const c = Math.min(availableCredit, Math.max(0, Number(val) || 0));
+                      setBillReceived(Math.max(0, currentOrderDue - c).toString());
+                    }}
+                    className="w-24 h-8 px-2 bg-white border border-emerald-300 rounded text-right font-bold"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Received for this bill */}
+            <div className="pt-2">
+              <label className="block text-[11px] font-black text-gray-800 uppercase tracking-wider mb-1">
+                Amount Received for this Order (PKR) *
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 font-black text-gray-500 text-xs">PKR</span>
@@ -97,77 +187,128 @@ const WorkerOrderDeliveryModal = ({ order, worker = {}, closeModal, onDelivered 
                   type="number"
                   min="0"
                   required
-                  value={receivedAmount}
-                  onChange={(e) => setReceivedAmount(e.target.value)}
+                  value={billReceived}
+                  onChange={(e) => setBillReceived(e.target.value)}
                   placeholder="0"
-                  className="w-full pl-12 pr-3 py-2.5 border-2 border-gray-200 focus:border-black rounded-lg text-base font-black outline-none font-sans text-gray-900 bg-white"
+                  className="w-full pl-12 pr-3 py-2 border-2 border-gray-300 focus:border-[#DFAC43] rounded text-base font-black outline-none font-sans text-gray-900 bg-white"
                 />
               </div>
             </div>
+          </div>
 
+          {/* Section 2: Previous Dues Collection (Optional) */}
+          {otherOpenOrders.length > 0 && (
+            <div className="bg-amber-50/60 border border-amber-200 rounded p-3 space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] font-black uppercase text-amber-900 tracking-wider">
+                  2. Previous Open Dues ({otherOpenOrders.length} Order{otherOpenOrders.length > 1 ? 's' : ''})
+                </span>
+                <span className="font-black text-amber-900">Total: Rs {previousDuesTotal.toLocaleString()}</span>
+              </div>
+              <div className="max-h-24 overflow-y-auto space-y-1 bg-white p-2 rounded border border-amber-200">
+                {otherOpenOrders.map(o => (
+                  <div key={o._id} className="flex justify-between items-center text-[11px] py-0.5 border-b border-gray-100 last:border-0">
+                    <span className="font-bold text-gray-700">Order #BT-{o.orderNumber}</span>
+                    <span className="font-black text-red-600">Rs {o.due?.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                  Received towards previous dues:
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={duesReceived}
+                  onChange={(e) => setDuesReceived(e.target.value)}
+                  placeholder="0"
+                  className="w-full h-8 px-2 border border-amber-300 rounded text-right font-bold text-xs"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Section 3: Payment details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-[11px] font-black text-gray-700 uppercase tracking-wider mb-1">
+              <label className="block text-[11px] font-bold text-gray-700 mb-1">
                 Payment Method
               </label>
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full border-2 border-gray-200 focus:border-black rounded-lg p-2.5 text-xs font-bold outline-none bg-white cursor-pointer"
+                className="w-full border border-gray-300 rounded h-9 px-2 text-xs font-bold outline-none bg-white cursor-pointer"
               >
-                <option value="Cash">Cash (نقد)</option>
-                <option value="JazzCash">JazzCash</option>
-                <option value="EasyPaisa">EasyPaisa</option>
-                <option value="Bank">Bank Transfer / Card</option>
+                {PAYMENT_METHODS.map(m => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
               </select>
             </div>
-
-            {/* Dynamic Feedback Alert */}
-            <div className={`p-3.5 rounded border text-xs font-bold ${
-              diff > 0 
-                ? 'bg-red-50 border-red-200 text-red-900' 
-                : diff < 0 
-                ? 'bg-green-50 border-green-200 text-green-900' 
-                : 'bg-emerald-50 border-emerald-200 text-emerald-900'
-            }`}>
-              {diff > 0 && (
-                <p className="flex items-center gap-1.5">
-                  <FiAlertTriangle className="text-red-600 shrink-0 text-sm" />
-                  <span>Rs {diff.toLocaleString()} remaining balance will be recorded to customer ledger.</span>
-                </p>
-              )}
-              {diff < 0 && (
-                <p className="flex items-center gap-1.5">
-                  <FiCheck className="text-green-600 shrink-0 text-sm" />
-                  <span>Rs {Math.abs(diff).toLocaleString()} extra payment will be credited to customer advance balance.</span>
-                </p>
-              )}
-              {diff === 0 && (
-                <p className="flex items-center gap-1.5">
-                  <FiCheckCircle className="text-emerald-600 shrink-0 text-sm" />
-                  <span>Full payment received! Zero balance (Account fully cleared).</span>
-                </p>
-              )}
+            <div>
+              <label className="block text-[11px] font-bold text-gray-700 mb-1">
+                Delivery Note (Optional)
+              </label>
+              <input
+                type="text"
+                value={deliveryNote}
+                onChange={(e) => setDeliveryNote(e.target.value)}
+                placeholder="e.g. Delivered by karigar"
+                className="w-full border border-gray-300 rounded h-9 px-2 text-xs outline-none bg-white"
+              />
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={closeModal}
-                className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded transition cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isPending}
-                className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] text-xs font-black px-5 py-2.5 rounded-lg transition shadow flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-              >
-                <FiCheckCircle /> {isPending ? 'Processing...' : 'Confirm Delivery & Generate Slip'}
-              </button>
+          {/* Live Settlement Status */}
+          <div className={`p-3 rounded border text-xs font-bold space-y-1 ${
+            orderUdhaar > 0
+              ? 'bg-amber-50 border-amber-300 text-amber-900'
+              : extraCredit > 0
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
+              : 'bg-green-50 border-green-300 text-green-900'
+          }`}>
+            <div className="flex justify-between">
+              <span>Total Received Now:</span>
+              <span className="font-black text-sm">Rs {(numBillReceived + numDuesReceived).toLocaleString()}</span>
             </div>
-          </form>
-        </div>
+            {orderUdhaar > 0 && (
+              <div className="flex items-center gap-1.5 text-amber-800 text-[11px]">
+                <FiAlertTriangle className="shrink-0" />
+                <span>Rs {orderUdhaar.toLocaleString()} remaining udhaar will be recorded on this order.</span>
+              </div>
+            )}
+            {extraCredit > 0 && (
+              <div className="flex items-center gap-1.5 text-emerald-800 text-[11px]">
+                <FiCheck className="shrink-0" />
+                <span>Rs {extraCredit.toLocaleString()} extra payment will be credited to customer.</span>
+              </div>
+            )}
+            {orderUdhaar === 0 && extraCredit === 0 && (
+              <div className="flex items-center gap-1.5 text-green-800 text-[11px]">
+                <FiCheckCircle className="shrink-0" />
+                <span>Full payment received! Nill balance.</span>
+              </div>
+            )}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-black rounded transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isPending}
+              className="bg-[#0F172A] hover:bg-[#DFAC43] text-white hover:text-[#0F172A] text-xs font-black px-5 py-2.5 rounded transition shadow flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <FiCheckCircle /> {isPending ? 'Processing...' : 'Confirm Delivery'}
+            </button>
+          </div>
+        </form>
 
       </div>
     </div>

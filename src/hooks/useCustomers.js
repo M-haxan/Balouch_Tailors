@@ -125,7 +125,7 @@ export const useGetCustomerLedger = (customerId) => {
   });
 };
 
-// 7. Settle Khata (Record Payment, Refund, Manual Adjustment)
+// 7. Settle Khata (Counter Settlement)
 export const useSettleCustomerKhata = () => {
   const queryClient = useQueryClient();
 
@@ -136,14 +136,100 @@ export const useSettleCustomerKhata = () => {
     },
     onSuccess: (res) => {
       toast.success(res.message || 'Khata updated successfully!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
       queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
       queryClient.invalidateQueries({ queryKey: ['customerKhata'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-dues'] });
     },
     onError: (error) => {
       toast.error(error.response?.data?.message || 'Failed to settle Khata.');
     }
+  });
+};
+
+// 7.1 Apply Customer Credit
+export const useApplyCredit = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ customerId, data }) => {
+      const response = await API.post(`/customer/${customerId}/apply-credit`, data);
+      return response.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message || 'Credit applied successfully!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['customerKhata'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-dues'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to apply credit.');
+    }
+  });
+};
+
+// 7.2 Refund Customer Credit
+export const useRefundCredit = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ customerId, data }) => {
+      const response = await API.post(`/customer/${customerId}/refund-credit`, data);
+      return response.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message || 'Credit refunded successfully!');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['customerKhata'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-dues'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to refund credit.');
+    }
+  });
+};
+
+// 7.3 Set Legacy Balance (Admin only)
+export const useSetLegacyBalance = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ customerId, data }) => {
+      const response = await API.patch(`/customer/${customerId}/legacy-balance`, data);
+      return response.data;
+    },
+    onSuccess: (res) => {
+      toast.success(res.message || 'Legacy balance updated!');
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customerProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['customerLedger'] });
+      queryClient.invalidateQueries({ queryKey: ['customerKhata'] });
+      queryClient.invalidateQueries({ queryKey: ['customer-dues'] });
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to update legacy balance.');
+    }
+  });
+};
+
+// 7.4 Fetch Customer Open Dues (Admin or canDeliverOrder)
+export const useCustomerDues = (customerId, options = {}) => {
+  return useQuery({
+    queryKey: ['customer-dues', customerId],
+    queryFn: async () => {
+      if (!customerId) return null;
+      const response = await API.get(`/customer/${customerId}/dues`);
+      return response.data;
+    },
+    enabled: Boolean(customerId) && options.enabled !== false
   });
 };
 

@@ -5,7 +5,9 @@ import { useGetShopSettings } from '../hooks/useShopSettings';
 import { formatPhone } from '../utils/formatters';
 import {
   useGetCustomerProfile,
-  useDeleteCustomer
+  useDeleteCustomer,
+  useRefundCredit,
+  useSetLegacyBalance
 } from '../hooks/useCustomers';
 import CustomerMeasurementsTab from '../components/CustomerMeasurementsTab';
 import CustomerOrdersTab from '../components/CustomerOrdersTab';
@@ -64,6 +66,17 @@ const CustomerProfile = () => {
   const [measurementModalConfig, setMeasurementModalConfig] = useState(null); // null or { mode: 'new' | 'update', category: '...' }
 
   const [isSettleKhataModalOpen, setIsSettleKhataModalOpen] = useState(false);
+  const [settleOrderId, setSettleOrderId] = useState(null);
+  const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
+  const [refundAmount, setRefundAmount] = useState('');
+  const [refundMethod, setRefundMethod] = useState('Cash');
+  const [refundNote, setRefundNote] = useState('');
+  const [isLegacyModalOpen, setIsLegacyModalOpen] = useState(false);
+  const [legacyAmount, setLegacyAmount] = useState('');
+  const [legacyReason, setLegacyReason] = useState('');
+
+  const { mutate: refundCredit, isPending: isRefunding } = useRefundCredit();
+  const { mutate: setLegacyBalance, isPending: isUpdatingLegacy } = useSetLegacyBalance();
 
   // State for measurement category viewer
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -120,6 +133,53 @@ const CustomerProfile = () => {
       latestMeasurementDate = new Date(Math.max(...dates));
     }
   }
+
+  const duesBalance = Number(profileData.account?.duesBalance ?? customer.duesBalance ?? (khataBal > 0 ? khataBal : 0));
+  const creditBalance = Number(profileData.account?.creditBalance ?? customer.creditBalance ?? (khataBal < 0 ? Math.abs(khataBal) : 0));
+  const netKhata = Number(profileData.account?.khataBalance ?? customer.khataBalance ?? (duesBalance - creditBalance));
+  const legacyBalance = Number(profileData.account?.legacyBalance ?? customer.legacyBalance ?? 0);
+  const openOrders = profileData.openOrders || [];
+
+  const handleRefundSubmit = (e) => {
+    e.preventDefault();
+    const num = Number(refundAmount);
+    if (!num || num <= 0) return toast.error('Please enter a valid refund amount.');
+    refundCredit({
+      customerId: customer._id,
+      data: {
+        amount: num,
+        method: refundMethod,
+        note: refundNote
+      }
+    }, {
+      onSuccess: () => {
+        setIsRefundModalOpen(false);
+        setRefundAmount('');
+        setRefundNote('');
+        refetch();
+      }
+    });
+  };
+
+  const handleLegacySubmit = (e) => {
+    e.preventDefault();
+    if (legacyAmount === '') return toast.error('Please enter a legacy balance.');
+    if (!legacyReason.trim()) return toast.error('A reason is required to adjust legacy balance.');
+    setLegacyBalance({
+      customerId: customer._id,
+      data: {
+        legacyBalance: Number(legacyAmount),
+        reason: legacyReason
+      }
+    }, {
+      onSuccess: () => {
+        setIsLegacyModalOpen(false);
+        setLegacyAmount('');
+        setLegacyReason('');
+        refetch();
+      }
+    });
+  };
 
   const formattedCustomerId = customer.customerNumber ? `#C-${customer.customerNumber}` : `#C-${customer._id.slice(-4).toUpperCase()}`;
 
@@ -301,70 +361,47 @@ const CustomerProfile = () => {
           <p className="text-[11px] text-gray-500 font-medium mt-1">Sum of all customer bills</p>
         </div>
 
-        {/* Metric 3: Outstanding Khata Balance */}
-        <div className={`border rounded p-4 sm:p-5 shadow-sm transition ${khataBal > 0
-            ? 'bg-red-50/50 border-red-200'
-            : khataBal < 0
-              ? 'bg-green-50/50 border-green-200'
-              : 'bg-white border-gray-200'
-          }`}>
+        {/* Metric 3: Total Outstanding Dues */}
+        <div className={`border rounded p-4 sm:p-5 shadow-sm transition ${duesBalance > 0 ? 'bg-red-50/50 border-red-200' : 'bg-white border-gray-200'}`}>
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[11px] font-black uppercase tracking-wider text-gray-500">Khata Balance</span>
-            <div className={`w-8 h-8 rounded flex items-center justify-center text-base ${khataBal > 0 ? 'bg-red-100 text-red-600' : khataBal < 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-              }`}>
+            <span className="text-[11px] font-black uppercase tracking-wider text-gray-500">Total Dues</span>
+            <div className={`w-8 h-8 rounded flex items-center justify-center text-base ${duesBalance > 0 ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-700'}`}>
               <FiCreditCard />
             </div>
           </div>
-          <p className={`text-2xl font-black font-sans ${khataBal > 0 ? 'text-red-700' : khataBal < 0 ? 'text-green-700' : 'text-gray-900'
-            }`}>
-            Rs {Math.abs(khataBal).toLocaleString()}
+          <p className={`text-2xl font-black font-sans ${duesBalance > 0 ? 'text-red-700' : 'text-gray-900'}`}>
+            Rs {duesBalance.toLocaleString()}
           </p>
-          <div className="mt-1">
-            {khataBal > 0 ? (
-              <span className="text-[10px] font-black uppercase bg-red-100 text-red-800 px-2 py-0.5 rounded inline-flex items-center gap-1">
-                <FiAlertCircle className="text-red-600 text-xs" /> Udhar (Receivable)
-              </span>
-            ) : khataBal < 0 ? (
-              <span className="text-[10px] font-black uppercase bg-green-100 text-green-800 px-2 py-0.5 rounded inline-flex items-center gap-1">
-                <FiCheckCircle className="text-green-600 text-xs" /> Advance Credit
-              </span>
-            ) : (
-              <span className="text-[10px] font-black uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded inline-flex items-center gap-1">
-                <FiCheck className="text-gray-500 text-xs" /> Clear (Rs 0)
-              </span>
-            )}
-          </div>
+          <p className="text-[11px] text-gray-500 font-medium mt-1">Unpaid balance on orders</p>
         </div>
 
-        {/* Metric 4: Latest Measurement Date */}
-        <div className="bg-white border border-gray-200 rounded p-4 sm:p-5 shadow-sm hover:border-[#DFAC43] transition">
+        {/* Metric 4: Available Advance Credit */}
+        <div className={`border rounded p-4 sm:p-5 shadow-sm transition ${creditBalance > 0 ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-gray-200'}`}>
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[11px] font-black uppercase tracking-wider text-gray-500">Measurements</span>
-            <div className="w-8 h-8 rounded bg-amber-50 text-black flex items-center justify-center text-base">
-              <FiScissors />
+            <span className="text-[11px] font-black uppercase tracking-wider text-gray-500">Advance Credit</span>
+            <div className={`w-8 h-8 rounded flex items-center justify-center text-base ${creditBalance > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700'}`}>
+              <FiCheckCircle />
             </div>
           </div>
-          <p className="text-base font-black text-gray-900 truncate">
-            {latestMeasurementDate ? new Date(latestMeasurementDate).toLocaleDateString() : 'No Sizes'}
+          <p className={`text-2xl font-black font-sans ${creditBalance > 0 ? 'text-emerald-700' : 'text-gray-900'}`}>
+            Rs {creditBalance.toLocaleString()}
           </p>
-          <p className="text-[11px] text-gray-500 font-medium mt-1">
-            {customer.measurements?.length ? `${customer.measurements.length} category saved` : 'Needs sizing'}
-          </p>
+          <p className="text-[11px] text-gray-500 font-medium mt-1">Prepaid balance available</p>
         </div>
 
-        {/* Metric 5: Active Orders & Status */}
-        <div className="bg-white border border-gray-200 rounded p-4 sm:p-5 shadow-sm hover:border-[#DFAC43] transition">
+        {/* Metric 5: Net Khata Balance */}
+        <div className={`border rounded p-4 sm:p-5 shadow-sm transition ${netKhata > 0 ? 'bg-amber-50/50 border-amber-300' : netKhata < 0 ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-gray-200'}`}>
           <div className="flex justify-between items-start mb-2">
-            <span className="text-[11px] font-black uppercase tracking-wider text-gray-500">Active Orders</span>
-            <div className="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-base">
+            <span className="text-[11px] font-black uppercase tracking-wider text-gray-500">Net Khata</span>
+            <div className={`w-8 h-8 rounded flex items-center justify-center text-base ${netKhata > 0 ? 'bg-amber-100 text-amber-800' : netKhata < 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-700'}`}>
               <FiClock />
             </div>
           </div>
-          <p className="text-2xl font-black text-gray-900">
-            {activeOrdersCount}
+          <p className={`text-2xl font-black font-sans ${netKhata > 0 ? 'text-amber-800' : netKhata < 0 ? 'text-emerald-700' : 'text-gray-900'}`}>
+            Rs {Math.abs(netKhata).toLocaleString()}
           </p>
           <p className="text-[11px] text-gray-500 font-medium mt-1">
-            {latestOrderStatus}
+            {netKhata > 0 ? 'Receivable (Udhar)' : netKhata < 0 ? 'Customer Credit' : 'Nill (Balanced)'}
           </p>
         </div>
 
@@ -634,8 +671,20 @@ const CustomerProfile = () => {
           <CustomerKhataLedgerTab
             customer={customer}
             ledger={ledger}
-            khataBalance={khataBal}
-            openSettleModal={() => setIsSettleKhataModalOpen(true)}
+            khataBalance={netKhata}
+            duesBalance={duesBalance}
+            creditBalance={creditBalance}
+            legacyBalance={legacyBalance}
+            openOrders={openOrders}
+            openSettleModal={(orderId = null) => {
+              setSettleOrderId(orderId);
+              setIsSettleKhataModalOpen(true);
+            }}
+            openRefundModal={() => setIsRefundModalOpen(true)}
+            openLegacyModal={() => {
+              setLegacyAmount(String(legacyBalance));
+              setIsLegacyModalOpen(true);
+            }}
           />
         )}
 
@@ -671,8 +720,141 @@ const CustomerProfile = () => {
       {isSettleKhataModalOpen && (
         <CustomerSettleKhataModal
           customer={customer}
-          closeModal={() => setIsSettleKhataModalOpen(false)}
+          initialOrderId={settleOrderId}
+          closeModal={() => {
+            setIsSettleKhataModalOpen(false);
+            setSettleOrderId(null);
+            refetch();
+          }}
         />
+      )}
+
+      {/* Refund Credit Modal */}
+      {isRefundModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-white rounded shadow-2xl w-full max-w-sm overflow-hidden border border-gray-200 p-5 space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+              <h3 className="font-black text-sm text-gray-900">Refund Advance Credit</h3>
+              <button onClick={() => setIsRefundModalOpen(false)} className="text-gray-400 hover:text-black">
+                <FiX />
+              </button>
+            </div>
+            <form onSubmit={handleRefundSubmit} className="space-y-3 text-xs">
+              <p className="text-gray-600">
+                Available credit: <strong className="text-emerald-700">Rs {creditBalance.toLocaleString()}</strong>
+              </p>
+              <div>
+                <label className="block text-gray-700 font-bold mb-1">Refund Amount (Rs) *</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max={creditBalance}
+                  value={refundAmount}
+                  onChange={(e) => setRefundAmount(e.target.value)}
+                  placeholder={`Max ${creditBalance}`}
+                  className="w-full h-9 px-3 border border-gray-300 rounded font-bold"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-bold mb-1">Method</label>
+                <select
+                  value={refundMethod}
+                  onChange={(e) => setRefundMethod(e.target.value)}
+                  className="w-full h-9 px-3 border border-gray-300 rounded font-bold bg-white"
+                >
+                  <option value="Cash">Cash</option>
+                  <option value="EasyPaisa">EasyPaisa</option>
+                  <option value="JazzCash">JazzCash</option>
+                  <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 font-bold mb-1">Note (Optional)</label>
+                <input
+                  type="text"
+                  value={refundNote}
+                  onChange={(e) => setRefundNote(e.target.value)}
+                  placeholder="e.g. Returned to customer"
+                  className="w-full h-9 px-3 border border-gray-300 rounded"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setIsRefundModalOpen(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isRefunding}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded disabled:opacity-50"
+                >
+                  {isRefunding ? 'Refunding...' : 'Confirm Refund'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Adjust Legacy Opening Balance Modal */}
+      {isLegacyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 font-sans">
+          <div className="bg-white rounded shadow-2xl w-full max-w-sm overflow-hidden border border-gray-200 p-5 space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+              <h3 className="font-black text-sm text-gray-900">Adjust Legacy Opening Balance</h3>
+              <button onClick={() => setIsLegacyModalOpen(false)} className="text-gray-400 hover:text-black">
+                <FiX />
+              </button>
+            </div>
+            <form onSubmit={handleLegacySubmit} className="space-y-3 text-xs">
+              <p className="text-gray-500 text-[11px]">
+                Pre-system opening khata balance. Changes are audited.
+              </p>
+              <div>
+                <label className="block text-gray-700 font-bold mb-1">New Legacy Balance (Rs) *</label>
+                <input
+                  type="number"
+                  required
+                  value={legacyAmount}
+                  onChange={(e) => setLegacyAmount(e.target.value)}
+                  placeholder="0"
+                  className="w-full h-9 px-3 border border-gray-300 rounded font-bold"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 font-bold mb-1">Reason for Adjustment *</label>
+                <input
+                  type="text"
+                  required
+                  value={legacyReason}
+                  onChange={(e) => setLegacyReason(e.target.value)}
+                  placeholder="e.g. Correcting paper khata discrepancy"
+                  className="w-full h-9 px-3 border border-gray-300 rounded"
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setIsLegacyModalOpen(false)}
+                  className="px-4 py-2 bg-gray-100 text-gray-700 font-bold rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingLegacy}
+                  className="px-4 py-2 bg-[#0F172A] hover:bg-[#DFAC43] text-[#DFAC43] hover:text-[#0F172A] font-bold rounded disabled:opacity-50"
+                >
+                  {isUpdatingLegacy ? 'Saving...' : 'Update Balance'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
     </div>

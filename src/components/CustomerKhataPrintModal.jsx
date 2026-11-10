@@ -25,8 +25,11 @@ const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, clos
   let totalDebit = 0;
   let totalCredit = 0;
   ledger.forEach(entry => {
-    if (entry.type === 'debit') totalDebit += Number(entry.amount) || 0;
-    if (entry.type === 'credit' || entry.type === 'payment') totalCredit += Number(entry.amount) || 0;
+    if (entry.debit) totalDebit += Number(entry.debit) || 0;
+    else if (entry.type === 'debit') totalDebit += Number(entry.amount) || 0;
+
+    if (entry.credit) totalCredit += Number(entry.credit) || 0;
+    else if (entry.type === 'credit' || entry.type === 'payment') totalCredit += Number(entry.amount) || 0;
   });
 
   const handlePrint = () => {
@@ -253,10 +256,10 @@ const CustomerKhataPrintModal = ({ customer, ledger = [], khataBalance = 0, clos
                       )}
                     </td>
                     <td className="py-1 px-1 text-right font-black text-red-600 font-sans whitespace-nowrap align-top">
-                      {entry.type === 'debit' ? `Rs ${entry.amount.toLocaleString()}` : '-'}
+                      {entry.debit ? `Rs ${entry.debit.toLocaleString()}` : entry.type === 'debit' ? `Rs ${entry.amount.toLocaleString()}` : '-'}
                     </td>
                     <td className="py-1 px-1 text-right font-black text-green-700 font-sans whitespace-nowrap align-top">
-                      {entry.type === 'credit' || entry.type === 'payment' ? `Rs ${entry.amount.toLocaleString()}` : '-'}
+                      {entry.credit ? `Rs ${entry.credit.toLocaleString()}` : (entry.type === 'credit' || entry.type === 'payment') ? `Rs ${entry.amount.toLocaleString()}` : '-'}
                     </td>
                     <td className="py-1 pl-1 text-right font-black font-sans text-gray-900 whitespace-nowrap align-top">
                       Rs {entry.runningBalance?.toLocaleString() || '0'}
